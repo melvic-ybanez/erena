@@ -1,6 +1,6 @@
 use crate::math::Real;
 use std::ops;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
@@ -29,6 +29,14 @@ impl ops::Add<Tuple> for Tuple {
 
     fn add(self, that: Tuple) -> Self::Output {
         Tuple::new(self.x + that.x, self.y + that.y, self.z + that.z, self.w + that.w)
+    }
+}
+
+impl ops::Sub<Tuple> for Tuple {
+    type Output = Tuple;
+
+    fn sub(self, that: Tuple) -> Self::Output {
+        Tuple::new(self.x - that.x, self.y - that.y, self.z - that.z, self.w - that.w)
     }
 }
 
@@ -99,9 +107,33 @@ mod tests {
     }
 
     #[test]
-    fn test_tuple_addition() {
+    fn test_tuples_addition() {
         let a = Tuple::new(3.0, -2.0, 5.0, 1.0);
         let b = Tuple::new(-2.0, 3.0, 1.0, 0.0);
         assert_eq!(a + b, Tuple::new(1.0, 1.0, 6.0, 1.0));
+    }
+
+    /// Subtracting two points
+    #[test]
+    fn test_points_subtraction() {
+        let point1 = Point::new(3.0, 2.0, 1.0);
+        let point2 = Point::new(5.0, 6.0, 7.0);
+        assert_eq!(point1 - point2, Vector::new(-2.0, -4.0, -6.0));
+    }
+
+    /// Tests subtracting a vector from a point
+    #[test]
+    fn test_point_vector_subtraction() {
+        let point = Point::new(3.0, 2.0, 1.0);
+        let vector = Vector::new(5.0, 6.0, 7.0);
+        assert_eq!(point - vector, Point::new(-2.0, -4.0, -6.0));
+    }
+
+    /// Subtracting two vectors
+    #[test]
+    fn test_vectors_subtraction() {
+        let vec1 = Vector::new(3.0, 2.0, 1.0);
+        let vec2 = Vector::new(5.0, 6.0, 7.0);
+        assert_eq!(vec1 - vec2, Vector::new(-2.0, -4.0, -6.0));
     }
 }
