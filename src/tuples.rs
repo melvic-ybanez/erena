@@ -1,4 +1,6 @@
 use crate::math::Real;
+use std::ops;
+use std::ops::Add;
 
 #[derive(Debug, PartialEq)]
 pub struct Tuple {
@@ -19,6 +21,14 @@ impl Tuple {
 
     fn is_vector(&self) -> bool {
         self.w == 0.0
+    }
+}
+
+impl ops::Add<Tuple> for Tuple {
+    type Output = Tuple;
+
+    fn add(self, that: Tuple) -> Self::Output {
+        Tuple::new(self.x + that.x, self.y + that.y, self.z + that.z, self.w + that.w)
     }
 }
 
@@ -86,5 +96,12 @@ mod tests {
     fn test_vector_creation() {
         let vector = Vector::new(4.0, -4.0, 3.0);
         assert_eq!(vector, Tuple::new(4.0, -4.0, 3.0, 0.0));
+    }
+
+    #[test]
+    fn test_tuple_addition() {
+        let a = Tuple::new(3.0, -2.0, 5.0, 1.0);
+        let b = Tuple::new(-2.0, 3.0, 1.0, 0.0);
+        assert_eq!(a + b, Tuple::new(1.0, 1.0, 6.0, 1.0));
     }
 }
