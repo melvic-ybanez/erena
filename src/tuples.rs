@@ -1,6 +1,7 @@
 use crate::math::Real;
 
-struct Tuple {
+#[derive(Debug, PartialEq)]
+pub struct Tuple {
     x: Real,
     y: Real,
     z: Real,
@@ -21,9 +22,37 @@ impl Tuple {
     }
 }
 
+mod point {
+    use crate::tuples::Tuple;
+    use crate::math::Real;
+
+    pub struct Point(Tuple);
+
+    impl Point {
+        pub fn new(x: Real, y: Real, z: Real) -> Tuple {
+            Tuple::new(x, y, z, 1.0)
+        }
+    }
+}
+
+mod vector {
+    use crate::math::Real;
+    use crate::tuples::Tuple;
+
+    pub struct Vector(Tuple);
+
+    impl Vector {
+        pub fn new(x: Real, y: Real, z: Real) -> Tuple {
+            Tuple::new(x, y, z, 0.0)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::tuples::Tuple;
+    use crate::tuples::point::Point;
+    use crate::tuples::vector::Vector;
 
     /// A tuple with w=1.0 is a point
     #[test]
@@ -45,5 +74,17 @@ mod tests {
         assert_eq!(tuple.z, 3.1);
         assert_eq!(tuple.w, 0.0);
         assert!(tuple.is_vector());
+    }
+
+    #[test]
+    fn test_point_creation() {
+        let point = Point::new(4.0, -4.0, 3.0);
+        assert_eq!(point, Tuple::new(4.0, -4.0, 3.0, 1.0));
+    }
+
+    #[test]
+    fn test_vector_creation() {
+        let vector = Vector::new(4.0, -4.0, 3.0);
+        assert_eq!(vector, Tuple::new(4.0, -4.0, 3.0, 0.0));
     }
 }
