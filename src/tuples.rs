@@ -1,6 +1,6 @@
 use crate::math::Real;
 use std::ops;
-use std::ops::{Add, Sub, Neg};
+use std::ops::{Add, Sub, Neg, Mul};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Tuple {
@@ -56,6 +56,14 @@ impl ops::Neg for Tuple {
 
     fn neg(self) -> Self::Output {
         Tuple::new(-self.x, -self.y, -self.z, -self.w)
+    }
+}
+
+impl ops::Mul<Real> for Tuple {
+    type Output = Tuple;
+
+    fn mul(self, scalar: Real) -> Self::Output {
+        Tuple::new(self.x * scalar, self.y * scalar, self.z * scalar, self.w * scalar)
     }
 }
 
@@ -146,5 +154,17 @@ mod tests {
     fn test_tuple_negation() {
         let tuple = Tuple::new(1.0, -2.0, 3.0, -4.0);
         assert_eq!(-tuple, Tuple::new(-1.0, 2.0, -3.0, 4.0));
+    }
+
+    #[test]
+    fn test_scalar_multiplication() {
+        let tuple = Tuple::new(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(tuple * 3.5, Tuple::new(3.5, -7.0, 10.5, -14.0));
+    }
+
+    #[test]
+    fn test_multiply_by_fraction() {
+        let tuple = Tuple::new(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(tuple * 0.5, Tuple::new(0.5, -1.0, 1.5, -2.0));
     }
 }
