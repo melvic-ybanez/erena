@@ -1,5 +1,6 @@
 use crate::math::Real;
 use std::ops;
+use std::ops::Mul;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Tuple {
@@ -69,6 +70,7 @@ impl ops::Neg for Tuple {
 impl ops::Mul<Real> for Tuple {
     type Output = Tuple;
 
+    /// Scalar multiplication
     fn mul(self, scalar: Real) -> Self::Output {
         Tuple::new(self.x * scalar, self.y * scalar, self.z * scalar, self.w * scalar)
     }
@@ -91,6 +93,22 @@ impl Vector {
         let magnitude = self.magnitude();
         Tuple::new(self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude)
     }
+
+    fn cross(&self, that: Vector) -> Vector {
+        vector(
+            self.y * that.z - self.z * that.y,
+            self.z * that.x - self.x * that.z,
+            self.x * that.y - self.y * that.x,
+        )
+    }
+}
+
+fn vector(x: Real, y: Real, z: Real) -> Vector {
+    Tuple::vector(x, y, z)
+}
+
+fn point(x: Real, y: Real, z: Real) -> Point {
+    Tuple::point(x, y, z)
 }
 
 #[cfg(test)]
