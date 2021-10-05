@@ -36,6 +36,10 @@ impl Tuple {
     fn magnitude(&self) -> Real {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
     }
+
+    fn dot(&self, that: Tuple) -> Real {
+        self.x * that.x + self.y * that.y + self.z * that.z + self.w * that.w
+    }
 }
 
 impl ops::Add<Tuple> for Tuple {

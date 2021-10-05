@@ -115,3 +115,10 @@ fn test_normalization() {
     // magnitude of a normalize vector
     assert_eq!(Tuple::vector(1.0, 2.0, 3.0).normalize().magnitude(), 1.0);
 }
+
+#[test]
+fn test_dot_product() {
+    let a = Tuple::vector(1.0, 2.0, 3.0);
+    let b = Tuple::vector(2.0, 3.0, 4.0);
+    assert_eq!(a.dot(b), 20.0);
+}
