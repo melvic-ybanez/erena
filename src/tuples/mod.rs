@@ -12,6 +12,7 @@ pub struct Tuple {
 
 type Vector = Tuple;
 type Point = Tuple;
+type Color = Tuple;
 
 impl Tuple {
     fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
@@ -24,6 +25,10 @@ impl Tuple {
 
     fn point(x: Real, y: Real, z: Real) -> Point {
         Tuple::new(x, y, z, 1.0)
+    }
+
+    fn color(x: Real, y: Real, z: Real) -> Color {
+        Tuple::new(x, y, z, 0.0)
     }
 
     fn is_point(&self) -> bool {
@@ -103,12 +108,30 @@ impl Vector {
     }
 }
 
+impl Color {
+    fn red(color: Color) -> Real {
+        color.x
+    }
+
+    fn green(color: Color) -> Real {
+        color.y
+    }
+
+    fn blue(color: Color) -> Real {
+        color.z
+    }
+}
+
 fn vector(x: Real, y: Real, z: Real) -> Vector {
     Tuple::vector(x, y, z)
 }
 
 fn point(x: Real, y: Real, z: Real) -> Point {
     Tuple::point(x, y, z)
+}
+
+fn color(x: Real, y: Real, z: Real) -> Color {
+    Tuple::color(x, y, z)
 }
 
 #[cfg(test)]

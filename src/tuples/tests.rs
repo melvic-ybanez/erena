@@ -1,4 +1,4 @@
-use crate::tuples::{Tuple, Vector, vector};
+use crate::tuples::{Tuple, Vector, Color, vector};
 
 /// A tuple with w=1.0 is a point
 #[test]
@@ -129,4 +129,13 @@ fn test_cross_product() {
     let b = vector(2.0, 3.0, 4.0);
     assert_eq!(a.cross(b), vector(-1.0, 2.0, -1.0));
     assert_eq!(b.cross(a), vector(1.0, -2.0, 1.0));
+}
+
+/// Colors are rgb tuples
+#[test]
+fn test_colors_as_tuples() {
+    let color = Tuple::color(-0.5, 0.4, 1.7);
+    assert_eq!(Color::red(color), -0.5);
+    assert_eq!(Color::green(color), 0.4);
+    assert_eq!(Color::blue(color), 1.7);
 }
