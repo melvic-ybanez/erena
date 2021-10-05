@@ -33,6 +33,10 @@ impl Tuple {
     fn is_vector(&self) -> bool {
         self.w == 0.0
     }
+
+    fn magnitude(&self) -> Real {
+        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
+    }
 }
 
 impl ops::Add<Tuple> for Tuple {
@@ -84,6 +88,7 @@ impl Vector {
 #[cfg(test)]
 mod tests {
     use crate::tuples::{Tuple, Vector};
+    use std::f64::consts::PI;
 
     /// A tuple with w=1.0 is a point
     #[test]
@@ -180,5 +185,14 @@ mod tests {
     fn test_scalar_division() {
         let tuple = Tuple::new(1.0, -2.0, 3.0, -4.0);
         assert_eq!(tuple / 2.0, Tuple::new(0.5, -1.0, 1.5, -2.0));
+    }
+
+    #[test]
+    fn test_magnitude() {
+        assert_eq!(Tuple::vector(1.0, 0.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Tuple::vector(0.0, 1.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Tuple::vector(0.0, 0.0, 1.0).magnitude(), 1.0);
+        assert_eq!(Tuple::vector(1.0, 2.0, 3.0).magnitude(), (14 as f64).sqrt());
+        assert_eq!(Tuple::vector(-1.0, -2.0, -3.0).magnitude(), (14 as f64).sqrt());
     }
 }
