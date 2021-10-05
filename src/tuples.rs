@@ -1,8 +1,8 @@
 use crate::math::Real;
 use std::ops;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, Neg};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Tuple {
     x: Real,
     y: Real,
@@ -10,9 +10,20 @@ pub struct Tuple {
     w: Real,
 }
 
+type Vector = Tuple;
+type Point = Tuple;
+
 impl Tuple {
     fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
         Tuple { x, y, z, w }
+    }
+
+    fn vector(x: Real, y: Real, z: Real) -> Vector {
+        Tuple::new(x, y, z, 0.0)
+    }
+
+    fn point(x: Real, y: Real, z: Real) -> Point {
+        Tuple::new(x, y, z, 1.0)
     }
 
     fn is_point(&self) -> bool {
@@ -40,37 +51,23 @@ impl ops::Sub<Tuple> for Tuple {
     }
 }
 
-mod point {
-    use crate::tuples::Tuple;
-    use crate::math::Real;
+impl ops::Neg for Tuple {
+    type Output = Tuple;
 
-    pub struct Point(Tuple);
-
-    impl Point {
-        pub fn new(x: Real, y: Real, z: Real) -> Tuple {
-            Tuple::new(x, y, z, 1.0)
-        }
+    fn neg(self) -> Self::Output {
+        Tuple::new(-self.x, -self.y, -self.z, -self.w)
     }
 }
 
-mod vector {
-    use crate::math::Real;
-    use crate::tuples::Tuple;
-
-    pub struct Vector(Tuple);
-
-    impl Vector {
-        pub fn new(x: Real, y: Real, z: Real) -> Tuple {
-            Tuple::new(x, y, z, 0.0)
-        }
+impl Vector {
+    fn zero() -> Vector {
+        Tuple::vector(0.0, 0.0, 0.0)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::tuples::Tuple;
-    use crate::tuples::point::Point;
-    use crate::tuples::vector::Vector;
+    use crate::tuples::{Tuple, Vector};
 
     /// A tuple with w=1.0 is a point
     #[test]
@@ -96,13 +93,13 @@ mod tests {
 
     #[test]
     fn test_point_creation() {
-        let point = Point::new(4.0, -4.0, 3.0);
+        let point = Tuple::point(4.0, -4.0, 3.0);
         assert_eq!(point, Tuple::new(4.0, -4.0, 3.0, 1.0));
     }
 
     #[test]
     fn test_vector_creation() {
-        let vector = Vector::new(4.0, -4.0, 3.0);
+        let vector = Tuple::vector(4.0, -4.0, 3.0);
         assert_eq!(vector, Tuple::new(4.0, -4.0, 3.0, 0.0));
     }
 
@@ -116,24 +113,38 @@ mod tests {
     /// Subtracting two points
     #[test]
     fn test_points_subtraction() {
-        let point1 = Point::new(3.0, 2.0, 1.0);
-        let point2 = Point::new(5.0, 6.0, 7.0);
-        assert_eq!(point1 - point2, Vector::new(-2.0, -4.0, -6.0));
+        let point1 = Tuple::point(3.0, 2.0, 1.0);
+        let point2 = Tuple::point(5.0, 6.0, 7.0);
+        assert_eq!(point1 - point2, Tuple::vector(-2.0, -4.0, -6.0));
     }
 
     /// Tests subtracting a vector from a point
     #[test]
     fn test_point_vector_subtraction() {
-        let point = Point::new(3.0, 2.0, 1.0);
-        let vector = Vector::new(5.0, 6.0, 7.0);
-        assert_eq!(point - vector, Point::new(-2.0, -4.0, -6.0));
+        let point = Tuple::point(3.0, 2.0, 1.0);
+        let vector = Tuple::vector(5.0, 6.0, 7.0);
+        assert_eq!(point - vector, Tuple::point(-2.0, -4.0, -6.0));
     }
 
     /// Subtracting two vectors
     #[test]
     fn test_vectors_subtraction() {
-        let vec1 = Vector::new(3.0, 2.0, 1.0);
-        let vec2 = Vector::new(5.0, 6.0, 7.0);
-        assert_eq!(vec1 - vec2, Vector::new(-2.0, -4.0, -6.0));
+        let vec1 = Tuple::vector(3.0, 2.0, 1.0);
+        let vec2 = Tuple::vector(5.0, 6.0, 7.0);
+        assert_eq!(vec1 - vec2, Tuple::vector(-2.0, -4.0, -6.0));
+    }
+
+    /// Subtracting a vector from the zero vector
+    #[test]
+    fn test_zero_vector_subtraction() {
+        let zero = Vector::zero();
+        let vec = Tuple::vector(1.0, -2.0, 3.0);
+        assert_eq!(zero - vec, Tuple::vector(-1.0, 2.0, -3.0));
+    }
+
+    #[test]
+    fn test_tuple_negation() {
+        let tuple = Tuple::new(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(-tuple, Tuple::new(-1.0, 2.0, -3.0, 4.0));
     }
 }
