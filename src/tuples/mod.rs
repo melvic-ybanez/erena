@@ -1,8 +1,9 @@
-use crate::math::Real;
 use std::ops;
-use std::ops::Mul;
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+use crate::math::Real;
+use crate::math;
+
+#[derive(Debug, Copy, Clone)]
 pub struct Tuple {
     x: Real,
     y: Real,
@@ -86,6 +87,15 @@ impl ops::Div<Real> for Tuple {
 
     fn div(self, scalar: Real) -> Self::Output {
         self * (1.0 / scalar)
+    }
+}
+
+impl PartialEq for Tuple {
+    fn eq(&self, other: &Self) -> bool {
+        math::compare_reals(self.x, other.x) &&
+            math::compare_reals(self.y, other.y) &&
+            math::compare_reals(self.z, other.z) &&
+            math::compare_reals(self.w, other.w)
     }
 }
 
