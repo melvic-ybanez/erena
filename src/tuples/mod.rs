@@ -2,6 +2,7 @@ use std::ops;
 
 use crate::math::Real;
 use crate::math;
+use std::ops::Mul;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tuple {
@@ -15,18 +16,6 @@ impl Tuple {
     fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
         Tuple { x, y, z, w }
     }
-    //
-    // fn vector(x: Real, y: Real, z: Real) -> Vector {
-    //     Tuple::new(x, y, z, 0.0)
-    // }
-    //
-    // fn point(x: Real, y: Real, z: Real) -> Point {
-    //     Tuple::new(x, y, z, 1.0)
-    // }
-    //
-    // fn color(x: Real, y: Real, z: Real) -> Color {
-    //     Tuple::new(x, y, z, 0.0)
-    // }
 
     fn is_point(&self) -> bool {
         self.w == 1.0
@@ -153,17 +142,17 @@ impl Color {
     }
 }
 
-// fn vector(x: Real, y: Real, z: Real) -> Vector {
-//     Tuple::vector(x, y, z)
-// }
-//
-// fn point(x: Real, y: Real, z: Real) -> Point {
-//     Tuple::point(x, y, z)
-// }
-//
-// fn color(x: Real, y: Real, z: Real) -> Color {
-//     Tuple::color(x, y, z)
-// }
+impl ops::Mul for Color {
+    type Output = Color;
+
+    /// Hadamard product
+    fn mul(self, other: Self) -> Self::Output {
+        let r = self.red() * other.red();
+        let g = self.green() * other.green();
+        let b = self.blue() * other.blue();
+        Color::new(r, g, b)
+    }
+}
 
 #[cfg(test)]
 mod tests;

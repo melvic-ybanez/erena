@@ -155,3 +155,16 @@ fn test_colors_subtraction() {
     let Color(result) = Color::new(0.2, 0.5, 0.5);
     assert_eq!(c1 - c2, result);
 }
+
+#[test]
+fn test_colors_scalar_multiplication() {
+    let Color(c) = Color::new(0.2, 0.3, 0.4);
+    assert_eq!(c * 2.0, Color::new(0.4, 0.6, 0.8).0);
+}
+
+#[test]
+fn test_hadamard_product() {
+    let c1 = Color::new(1.0, 0.2, 0.4);
+    let c2 = Color::new(0.9, 1.0, 0.1);
+    assert_eq!(c1 * c2, Color::new(0.9, 0.2, 0.04));
+}
