@@ -121,23 +121,25 @@ impl Point {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Color(Tuple);
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Color(pub Tuple);
 
 impl Color {
-    fn new(red: Real, green: Real, blue: Real) -> Color {
+    pub(crate) const BLACK: Color = Color(Tuple { x: 0.0, y: 0.0, z: 0.0, w: 0.0 });
+
+    pub(crate) fn new(red: Real, green: Real, blue: Real) -> Color {
         Color(Tuple::new(red, green, blue, 0.0))
     }
 
-    fn red(&self) -> Real {
+    pub(crate) fn red(&self) -> Real {
         self.0.x
     }
 
-    fn green(&self) -> Real {
+    pub(crate) fn green(&self) -> Real {
         self.0.y
     }
 
-    fn blue(&self) -> Real {
+    pub(crate) fn blue(&self) -> Real {
         self.0.z
     }
 }
