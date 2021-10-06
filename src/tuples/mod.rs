@@ -11,26 +11,22 @@ pub struct Tuple {
     w: Real,
 }
 
-type Vector = Tuple;
-type Point = Tuple;
-type Color = Tuple;
-
 impl Tuple {
     fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
         Tuple { x, y, z, w }
     }
-
-    fn vector(x: Real, y: Real, z: Real) -> Vector {
-        Tuple::new(x, y, z, 0.0)
-    }
-
-    fn point(x: Real, y: Real, z: Real) -> Point {
-        Tuple::new(x, y, z, 1.0)
-    }
-
-    fn color(x: Real, y: Real, z: Real) -> Color {
-        Tuple::new(x, y, z, 0.0)
-    }
+    //
+    // fn vector(x: Real, y: Real, z: Real) -> Vector {
+    //     Tuple::new(x, y, z, 0.0)
+    // }
+    //
+    // fn point(x: Real, y: Real, z: Real) -> Point {
+    //     Tuple::new(x, y, z, 1.0)
+    // }
+    //
+    // fn color(x: Real, y: Real, z: Real) -> Color {
+    //     Tuple::new(x, y, z, 0.0)
+    // }
 
     fn is_point(&self) -> bool {
         self.w == 1.0
@@ -99,50 +95,75 @@ impl PartialEq for Tuple {
     }
 }
 
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Vector(Tuple);
+
 impl Vector {
+    fn new(x: Real, y: Real, z: Real) -> Vector {
+        Vector(Tuple::new(x, y, z, 0.0))
+    }
+
     fn zero() -> Vector {
-        Tuple::vector(0.0, 0.0, 0.0)
+        Vector::new(0.0, 0.0, 0.0)
     }
 
     fn normalize(&self) -> Vector {
-        let magnitude = self.magnitude();
-        Tuple::new(self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude)
+        let magnitude = self.0.magnitude();
+        Vector(Tuple::new(
+            self.0.x / magnitude, self.0.y / magnitude, self.0.z / magnitude, self.0.w / magnitude)
+        )
     }
 
     fn cross(&self, that: Vector) -> Vector {
-        vector(
-            self.y * that.z - self.z * that.y,
-            self.z * that.x - self.x * that.z,
-            self.x * that.y - self.y * that.x,
+        Vector::new(
+            self.0.y * that.0.z - self.0.z * that.0.y,
+            self.0.z * that.0.x - self.0.x * that.0.z,
+            self.0.x * that.0.y - self.0.y * that.0.x,
         )
     }
 }
 
+#[derive(Debug, PartialEq)]
+pub struct Point(Tuple);
+
+impl Point {
+    fn new(x: Real, y: Real, z: Real) -> Point {
+        Point(Tuple::new(x, y, z, 1.0))
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Color(Tuple);
+
 impl Color {
-    fn red(color: Color) -> Real {
-        color.x
+    fn new(red: Real, green: Real, blue: Real) -> Color {
+        Color(Tuple::new(red, green, blue, 0.0))
     }
 
-    fn green(color: Color) -> Real {
-        color.y
+    fn red(&self) -> Real {
+        self.0.x
     }
 
-    fn blue(color: Color) -> Real {
-        color.z
+    fn green(&self) -> Real {
+        self.0.y
+    }
+
+    fn blue(&self) -> Real {
+        self.0.z
     }
 }
 
-fn vector(x: Real, y: Real, z: Real) -> Vector {
-    Tuple::vector(x, y, z)
-}
-
-fn point(x: Real, y: Real, z: Real) -> Point {
-    Tuple::point(x, y, z)
-}
-
-fn color(x: Real, y: Real, z: Real) -> Color {
-    Tuple::color(x, y, z)
-}
+// fn vector(x: Real, y: Real, z: Real) -> Vector {
+//     Tuple::vector(x, y, z)
+// }
+//
+// fn point(x: Real, y: Real, z: Real) -> Point {
+//     Tuple::point(x, y, z)
+// }
+//
+// fn color(x: Real, y: Real, z: Real) -> Color {
+//     Tuple::color(x, y, z)
+// }
 
 #[cfg(test)]
 mod tests;

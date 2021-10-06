@@ -1,4 +1,4 @@
-use crate::tuples::{Tuple, Vector, Color, vector, color};
+use crate::tuples::{Tuple, Vector, Color, Point};
 
 /// A tuple with w=1.0 is a point
 #[test]
@@ -24,14 +24,14 @@ fn test_vector_w() {
 
 #[test]
 fn test_point_creation() {
-    let point = Tuple::point(4.0, -4.0, 3.0);
-    assert_eq!(point, Tuple::new(4.0, -4.0, 3.0, 1.0));
+    let point = Point::new(4.0, -4.0, 3.0);
+    assert_eq!(point.0, Tuple::new(4.0, -4.0, 3.0, 1.0));
 }
 
 #[test]
 fn test_vector_creation() {
-    let vector = Tuple::vector(4.0, -4.0, 3.0);
-    assert_eq!(vector, Tuple::new(4.0, -4.0, 3.0, 0.0));
+    let vector = Vector::new(4.0, -4.0, 3.0);
+    assert_eq!(vector.0, Tuple::new(4.0, -4.0, 3.0, 0.0));
 }
 
 #[test]
@@ -44,33 +44,33 @@ fn test_tuples_addition() {
 /// Subtracting two points
 #[test]
 fn test_points_subtraction() {
-    let point1 = Tuple::point(3.0, 2.0, 1.0);
-    let point2 = Tuple::point(5.0, 6.0, 7.0);
-    assert_eq!(point1 - point2, Tuple::vector(-2.0, -4.0, -6.0));
+    let point1 = Point::new(3.0, 2.0, 1.0);
+    let point2 = Point::new(5.0, 6.0, 7.0);
+    assert_eq!(point1.0 - point2.0, Vector::new(-2.0, -4.0, -6.0).0);
 }
 
 /// Tests subtracting a vector from a point
 #[test]
 fn test_point_vector_subtraction() {
-    let point = Tuple::point(3.0, 2.0, 1.0);
-    let vector = Tuple::vector(5.0, 6.0, 7.0);
-    assert_eq!(point - vector, Tuple::point(-2.0, -4.0, -6.0));
+    let point = Point::new(3.0, 2.0, 1.0);
+    let vector = Vector::new(5.0, 6.0, 7.0);
+    assert_eq!(point.0 - vector.0, Point::new(-2.0, -4.0, -6.0).0);
 }
 
 /// Subtracting two vectors
 #[test]
 fn test_vectors_subtraction() {
-    let vec1 = Tuple::vector(3.0, 2.0, 1.0);
-    let vec2 = Tuple::vector(5.0, 6.0, 7.0);
-    assert_eq!(vec1 - vec2, Tuple::vector(-2.0, -4.0, -6.0));
+    let Vector(vec1) = Vector::new(3.0, 2.0, 1.0);
+    let Vector(vec2) = Vector::new(5.0, 6.0, 7.0);
+    assert_eq!(vec1 - vec2, Vector::new(-2.0, -4.0, -6.0).0);
 }
 
 /// Subtracting a vector from the zero vector
 #[test]
 fn test_zero_vector_subtraction() {
-    let zero = Vector::zero();
-    let vec = Tuple::vector(1.0, -2.0, 3.0);
-    assert_eq!(zero - vec, Tuple::vector(-1.0, 2.0, -3.0));
+    let Vector(zero) = Vector::zero();
+    let Vector(vec) = Vector::new(1.0, -2.0, 3.0);
+    assert_eq!(zero - vec, Vector::new(-1.0, 2.0, -3.0).0);
 }
 
 #[test]
@@ -99,57 +99,59 @@ fn test_scalar_division() {
 
 #[test]
 fn test_magnitude() {
-    assert_eq!(Tuple::vector(1.0, 0.0, 0.0).magnitude(), 1.0);
-    assert_eq!(Tuple::vector(0.0, 1.0, 0.0).magnitude(), 1.0);
-    assert_eq!(Tuple::vector(0.0, 0.0, 1.0).magnitude(), 1.0);
-    assert_eq!(Tuple::vector(1.0, 2.0, 3.0).magnitude(), (14 as f64).sqrt());
-    assert_eq!(Tuple::vector(-1.0, -2.0, -3.0).magnitude(), (14 as f64).sqrt());
+    assert_eq!(Vector::new(1.0, 0.0, 0.0).0.magnitude(), 1.0);
+    assert_eq!(Vector::new(0.0, 1.0, 0.0).0.magnitude(), 1.0);
+    assert_eq!(Vector::new(0.0, 0.0, 1.0).0.magnitude(), 1.0);
+    assert_eq!(Vector::new(1.0, 2.0, 3.0).0.magnitude(), (14 as f64).sqrt());
+    assert_eq!(Vector::new(-1.0, -2.0, -3.0).0.magnitude(), (14 as f64).sqrt());
 }
 
 #[test]
 fn test_normalization() {
-    assert_eq!(Tuple::vector(4.0, 0.0, 0.0).normalize(), Tuple::vector(1.0, 0.0, 0.0));
+    assert_eq!(Vector::new(4.0, 0.0, 0.0).normalize(), Vector::new(1.0, 0.0, 0.0));
     let sqrt14 = (14 as f64).sqrt();
-    assert_eq!(Tuple::vector(1.0, 2.0, 3.0).normalize(),
-               Tuple::vector(1.0 / sqrt14, 2.0 / sqrt14, 3.0 / sqrt14));
+    assert_eq!(Vector::new(1.0, 2.0, 3.0).normalize(),
+               Vector::new(1.0 / sqrt14, 2.0 / sqrt14, 3.0 / sqrt14));
     // magnitude of a normalize vector
-    assert_eq!(Tuple::vector(1.0, 2.0, 3.0).normalize().magnitude(), 1.0);
+    assert_eq!(Vector::new(1.0, 2.0, 3.0).normalize().0.magnitude(), 1.0);
 }
 
 #[test]
 fn test_dot_product() {
-    let a = Tuple::vector(1.0, 2.0, 3.0);
-    let b = Tuple::vector(2.0, 3.0, 4.0);
+    let Vector(a) = Vector::new(1.0, 2.0, 3.0);
+    let Vector(b) = Vector::new(2.0, 3.0, 4.0);
     assert_eq!(a.dot(b), 20.0);
 }
 
 #[test]
 fn test_cross_product() {
-    let a = vector(1.0, 2.0, 3.0);
-    let b = vector(2.0, 3.0, 4.0);
-    assert_eq!(a.cross(b), vector(-1.0, 2.0, -1.0));
-    assert_eq!(b.cross(a), vector(1.0, -2.0, 1.0));
+    let a = Vector::new(1.0, 2.0, 3.0);
+    let b = Vector::new(2.0, 3.0, 4.0);
+    assert_eq!(a.cross(b), Vector::new(-1.0, 2.0, -1.0));
+    assert_eq!(b.cross(a), Vector::new(1.0, -2.0, 1.0));
 }
 
 /// Colors are rgb tuples
 #[test]
 fn test_colors_as_tuples() {
-    let color = Tuple::color(-0.5, 0.4, 1.7);
-    assert_eq!(Color::red(color), -0.5);
-    assert_eq!(Color::green(color), 0.4);
-    assert_eq!(Color::blue(color), 1.7);
+    let color = Color::new(-0.5, 0.4, 1.7);
+    assert_eq!(color.red(), -0.5);
+    assert_eq!(color.green(), 0.4);
+    assert_eq!(color.blue(), 1.7);
 }
 
 #[test]
 fn test_colors_addition() {
-    let c1 = color(0.9, 0.6, 0.75);
-    let c2 = color(0.7, 0.1, 0.25);
-    assert_eq!(c1 + c2, color(1.6, 0.7, 1.0));
+    let Color(c1) = Color::new(0.9, 0.6, 0.75);
+    let Color(c2) = Color::new(0.7, 0.1, 0.25);
+    let Color(sum) = Color::new(1.6, 0.7, 1.0);
+    assert_eq!(c1 + c2, sum);
 }
 
 #[test]
 fn test_colors_subtraction() {
-    let c1 = color(0.9, 0.6, 0.75);
-    let c2 = color(0.7, 0.1, 0.25);
-    assert_eq!(c1 - c2, color(0.2, 0.5, 0.5));
+    let Color(c1) = Color::new(0.9, 0.6, 0.75);
+    let Color(c2) = Color::new(0.7, 0.1, 0.25);
+    let Color(result) = Color::new(0.2, 0.5, 0.5);
+    assert_eq!(c1 - c2, result);
 }
