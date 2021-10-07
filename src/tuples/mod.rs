@@ -6,10 +6,10 @@ use std::ops::Mul;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tuple {
-    x: Real,
-    y: Real,
-    z: Real,
-    w: Real,
+    pub x: Real,
+    pub y: Real,
+    pub z: Real,
+    pub w: Real,
 }
 
 impl Tuple {
