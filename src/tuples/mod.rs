@@ -126,6 +126,7 @@ pub struct Color(pub Tuple);
 
 impl Color {
     pub(crate) const BLACK: Color = Color(Tuple { x: 0.0, y: 0.0, z: 0.0, w: 0.0 });
+    pub(crate) const RED: Color = Color(Tuple { x: 1.0, y: 0.0, z: 0.0, w: 0.0 });
 
     pub(crate) fn new(red: Real, green: Real, blue: Real) -> Color {
         Color(Tuple::new(red, green, blue, 0.0))

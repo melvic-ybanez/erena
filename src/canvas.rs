@@ -43,4 +43,12 @@ mod tests {
         assert_eq!(canvas.height, 20);
         canvas.pixels.iter().map(|color| assert_eq!(*color, Color::BLACK));
     }
+
+    #[test]
+    fn test_pixel_update() {
+        let mut canvas = Canvas::new(10, 20);
+        let red = Color::RED;
+        canvas[(2, 3)] = red;
+        assert_eq!(canvas[(2, 3)], red);
+    }
 }
