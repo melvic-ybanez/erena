@@ -1,5 +1,5 @@
 use crate::math::Real;
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use crate::tuples::Color;
 
 struct Canvas {
@@ -15,11 +15,19 @@ impl Canvas {
     }
 }
 
-impl Index<usize> for Canvas {
-    type Output = [Color];
+impl Index<(usize, usize)> for Canvas {
+    type Output = Color;
 
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.pixels[index * self.width..(index + 1) * self.width]
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        let (row, col) = index;
+        &self.pixels[row *  self.width + col]
+    }
+}
+
+impl IndexMut<(usize, usize)> for Canvas {
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        let (row, col) = index;
+        &mut self.pixels[row * self.width + col]
     }
 }
 
