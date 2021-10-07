@@ -1,4 +1,3 @@
-use crate::math::Real;
 use std::ops::{Index, IndexMut};
 use crate::tuples::{Color, Tuple};
 use crate::math;
@@ -11,14 +10,14 @@ struct Canvas {
 
 impl Canvas {
     fn new(width: usize, height: usize) -> Canvas {
-        let pixels = (0..(width * height)).map(|x| Color::BLACK).collect();
+        let pixels = (0..(width * height)).map(|_x| Color::BLACK).collect();
         Canvas { width, height, pixels }
     }
 
     fn to_ppm(&self) -> Ppm {
         let header = format!("P3\n{} {}\n{}", self.width, self.height, 255);
 
-        fn row(chunk: &[Color]) -> String {
+        fn row(chunk: &[Color]) -> Vec<String> {
             let row: Vec<_> = chunk.iter().map(|color| {
                 let Tuple { x: r, y: g, z: b, .. } = color.0;
                 let max_value = Ppm::MAX_COLOR_VALUE as i32;
@@ -27,11 +26,28 @@ impl Canvas {
                 let b = math::scale_to(max_value, b);
                 format!("{} {} {}", r, g, b)
             }).collect();
-            row.join(" ")
+            Canvas::wrap(row.join(" "))
         }
 
-        let data: Vec<_> = self.pixels.chunks(self.width).map(row).collect();
+        let data: Vec<_> = self.pixels.chunks(self.width).flat_map(row).collect();
         Ppm::new(header, data)
+    }
+
+    fn wrap(row: String) -> Vec<String> {
+        row.split(" ").fold(vec![], |mut acc, next| {
+            let next_str = next.to_string();
+            match acc.last_mut() {
+                None => vec![next_str],
+                Some(last) =>
+                    if last.len() + next.len() > 69 {
+                        acc.push(next_str);
+                        acc
+                    } else {
+                        *last = last.to_string() + " " + &next;
+                        acc
+                    }
+            }
+        })
     }
 }
 
@@ -74,7 +90,7 @@ mod tests {
         let canvas = Canvas::new(10, 20);
         assert_eq!(canvas.width, 10);
         assert_eq!(canvas.height, 20);
-        canvas.pixels.iter().map(|color| assert_eq!(*color, Color::BLACK));
+        canvas.pixels.iter().for_each(|color| assert_eq!(*color, Color::BLACK));
     }
 
     #[test]
@@ -102,10 +118,27 @@ mod tests {
         canvas[(2, 1)] = c2;
         canvas[(4, 2)] = c3;
         let ppm = canvas.to_ppm();
-        assert_eq!(ppm.data, vec!(
+        assert_eq!(ppm.data, vec![
             "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
             "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0",
             "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"
-        ));
+        ]);
+    }
+
+    #[test]
+    fn test_long_lines_wrapping() {
+        let mut canvas = Canvas::new(10, 2);
+        for i in 0..10 {
+            for j in 0..2 {
+                canvas[(i, j)] = Color::new(1.0, 0.8, 0.6);
+            }
+        }
+        let ppm = canvas.to_ppm();
+        assert_eq!(ppm.data, vec![
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+            "153 255 204 153 255 204 153 255 204 153 255 204 153",
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+            "153 255 204 153 255 204 153 255 204 153 255 204 153"
+        ])
     }
 }

@@ -2,7 +2,6 @@ use std::ops;
 
 use crate::math::Real;
 use crate::math;
-use std::ops::Mul;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tuple {
