@@ -1,5 +1,7 @@
 pub type Real = f64;
 
+pub(crate) type Idx = (usize, usize);
+
 pub fn compare_reals(a: Real, b: Real) -> bool {
     (a - b).abs() <= Real::EPSILON
 }

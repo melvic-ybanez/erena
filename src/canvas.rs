@@ -10,12 +10,11 @@ struct Canvas {
 
 impl Canvas {
     fn new(width: usize, height: usize) -> Canvas {
-        let pixels = (0..(width * height)).map(|_x| Color::BLACK).collect();
-        Canvas { width, height, pixels }
+        Canvas { width, height, pixels: vec![Color::BLACK; width * height] }
     }
 
     fn to_ppm(&self) -> Ppm {
-        let header = format!("P3\n{} {}\n{}", self.width, self.height, 255);
+        let header = format!("P3\n{} {}\n{}", self.width, self.height, Ppm::MAX_COLOR_VALUE);
 
         fn row(chunk: &[Color]) -> Vec<String> {
             let row: Vec<_> = chunk.iter().map(|color| {
@@ -64,16 +63,16 @@ impl Ppm {
     }
 }
 
-impl Index<(usize, usize)> for Canvas {
+impl Index<math::Idx> for Canvas {
     type Output = Color;
 
-    fn index(&self, index: (usize, usize)) -> &Self::Output {
+    fn index(&self, index: math::Idx) -> &Self::Output {
         let (x, y) = index;
         &self.pixels[math::index_of(x, y, self.width)]
     }
 }
 
-impl IndexMut<(usize, usize)> for Canvas {
+impl IndexMut<math::Idx> for Canvas {
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
         let (x, y) = index;
         &mut self.pixels[math::index_of(x, y, self.width)]
