@@ -10,7 +10,7 @@ struct Canvas {
 
 impl Canvas {
     fn new(width: usize, height: usize) -> Canvas {
-        Canvas { width, height, pixels: vec![Color::BLACK; width * height] }
+        Canvas { width, height, pixels: vec![Color::black(); width * height] }
     }
 
     fn to_ppm(&self) -> Ppm {
@@ -89,13 +89,13 @@ mod tests {
         let canvas = Canvas::new(10, 20);
         assert_eq!(canvas.width, 10);
         assert_eq!(canvas.height, 20);
-        canvas.pixels.iter().for_each(|color| assert_eq!(*color, Color::BLACK));
+        canvas.pixels.iter().for_each(|color| assert_eq!(*color, Color::black()));
     }
 
     #[test]
     fn test_pixel_update() {
         let mut canvas = Canvas::new(10, 20);
-        let red = Color::RED;
+        let red = Color::red();
         canvas[(2, 3)] = red;
         assert_eq!(canvas[(2, 3)], red);
     }

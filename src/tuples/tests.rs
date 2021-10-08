@@ -135,9 +135,9 @@ fn test_cross_product() {
 #[test]
 fn test_colors_as_tuples() {
     let color = Color::new(-0.5, 0.4, 1.7);
-    assert_eq!(color.red(), -0.5);
-    assert_eq!(color.green(), 0.4);
-    assert_eq!(color.blue(), 1.7);
+    assert_eq!(color.red_value(), -0.5);
+    assert_eq!(color.green_value(), 0.4);
+    assert_eq!(color.blue_value(), 1.7);
 }
 
 #[test]

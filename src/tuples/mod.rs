@@ -112,6 +112,7 @@ impl Vector {
         Vector(Tuple::new(x, y, z, 0.0))
     }
 
+    #[inline(always)]
     fn zero() -> Vector {
         Vector::new(0.0, 0.0, 0.0)
     }
@@ -145,23 +146,30 @@ impl Point {
 pub struct Color(pub Tuple);
 
 impl Color {
-    pub(crate) const BLACK: Color = Color(Tuple { x: 0.0, y: 0.0, z: 0.0, w: 0.0 });
-    pub(crate) const RED: Color = Color(Tuple { x: 1.0, y: 0.0, z: 0.0, w: 0.0 });
-
     pub(crate) fn new(red: Real, green: Real, blue: Real) -> Color {
         Color(Tuple::new(red, green, blue, 0.0))
     }
 
-    pub(crate) fn red(&self) -> Real {
+    pub(crate) fn red_value(&self) -> Real {
         self.0.x
     }
 
-    pub(crate) fn green(&self) -> Real {
+    pub(crate) fn green_value(&self) -> Real {
         self.0.y
     }
 
-    pub(crate) fn blue(&self) -> Real {
+    pub(crate) fn blue_value(&self) -> Real {
         self.0.z
+    }
+
+    #[inline(always)]
+    pub(crate) fn black() -> Color {
+        Color::new(0.0, 0.0, 0.0)
+    }
+
+    #[inline(always)]
+    pub(crate) fn red() -> Color {
+        Color::new(1.0, 0.0, 0.0)
     }
 }
 
@@ -170,9 +178,9 @@ impl ops::Mul for Color {
 
     /// Hadamard product
     fn mul(self, other: Self) -> Self::Output {
-        let r = self.red() * other.red();
-        let g = self.green() * other.green();
-        let b = self.blue() * other.blue();
+        let r = self.red_value() * other.red_value();
+        let g = self.green_value() * other.green_value();
+        let b = self.blue_value() * other.blue_value();
         Color::new(r, g, b)
     }
 }
