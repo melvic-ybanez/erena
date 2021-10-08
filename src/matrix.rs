@@ -1,5 +1,5 @@
 use crate::math::Real;
-use std::ops::Index;
+use std::ops::{Index, Mul, IndexMut};
 use crate::math;
 
 #[derive(Debug)]
@@ -16,6 +16,10 @@ impl Matrix {
             height: elements.len(),
             elements: elements.into_iter().flatten().collect::<Vec<Real>>()
         }
+    }
+
+    fn with_nxn(n: usize) -> Matrix {
+        Matrix::new(vec![vec![0.0; n]; n])
     }
 
     fn new_nxn(n: usize, elements: &[Real]) -> Matrix {
@@ -44,6 +48,13 @@ impl Index<math::Idx> for Matrix {
     }
 }
 
+impl IndexMut<math::Idx> for Matrix {
+    fn index_mut(&mut self, index: math::Idx) -> &mut Self::Output {
+        let (row, col) = index;
+        &mut self.elements[math::index_of(col, row, self.width)]
+    }
+}
+
 impl PartialEq for Matrix {
     fn eq(&self, other: &Self) -> bool {
         if self.width != other.width || self.height != other.height {
@@ -57,6 +68,38 @@ impl PartialEq for Matrix {
             }
         }
         true
+    }
+}
+
+impl Mul for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, other: Self) -> Self::Output {
+        let mut matrix = Matrix::with_nxn(self.width);
+
+        // assumes the width and height have the same size
+        let size = self.width;
+
+        let cell = |row: &[Real], col_index: usize| -> Real {
+            let mut acc = 0 as Real;
+            for i in 0..size {
+                acc += row[i] * other[(i, col_index)];
+            }
+            acc
+        };
+
+        println!("width: {}", size);
+        println!("{}", matrix[(0, 3)]);
+
+        for j in 0..size {
+            for i in 0..size {
+                let row = &self.elements[j * size..j * size + size];
+                println!("{} {}", j, i);
+                matrix[(j, i)] = cell(&row, i);
+            }
+        }
+
+        matrix
     }
 }
 
@@ -133,5 +176,27 @@ mod tests {
             4.0, 3.0, 2.0, 1.0
         ]);
         assert_ne!(m, m1);
+    }
+
+    #[test]
+    fn test_matrix_multiplication() {
+        let m1 = Matrix::new44(&[
+            1.0, 2.0, 3.0, 4.0,
+            5.0, 6.0, 7.0, 8.0,
+            9.0, 8.0, 7.0, 6.0,
+            5.0, 4.0, 3.0, 2.0,
+        ]);
+        let m2 = Matrix::new44(&[
+            -2.0, 1.0, 2.0, 3.0,
+            3.0, 2.0, 1.0, -1.0,
+            4.0, 3.0, 6.0, 5.0,
+            1.0, 2.0, 7.0, 8.0,
+        ]);
+        assert_eq!(m1 * m2, Matrix::new44(&[
+            20.0, 22.0, 50.0, 48.0,
+            44.0, 54.0, 114.0, 108.0,
+            40.0, 58.0, 110.0, 102.0,
+            16.0, 26.0, 46.0, 42.0,
+        ]));
     }
 }

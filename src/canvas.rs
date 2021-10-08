@@ -73,7 +73,7 @@ impl Index<math::Idx> for Canvas {
 }
 
 impl IndexMut<math::Idx> for Canvas {
-    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+    fn index_mut(&mut self, index: math::Idx) -> &mut Self::Output {
         let (x, y) = index;
         &mut self.pixels[math::index_of(x, y, self.width)]
     }
