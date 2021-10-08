@@ -88,13 +88,9 @@ impl Mul for Matrix {
             acc
         };
 
-        println!("width: {}", size);
-        println!("{}", matrix[(0, 3)]);
-
         for j in 0..size {
             for i in 0..size {
                 let row = &self.elements[j * size..j * size + size];
-                println!("{} {}", j, i);
                 matrix[(j, i)] = cell(&row, i);
             }
         }
