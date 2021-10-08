@@ -2,6 +2,7 @@ use crate::math::Real;
 use std::ops::Index;
 use crate::math;
 
+#[derive(Debug)]
 struct Matrix {
     elements: Vec<Real>,
     width: usize,
@@ -40,6 +41,22 @@ impl Index<math::Idx> for Matrix {
     fn index(&self, index: math::Idx) -> &Self::Output {
         let (row, col) = index;
         &self.elements[math::index_of(col, row, self.width)]
+    }
+}
+
+impl PartialEq for Matrix {
+    fn eq(&self, other: &Self) -> bool {
+        if self.width != other.width || self.height != other.height {
+            return false;
+        }
+        for j in 0..self.height {
+            for i in 0..self.width {
+                if !math::compare_reals(self[(j, i)], other[(j, i)]) {
+                    return false;
+                }
+            }
+        }
+        true
     }
 }
 
@@ -86,5 +103,35 @@ mod tests {
         assert_eq!(m[(0, 0)], -3.0);
         assert_eq!(m[(1, 1)], -2.0);
         assert_eq!(m[(2, 2)], 1.0);
+    }
+
+    #[test]
+    fn test_matrix_equality() {
+        let elems = &[
+            1.0, 2.0, 3.0, 4.0,
+            5.0, 6.0, 7.0, 8.0,
+            9.0, 8.0, 7.0, 6.0,
+            5.0, 4.0, 3.0, 2.0,
+        ];
+        let m = Matrix::new44(elems);
+        let m1 = Matrix::new44(elems);
+        assert_eq!(m, m1);
+    }
+
+    #[test]
+    fn test_matrix_inequality() {
+        let m = Matrix::new44(&[
+            1.0, 2.0, 3.0, 4.0,
+            5.0, 6.0, 7.0, 8.0,
+            9.0, 8.0, 7.0, 6.0,
+            5.0, 4.0, 3.0, 2.0,
+        ]);
+        let m1 = Matrix::new44(&[
+            2.0, 3.0, 4.0, 5.0,
+            6.0, 7.0, 8.0, 9.0,
+            8.0, 7.0, 6.0, 5.0,
+            4.0, 3.0, 2.0, 1.0
+        ]);
+        assert_ne!(m, m1);
     }
 }
