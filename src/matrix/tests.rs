@@ -118,3 +118,19 @@ fn test_identity_matrix() {
     }
     assert_eq!(matrix() * Matrix::id44(), matrix());
 }
+
+#[test]
+fn test_transpose() {
+    let matrix = Matrix::new44(&[
+        0.0, 9.0, 3.0, 0.0,
+        9.0, 8.0, 0.0, 8.0,
+        1.0, 8.0, 5.0, 3.0,
+        0.0, 0.0, 5.0, 8.0,
+    ]);
+    assert_eq!(matrix.transpose(), Matrix::new44(&[
+        0.0, 9.0, 1.0, 0.0,
+        9.0, 8.0, 8.0, 0.0,
+        3.0, 0.0, 5.0, 5.0,
+        0.0, 8.0, 3.0, 8.0,
+    ]));
+}

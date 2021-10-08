@@ -54,6 +54,16 @@ impl Matrix {
             0.0, 0.0, 0.0, 1.0
         ])
     }
+
+    fn transpose(&self) -> Matrix {
+        let mut matrix = Matrix::with_nxn(self.width);
+        for r in 0..self.width {
+            for c in 0..self.width {
+                matrix[(r, c)] = self[(c, r)];
+            }
+        }
+        matrix
+    }
 }
 
 impl Index<math::Idx> for Matrix {
