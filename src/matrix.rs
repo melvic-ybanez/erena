@@ -17,8 +17,20 @@ impl Matrix {
         }
     }
 
+    fn new_nxn(n: usize, elements: &[Real]) -> Matrix {
+        Matrix::new(elements.to_vec().chunks(n).map(|x| x.to_vec()).collect())
+    }
+
     fn new44(elements: &[Real; 16]) -> Matrix {
-        Matrix::new(elements.to_vec().chunks(4).map(|x| x.to_vec()).collect())
+        Matrix::new_nxn(4, elements)
+    }
+
+    fn new22(elements: &[Real; 4]) -> Matrix {
+        Matrix::new_nxn(2, elements)
+    }
+
+    fn new33(elements: &[Real; 9]) -> Matrix {
+        Matrix::new_nxn(3, elements)
     }
 }
 
@@ -50,5 +62,29 @@ mod tests {
         assert_eq!(matrix[(2, 2)], 11.0);
         assert_eq!(matrix[(3, 0)], 13.5);
         assert_eq!(matrix[(3, 2)], 15.5);
+    }
+
+    #[test]
+    fn test_2x2_matrix() {
+        let m = Matrix::new22(&[
+           -3.0, 5.0,
+            1.0, -2.0
+        ]);
+        assert_eq!(m[(0, 0)], -3.0);
+        assert_eq!(m[(0, 1)], 5.0);
+        assert_eq!(m[(1, 0)], 1.0);
+        assert_eq!(m[(1, 1)], -2.0);
+    }
+
+    #[test]
+    fn test_3x3_matrix() {
+        let m = Matrix::new33(&[
+            -3.0, 5.0, 0.0,
+            1.0, -2.0, -7.0,
+            0.0, 1.0, 1.0
+        ]);
+        assert_eq!(m[(0, 0)], -3.0);
+        assert_eq!(m[(1, 1)], -2.0);
+        assert_eq!(m[(2, 2)], 1.0);
     }
 }
