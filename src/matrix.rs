@@ -1,6 +1,7 @@
 use crate::math::Real;
 use std::ops::{Index, Mul, IndexMut};
 use crate::math;
+use crate::tuples::Tuple;
 
 #[derive(Debug)]
 struct Matrix {
@@ -88,10 +89,10 @@ impl Mul for Matrix {
             acc
         };
 
-        for j in 0..size {
-            for i in 0..size {
-                let row = &self.elements[j * size..j * size + size];
-                matrix[(j, i)] = cell(&row, i);
+        for r in 0..size {
+            for c in 0..size {
+                let row = &self.elements[r * size..r * size + size];
+                matrix[(r, c)] = cell(&row, c);
             }
         }
 
@@ -99,9 +100,26 @@ impl Mul for Matrix {
     }
 }
 
+impl Mul<Tuple> for Matrix {
+    type Output = Tuple;
+
+    fn mul(self, rhs: Tuple) -> Self::Output {
+        let mut elems = [0.0; Tuple::LEN];
+
+        for r in 0..Tuple::LEN {
+            for c in 0..Tuple::LEN {
+                elems[r] += self[(r, c)] * rhs[c];
+            }
+        }
+
+        Tuple::from_array(&elems)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::matrix::Matrix;
+    use crate::tuples::Tuple;
 
     #[test]
     fn test_4x4_matrix_creation() {
@@ -194,5 +212,17 @@ mod tests {
             40.0, 58.0, 110.0, 102.0,
             16.0, 26.0, 46.0, 42.0,
         ]));
+    }
+
+    #[test]
+    fn test_matrix_tuple_multiplication() {
+        let matrix = Matrix::new44(&[
+            1.0, 2.0, 3.0, 4.0,
+            2.0, 4.0, 4.0, 2.0,
+            8.0, 6.0, 4.0, 1.0,
+            0.0, 0.0, 0.0, 1.0,
+        ]);
+        let tuple = Tuple::new(1.0, 2.0, 3.0, 1.0);
+        assert_eq!(matrix * tuple, Tuple::new(18.0, 24.0, 33.0, 1.0));
     }
 }

@@ -2,6 +2,7 @@ use std::ops;
 
 use crate::math::Real;
 use crate::math;
+use std::ops::Index;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tuple {
@@ -12,8 +13,14 @@ pub struct Tuple {
 }
 
 impl Tuple {
-    fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
+    pub(crate) const LEN: usize = 4;
+
+    pub(crate) fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
         Tuple { x, y, z, w }
+    }
+
+    pub(crate) fn from_array(elems: &[Real; Tuple::LEN]) -> Tuple {
+        Tuple::new(elems[0], elems[1], elems[2], elems[3])
     }
 
     fn is_point(&self) -> bool {
@@ -71,6 +78,20 @@ impl ops::Div<Real> for Tuple {
 
     fn div(self, scalar: Real) -> Self::Output {
         self * (1.0 / scalar)
+    }
+}
+
+impl Index<usize> for Tuple {
+    type Output = Real;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            3 => &self.w,
+            _ => panic!("Invalid index")
+        }
     }
 }
 
