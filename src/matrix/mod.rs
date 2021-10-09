@@ -3,7 +3,7 @@ use std::ops::{Index, Mul, IndexMut};
 use crate::math;
 use crate::tuples::Tuple;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Matrix {
     elements: Vec<Real>,
     width: usize,
@@ -11,11 +11,15 @@ struct Matrix {
 }
 
 impl Matrix {
+    fn new(width: usize, height: usize, elements: Vec<Real>) -> Matrix {
+        Matrix { width, height, elements }
+    }
+
     /// Constructs a new matrix from a 2D vector. The
     /// width and height properties are computed from the vector itself.
     /// Note: This constructor assumes the vector represents n x n matrix
     /// and not an m x n one.
-    fn new(elements: Vec<Vec<Real>>) -> Matrix {
+    fn from_vec2(elements: Vec<Vec<Real>>) -> Matrix {
         Matrix {
             width: elements[0].len(),
             height: elements.len(),
@@ -23,17 +27,13 @@ impl Matrix {
         }
     }
 
-    fn from_data(width: usize, height: usize, elements: Vec<Real>) -> Matrix {
-        Matrix { width, height, elements }
-    }
-
     /// Constructs an n x n matrix with all the cells initialized to 0.0.
     fn with_nxn(n: usize) -> Matrix {
-        Matrix::new(vec![vec![0.0; n]; n])
+        Matrix::from_vec2(vec![vec![0.0; n]; n])
     }
 
     fn new_nxn(n: usize, elements: &[Real]) -> Matrix {
-        Matrix::new(elements.to_vec().chunks(n).map(|x| x.to_vec()).collect())
+        Matrix::from_vec2(elements.to_vec().chunks(n).map(|x| x.to_vec()).collect())
     }
 
     fn new44(elements: &[Real; 16]) -> Matrix {
@@ -99,7 +99,7 @@ impl Matrix {
             }
         }
 
-        Matrix::from_data(self.width - 1, self.height - 1, elems)
+        Matrix::new(self.width - 1, self.height - 1, elems)
     }
 
     fn minor(&self, row: usize, col: usize) ->  Real {
@@ -140,9 +140,10 @@ impl Matrix {
         }
     }
 
+    /// This is used mainly for testing purposes
     fn round_items(&self, limit: u32) -> Matrix {
         let elems: Vec<_> = self.elements.iter().map(|&x| math::round(x, limit)).collect();
-        Matrix::from_data(self.width, self.height, elems)
+        Matrix::new(self.width, self.height, elems)
     }
 }
 
@@ -169,9 +170,9 @@ impl PartialEq for Matrix {
         if self.width != other.width || self.height != other.height {
             return false;
         }
-        for j in 0..self.height {
-            for i in 0..self.width {
-                if !math::compare_reals(self[(j, i)], other[(j, i)]) {
+        for r in 0..self.height {
+            for c in 0..self.width {
+                if !math::compare_reals(self[(r, c)], other[(r, c)]) {
                     return false;
                 }
             }
@@ -180,7 +181,7 @@ impl PartialEq for Matrix {
     }
 }
 
-impl Mul for Matrix {
+impl Mul for &Matrix {
     type Output = Matrix;
 
     fn mul(self, other: Self) -> Self::Output {
@@ -205,6 +206,14 @@ impl Mul for Matrix {
         }
 
         matrix
+    }
+}
+
+impl Mul for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        &self * &rhs
     }
 }
 

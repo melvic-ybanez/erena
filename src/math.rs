@@ -1,9 +1,11 @@
 pub type Real = f64;
 
+const EPSILON: Real = 0.000001;
+
 pub(crate) type Idx = (usize, usize);
 
 pub fn compare_reals(a: Real, b: Real) -> bool {
-    (a - b).abs() <= Real::EPSILON
+    (a - b).abs() <= EPSILON
 }
 
 pub fn index_of(col: usize, row: usize, width: usize) -> usize {
