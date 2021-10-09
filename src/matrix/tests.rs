@@ -221,3 +221,27 @@ fn test_determinant_for_4x4() {
     assert_eq!(matrix.cofactor(0, 3), 51.0);
     assert_eq!(matrix.determinant(), -4071.0);
 }
+
+#[test]
+fn test_invertible() {
+    let matrix = Matrix::new44(&[
+        6.0, 4.0, 4.0, 4.0,
+        5.0, 5.0, 7.0, 6.0,
+        4.0, -9.0, 3.0, -7.0,
+        9.0, 1.0, 7.0, -6.0,
+    ]);
+    assert_eq!(matrix.determinant(), -2120.0);
+    assert!(matrix.is_invertible());
+}
+
+#[test]
+fn test_not_invertible() {
+    let matrix = Matrix::new44(&[
+        -4.0, 2.0, -2.0, -3.0,
+        9.0, 6.0, 2.0, 6.0,
+        0.0, -5.0, 1.0, -5.0,
+        0.0, 0.0, 0.0, 0.0,
+    ]);
+    assert_eq!(matrix.determinant(), 0.0);
+    assert!(!matrix.is_invertible());
+}
