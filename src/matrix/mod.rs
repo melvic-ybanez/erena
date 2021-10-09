@@ -23,6 +23,10 @@ impl Matrix {
         }
     }
 
+    fn from_data(width: usize, height: usize, elements: Vec<Real>) -> Matrix {
+        Matrix { width, height, elements }
+    }
+
     /// Constructs an n x n mod with all the cells initialized to 0.0.
     fn with_nxn(n: usize) -> Matrix {
         Matrix::new(vec![vec![0.0; n]; n])
@@ -70,7 +74,22 @@ impl Matrix {
             // The determinant of a 2 x 2 matrix follows the formula `ad - bc`
             return self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)];
         }
-        unimplemented!()
+        unimplemented!()    // TODO: Implement this
+    }
+
+    //noinspection SpellCheckingInspection
+    fn submatrix(&self, row: usize, col: usize) -> Matrix {
+        let mut elems: Vec<Real> = vec![];
+
+        for r in 0..self.width {
+            for c in 0..self.width {
+                if r != row && c != col {
+                    elems.push(self[(r, c)]);
+                }
+            }
+        }
+
+        Matrix::from_data(self.width - 1, self.height - 1, elems)
     }
 }
 

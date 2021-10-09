@@ -143,3 +143,28 @@ fn test_2x2_determinant() {
     ]);
     assert_eq!(matrix.determinant(), 17.0);
 }
+
+#[test]
+fn test_submatrix() {
+    let matrix = Matrix::new33(&[
+        1.0, 5.0, 0.0,
+        -3.0, 2.0, 7.0,
+        0.0, 6.0, -3.0,
+    ]);
+    assert_eq!(matrix.submatrix(0, 2), Matrix::new22(&[
+       -3.0, 2.0,
+        0.0, 6.0,
+    ]));
+
+    let matrix1 = Matrix::new44(&[
+        -6.0, 1.0, 1.0, 6.0,
+        -8.0, 5.0, 8.0, 6.0,
+        -1.0, 0.0, 8.0, 2.0,
+        -7.0, 1.0, -1.0, 1.0,
+    ]);
+    assert_eq!(matrix1.submatrix(2, 1), Matrix::new33(&[
+        -6.0, 1.0, 6.0,
+        -8.0, 8.0, 6.0,
+        -7.0, -1.0, 1.0,
+    ]));
+}
