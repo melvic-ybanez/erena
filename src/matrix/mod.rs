@@ -72,9 +72,14 @@ impl Matrix {
     fn determinant(&self) -> Real {
         if self.width == 2 && self.height == 2 {
             // The determinant of a 2 x 2 matrix follows the formula `ad - bc`
-            return self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)];
+            self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]
+        } else {
+            let mut determinant = 0 as Real;
+            for c in 0..self.width {
+                determinant += self[(0, c)] * self.cofactor(0, c);
+            }
+            determinant
         }
-        unimplemented!()    // TODO: Implement this
     }
 
     /// Removes the rowth row and colth column of the matrix.
