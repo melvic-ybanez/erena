@@ -170,7 +170,7 @@ fn test_submatrix() {
 }
 
 #[test]
-fn test_minor() {
+fn test_minor_for_3x3() {
     let matrix = Matrix::new33(&[
         3.0, 5.0, 0.0,
         2.0, -1.0, -7.0,
@@ -179,4 +179,17 @@ fn test_minor() {
     let sub = matrix.submatrix(1, 0);
     assert_eq!(sub.determinant(), 25.0);
     assert_eq!(matrix.minor(1, 0), 25.0);
+}
+
+#[test]
+fn test_cofactor_for_3x3() {
+    let matrix = Matrix::new33(&[
+        3.0, 5.0, 0.0,
+        2.0, -1.0, -7.0,
+        6.0, -1.0, 5.0,
+    ]);
+    assert_eq!(matrix.minor(0, 0), -12.0);
+    assert_eq!(matrix.cofactor(0, 0), -12.0);
+    assert_eq!(matrix.minor(1, 0), 25.0);
+    assert_eq!(matrix.cofactor(1, 0), -25.0);
 }

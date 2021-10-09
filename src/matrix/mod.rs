@@ -61,7 +61,7 @@ impl Matrix {
 
     fn transpose(&self) -> Matrix {
         let mut matrix = Matrix::with_nxn(self.width);
-        for r in 0..self.width {
+        for r in 0..self.height {
             for c in 0..self.width {
                 matrix[(r, c)] = self[(c, r)];
             }
@@ -82,7 +82,7 @@ impl Matrix {
     fn submatrix(&self, row: usize, col: usize) -> Matrix {
         let mut elems: Vec<Real> = vec![];
 
-        for r in 0..self.width {
+        for r in 0..self.height {
             for c in 0..self.width {
                 if r != row && c != col {
                     elems.push(self[(r, c)]);
@@ -95,6 +95,15 @@ impl Matrix {
 
     fn minor(&self, row: usize, col: usize) ->  Real {
         self.submatrix(row, col).determinant()
+    }
+
+    fn cofactor(&self, row: usize, col: usize) -> Real {
+        let minor = self.minor(row, col);
+        if (row + col) % 2 == 1 {
+            -minor
+        } else {
+            minor
+        }
     }
 }
 
