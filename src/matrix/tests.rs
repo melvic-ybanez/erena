@@ -120,7 +120,7 @@ fn test_identity_matrix() {
 }
 
 #[test]
-fn test_transpose() {
+fn test_transposition() {
     let matrix = Matrix::new44(&[
         0.0, 9.0, 3.0, 0.0,
         9.0, 8.0, 0.0, 8.0,
@@ -133,4 +133,13 @@ fn test_transpose() {
         3.0, 0.0, 5.0, 5.0,
         0.0, 8.0, 3.0, 8.0,
     ]));
+}
+
+#[test]
+fn test_2x2_determinant() {
+    let matrix = Matrix::new_nxn(2, &[
+        1.0, 5.0,
+        -3.0, 2.0,
+    ]);
+    assert_eq!(matrix.determinant(), 17.0);
 }
