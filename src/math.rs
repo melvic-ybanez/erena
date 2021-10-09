@@ -20,3 +20,8 @@ pub fn scale_to(max_value: i32, value: Real) -> i32 {
         result
     }
 }
+
+pub fn round(value: Real, limit: u32) -> Real {
+    let limit = 10f64.powf(limit as Real);
+    (value * limit).round() / limit
+}

@@ -40,6 +40,10 @@ impl Matrix {
         Matrix::new_nxn(4, elements)
     }
 
+    fn new44i(elements: &[i64; 16]) -> Matrix {
+        Matrix::new44(&elements.map(|e| e as Real))
+    }
+
     fn new22(elements: &[Real; 4]) -> Matrix {
         Matrix::new_nxn(2, elements)
     }
@@ -113,6 +117,32 @@ impl Matrix {
 
     fn is_invertible(&self) -> bool {
         self.determinant() != 0.0
+    }
+
+    /// Computes the inverse of the matrix with the following algorithm:
+    /// 1. Make a new matrix M composed of the cofactors of the given the matrix M0.
+    /// 2. Transpose M into M'.
+    /// 3. For every element E in M', divide E by the determinant of M0.
+    fn inverse(&self) -> Option<Matrix> {
+        if !self.is_invertible() {
+            None
+        } else {
+            let mut matrix = Matrix::with_nxn(self.width);
+            for r in 0..self.height {
+                for c in 0..self.width {
+                    let cofactor = self.cofactor(r, c);
+
+                    // switch the rows and columns to transpose the matrix
+                    matrix[(c, r)] = cofactor / self.determinant();
+                }
+            }
+            Some(matrix)
+        }
+    }
+
+    fn round_items(&self, limit: u32) -> Matrix {
+        let elems: Vec<_> = self.elements.iter().map(|&x| math::round(x, limit)).collect();
+        Matrix::from_data(self.width, self.height, elems)
     }
 }
 
