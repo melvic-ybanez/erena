@@ -11,9 +11,9 @@ struct Matrix {
 }
 
 impl Matrix {
-    /// Constructs a new mod from a 2D vector. The
+    /// Constructs a new matrix from a 2D vector. The
     /// width and height properties are computed from the vector itself.
-    /// Note: This constructor assumes the vector represents n x n mod
+    /// Note: This constructor assumes the vector represents n x n matrix
     /// and not an m x n one.
     fn new(elements: Vec<Vec<Real>>) -> Matrix {
         Matrix {
@@ -27,7 +27,7 @@ impl Matrix {
         Matrix { width, height, elements }
     }
 
-    /// Constructs an n x n mod with all the cells initialized to 0.0.
+    /// Constructs an n x n matrix with all the cells initialized to 0.0.
     fn with_nxn(n: usize) -> Matrix {
         Matrix::new(vec![vec![0.0; n]; n])
     }
@@ -48,7 +48,7 @@ impl Matrix {
         Matrix::new_nxn(3, elements)
     }
 
-    /// Identity for 4 x 4 mod
+    /// Identity for 4 x 4 matrix
     #[inline(always)]
     fn id44() -> Matrix {
         Matrix::new44(&[
