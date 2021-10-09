@@ -168,3 +168,15 @@ fn test_submatrix() {
         -7.0, -1.0, 1.0,
     ]));
 }
+
+#[test]
+fn test_minor() {
+    let matrix = Matrix::new33(&[
+        3.0, 5.0, 0.0,
+        2.0, -1.0, -7.0,
+        6.0, -1.0, 5.0,
+    ]);
+    let sub = matrix.submatrix(1, 0);
+    assert_eq!(sub.determinant(), 25.0);
+    assert_eq!(matrix.minor(1, 0), 25.0);
+}

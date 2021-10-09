@@ -77,7 +77,8 @@ impl Matrix {
         unimplemented!()    // TODO: Implement this
     }
 
-    //noinspection SpellCheckingInspection
+    /// Removes the rowth row and colth column of the matrix.
+    // noinspection SpellCheckingInspection
     fn submatrix(&self, row: usize, col: usize) -> Matrix {
         let mut elems: Vec<Real> = vec![];
 
@@ -90,6 +91,10 @@ impl Matrix {
         }
 
         Matrix::from_data(self.width - 1, self.height - 1, elems)
+    }
+
+    fn minor(&self, row: usize, col: usize) ->  Real {
+        self.submatrix(row, col).determinant()
     }
 }
 
