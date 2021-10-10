@@ -1,11 +1,14 @@
-use crate::math::Real;
-use std::ops::{Index, Mul, IndexMut};
-use crate::math;
-use crate::tuples::{Tuple, Point, Vector};
 use std::borrow::Borrow;
+use std::ops::{Index, IndexMut, Mul};
+
+use crate::math;
+use crate::math::Real;
+use crate::tuples::{Point, Tuple, Vector};
+
+pub use transformations::*;
 
 #[derive(Debug, Clone)]
-struct Matrix {
+pub struct Matrix {
     elements: Vec<Real>,
     width: usize,
     height: usize,
@@ -251,5 +254,5 @@ impl Mul<Vector> for Matrix {
 }
 
 #[cfg(test)]
-mod tests;
 mod transformations;
+mod tests;

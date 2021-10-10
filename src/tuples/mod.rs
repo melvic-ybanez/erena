@@ -97,10 +97,7 @@ impl Index<usize> for Tuple {
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        math::compare_reals(self.x, other.x) &&
-            math::compare_reals(self.y, other.y) &&
-            math::compare_reals(self.z, other.z) &&
-            math::compare_reals(self.w, other.w)
+        (0..4).all(|i| math::compare_reals(self[i], other[i]))
     }
 }
 
