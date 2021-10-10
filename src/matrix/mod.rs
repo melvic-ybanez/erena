@@ -1,7 +1,7 @@
 use crate::math::Real;
 use std::ops::{Index, Mul, IndexMut};
 use crate::math;
-use crate::tuples::Tuple;
+use crate::tuples::{Tuple, Point, Vector};
 
 #[derive(Debug, Clone)]
 struct Matrix {
@@ -233,5 +233,22 @@ impl Mul<Tuple> for Matrix {
     }
 }
 
+impl Mul<Point> for Matrix {
+    type Output = Point;
+
+    fn mul(self, rhs: Point) -> Self::Output {
+        Point(self * rhs.0)
+    }
+}
+
+impl Mul<Vector> for Matrix {
+    type Output = Vector;
+
+    fn mul(self, rhs: Vector) -> Self::Output {
+        Vector(self * rhs.0)
+    }
+}
+
 #[cfg(test)]
 mod tests;
+mod transformations;

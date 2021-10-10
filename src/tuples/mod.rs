@@ -105,10 +105,10 @@ impl PartialEq for Tuple {
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Vector(Tuple);
+pub struct Vector(pub Tuple);
 
 impl Vector {
-    fn new(x: Real, y: Real, z: Real) -> Vector {
+    pub(crate) fn new(x: Real, y: Real, z: Real) -> Vector {
         Vector(Tuple::new(x, y, z, 0.0))
     }
 
@@ -134,10 +134,10 @@ impl Vector {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Point(Tuple);
+pub struct Point(pub Tuple);
 
 impl Point {
-    fn new(x: Real, y: Real, z: Real) -> Point {
+    pub(crate) fn new(x: Real, y: Real, z: Real) -> Point {
         Point(Tuple::new(x, y, z, 1.0))
     }
 }
