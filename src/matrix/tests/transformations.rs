@@ -125,3 +125,32 @@ fn test_shearing() {
     let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
     assert_eq!(transform * &point, Point::new(2.0, 3.0, 7.0));
 }
+
+
+/// Tests to see if individual transformations are applied in sequence.
+#[test]
+fn test_transformations_sequence() {
+    let point = Point::new(1.0, 0.0, 1.0);
+    let a = rotation_x(math::PI / 2.0);
+    let b = scaling(5.0, 5.0, 5.0);
+    let c = translation(10.0, 5.0, 7.0);
+
+    let point = a * point;  // apply rotation
+    assert_eq!(point, Point::new(1.0, -1.0, 0.0));
+
+    let point = b * point;  // then scale
+    assert_eq!(point, Point::new(5.0, -5.0, 0.0));
+
+    let point = c * point;  // then translate
+    assert_eq!(point, Point::new(15.0, 0.0, 7.0));
+}
+
+#[test]
+fn test_transformations_reverse_order() {
+    let point = Point::new(1.0, 0.0, 1.0);
+    let a = rotation_x(math::PI / 2.0);
+    let b = scaling(5.0, 5.0, 5.0);
+    let c = translation(10.0, 5.0, 7.0);
+    let transformations = c * b * a;
+    assert_eq!(transformations * point, Point::new(15.0, 0.0, 7.0));
+}
