@@ -2,6 +2,7 @@ use crate::math::Real;
 use std::ops::{Index, Mul, IndexMut};
 use crate::math;
 use crate::tuples::{Tuple, Point, Vector};
+use std::borrow::Borrow;
 
 #[derive(Debug, Clone)]
 struct Matrix {
@@ -233,11 +234,11 @@ impl Mul<Tuple> for Matrix {
     }
 }
 
-impl Mul<Point> for Matrix {
+impl<P: Borrow<Point>> Mul<P> for Matrix {
     type Output = Point;
 
-    fn mul(self, rhs: Point) -> Self::Output {
-        Point(self * rhs.0)
+    fn mul(self, rhs: P) -> Self::Output {
+        Point(self * rhs.borrow().0)
     }
 }
 

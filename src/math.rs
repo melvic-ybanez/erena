@@ -2,6 +2,8 @@ pub type Real = f64;
 
 const EPSILON: Real = 0.000001;
 
+pub(crate) const PI: Real = std::f64::consts::PI;
+
 pub(crate) type Idx = (usize, usize);
 
 pub fn compare_reals(a: Real, b: Real) -> bool {

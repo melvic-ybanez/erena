@@ -21,10 +21,21 @@ fn scaling(x: Real, y: Real, z: Real) -> Matrix {
     ])
 }
 
+#[inline(always)]
+fn rotation_x(rad: Real) -> Matrix {
+    Matrix::new44(&[
+        1.0, 0.0, 0.0, 0.0,
+        0.0, rad.cos(), -rad.sin(), 0.0,
+        0.0, rad.sin(), rad.cos(), 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    ])
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::matrix::transformations::{translation, scaling};
+    use crate::matrix::transformations::{translation, scaling, rotation_x};
     use crate::tuples::{Point, Vector};
+    use crate::math;
 
     #[test]
     fn test_translation() {
@@ -85,5 +96,14 @@ mod tests {
         let transform = scaling(-1.0, 1.0, 1.0);
         let point = Point::new(2.0, 3.0, 4.0);
         assert_eq!(transform * point, Point::new(-2.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn test_rotation_around_x() {
+        let point = Point::new(0.0, 1.0, 0.0);
+        let half_quarter = rotation_x(math::PI / 4.0);
+        let full_quarter = rotation_x(math::PI / 2.0);
+        assert_eq!(half_quarter * &point, Point::new(0.0, 2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0));
+        assert_eq!(full_quarter * point, Point::new(0.0, 0.0, 1.0));
     }
 }
