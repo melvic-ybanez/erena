@@ -1,4 +1,4 @@
-use crate::matrix::{translation, scaling, rotation_x, rotation_y, rotation_z};
+use crate::matrix::{translation, scaling, rotation_x, rotation_y, rotation_z, shearing};
 use crate::tuples::{Point, Vector};
 use crate::math;
 
@@ -101,4 +101,27 @@ fn test_rotation_around_z() {
     let full_quarter = rotation_z(math::PI / 2.0);
     assert_eq!(half_quarter * &point, Point::new(-2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0, 0.0));
     assert_eq!(full_quarter * point, Point::new(-1.0, 0.0, 0.0));
+}
+
+#[test]
+fn test_shearing() {
+    let point = Point::new(2.0, 3.0, 4.0);
+
+    let transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    assert_eq!(transform * &point, Point::new(5.0, 3.0, 4.0));
+
+    let transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+    assert_eq!(transform * &point, Point::new(6.0, 3.0, 4.0));
+
+    let transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+    assert_eq!(transform * &point, Point::new(2.0, 5.0, 4.0));
+
+    let transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    assert_eq!(transform * &point, Point::new(2.0, 7.0, 4.0));
+
+    let transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    assert_eq!(transform * &point, Point::new(2.0, 3.0, 6.0));
+
+    let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+    assert_eq!(transform * &point, Point::new(2.0, 3.0, 7.0));
 }

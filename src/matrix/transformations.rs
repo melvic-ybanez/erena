@@ -50,3 +50,16 @@ pub(crate) fn rotation_z(rad: Real) -> Matrix {
         0.0, 0.0, 0.0, 1.0,
     ])
 }
+
+#[inline(always)]
+pub(crate) fn shearing(
+    xy: Real, xz: Real, yx: Real,
+    yz: Real, zx: Real, zy: Real,
+) -> Matrix {
+    Matrix::new44(&[
+        1.0, xy, xz, 0.0,
+        yx, 1.0, yz, 0.0,
+        zx, zy, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    ])
+}
