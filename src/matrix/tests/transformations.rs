@@ -1,4 +1,4 @@
-use crate::matrix::{translation, scaling, rotation_x};
+use crate::matrix::{translation, scaling, rotation_x, rotation_y};
 use crate::tuples::{Point, Vector};
 use crate::math;
 
@@ -83,4 +83,13 @@ fn test_inverse_x_rotation() {
             assert_eq!(inv * point, Point::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0)),
         None => assert!(false)
     }
+}
+
+#[test]
+fn test_rotation_around_y() {
+    let point = Point::new(0.0, 0.0, 1.0);
+    let half_quarter = rotation_y(math::PI / 4.0);
+    let full_quarter = rotation_y(math::PI / 2.0);
+    assert_eq!(half_quarter * &point, Point::new(2_f64.sqrt() / 2.0, 0.0, 2_f64.sqrt() / 2.0));
+    assert_eq!(full_quarter * point, Point::new(1.0, 0.0, 0.0));
 }

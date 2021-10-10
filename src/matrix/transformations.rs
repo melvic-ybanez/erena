@@ -30,3 +30,13 @@ pub(crate) fn rotation_x(rad: Real) -> Matrix {
         0.0, 0.0, 0.0, 1.0,
     ])
 }
+
+#[inline(always)]
+pub(crate) fn rotation_y(rad: Real) -> Matrix {
+    Matrix::new44(&[
+        rad.cos(), 0.0, rad.sin(), 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        -rad.sin(), 0.0, rad.cos(), 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    ])
+}
