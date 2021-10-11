@@ -1,13 +1,13 @@
 use crate::tuples::{Point, Vector};
 use crate::math::Real;
 
-struct Ray {
-    origin: Point,
-    direction: Vector
+pub(crate) struct Ray {
+    pub(crate) origin: Point,
+    pub(crate) direction: Vector
 }
 
 impl Ray {
-    fn new(origin: Point, direction: Vector) -> Ray {
+    pub(crate) fn new(origin: Point, direction: Vector) -> Ray {
         Ray { origin, direction }
     }
 

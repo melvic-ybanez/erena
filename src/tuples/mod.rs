@@ -35,7 +35,7 @@ impl Tuple {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
     }
 
-    fn dot(&self, that: Tuple) -> Real {
+    pub(crate) fn dot(&self, that: Tuple) -> Real {
         self.x * that.x + self.y * that.y + self.z * that.z + self.w * that.w
     }
 }
@@ -136,6 +136,11 @@ pub struct Point(pub Tuple);
 impl Point {
     pub(crate) fn new(x: Real, y: Real, z: Real) -> Point {
         Point(Tuple::new(x, y, z, 1.0))
+    }
+
+    #[inline(always)]
+    pub(crate) fn origin() -> Point {
+        Point::new(0.0, 0.0, 0.0)
     }
 }
 
