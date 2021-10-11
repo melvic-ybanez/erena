@@ -126,7 +126,6 @@ fn test_shearing() {
     assert_eq!(transform * &point, Point::new(2.0, 3.0, 7.0));
 }
 
-
 /// Tests to see if individual transformations are applied in sequence.
 #[test]
 fn test_transformations_sequence() {

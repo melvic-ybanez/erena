@@ -130,7 +130,7 @@ impl Vector {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Point(pub Tuple);
 
 impl Point {
