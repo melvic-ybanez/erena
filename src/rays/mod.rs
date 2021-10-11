@@ -1,7 +1,9 @@
+mod intersections;
+
 use crate::tuples::{Point, Vector};
 use crate::math::Real;
 
-pub(crate) struct Ray {
+pub struct Ray {
     pub(crate) origin: Point,
     pub(crate) direction: Vector
 }
@@ -15,6 +17,7 @@ impl Ray {
         Point(self.origin.0 + self.direction.0 * t)
     }
 }
+
 
 #[cfg(test)]
 mod tests {

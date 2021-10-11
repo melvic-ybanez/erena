@@ -2,14 +2,15 @@ use crate::math::Real;
 use crate::rays::Ray;
 use crate::tuples::Point;
 
-trait Shape {
+pub trait Shape {
     fn intersect(&self, ray: Ray) -> Vec<Real>;
 }
 
-struct Sphere {}
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
+pub struct Sphere {}
 
 impl Sphere {
-    fn new() -> Sphere {
+    pub(crate) fn new() -> Sphere {
         Sphere {}
     }
 }
