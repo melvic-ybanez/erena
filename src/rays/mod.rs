@@ -1,4 +1,5 @@
 use crate::tuples::{Point, Vector};
+use crate::math::Real;
 
 struct Ray {
     origin: Point,
@@ -8,6 +9,10 @@ struct Ray {
 impl Ray {
     fn new(origin: Point, direction: Vector) -> Ray {
         Ray { origin, direction }
+    }
+
+    fn position(&self, t: Real) -> Point {
+        Point(self.origin.0 + self.direction.0 * t)
     }
 }
 
@@ -23,5 +28,15 @@ mod tests {
         let ray = Ray::new(origin, direction);
         assert_eq!(ray.origin, origin);
         assert_eq!(ray.direction, direction);
+    }
+
+    /// Tests computing a point from a distance
+    #[test]
+    fn test_compute_point_from_distance() {
+        let ray = Ray::new(Point::new(2.0, 3.0, 4.0), Vector::new(1.0, 0.0, 0.0));
+        assert_eq!(ray.position(0.0), Point::new(2.0, 3.0, 4.0));
+        assert_eq!(ray.position(1.0), Point::new(3.0, 3.0, 4.0));
+        assert_eq!(ray.position(-1.0), Point::new(1.0, 3.0, 4.0));
+        assert_eq!(ray.position(2.5), Point::new(4.5, 3.0, 4.0));
     }
 }
