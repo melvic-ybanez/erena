@@ -1,13 +1,14 @@
 use crate::math::Real;
 use crate::shapes::Shape;
 
-struct Intersection<S: Shape> {
-    t: Real,
-    object: S,
+#[derive(Debug, PartialOrd, PartialEq)]
+pub struct Intersection<S: Shape> {
+    pub(crate) t: Real,
+    pub(crate) object: S,
 }
 
 impl<S: Shape> Intersection<S> {
-    fn new(t: Real, object: S) -> Intersection<S> {
+    pub(crate) fn new(t: Real, object: S) -> Intersection<S> {
         Intersection { t, object }
     }
 }

@@ -2,6 +2,7 @@ mod intersections;
 
 use crate::tuples::{Point, Vector};
 use crate::math::Real;
+pub use intersections::Intersection;
 
 pub struct Ray {
     pub(crate) origin: Point,

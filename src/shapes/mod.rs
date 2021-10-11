@@ -1,9 +1,8 @@
-use crate::math::Real;
-use crate::rays::Ray;
+use crate::rays::{Ray, Intersection};
 use crate::tuples::Point;
 
-pub trait Shape {
-    fn intersect(&self, ray: Ray) -> Vec<Real>;
+pub trait Shape: Sized {
+    fn intersect(&self, ray: Ray) -> Vec<Intersection<Self>>;
 }
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
@@ -16,7 +15,7 @@ impl Sphere {
 }
 
 impl Shape for Sphere {
-    fn intersect(&self, ray: Ray) -> Vec<Real> {
+    fn intersect(&self, ray: Ray) -> Vec<Intersection<Sphere>> {
         // note: sphere's center is at world origin
         let sphere_to_ray = ray.origin.0 - Point::origin().0;
 
@@ -29,8 +28,8 @@ impl Shape for Sphere {
             vec![]
         } else {
             vec![
-                (-b - discriminant.sqrt()) / (2.0 * a),     // t1
-                (-b + discriminant.sqrt()) / (2.0 * a),     // t2
+                Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), *self),     // t1
+                Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), *self),     // t2
             ]
         }
     }
