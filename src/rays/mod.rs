@@ -19,7 +19,6 @@ impl Ray {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::tuples::{Point, Vector};
