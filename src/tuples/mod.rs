@@ -4,7 +4,7 @@ use crate::math::Real;
 use crate::math;
 use std::ops::Index;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialOrd)]
 pub struct Tuple {
     pub x: Real,
     pub y: Real,
@@ -101,7 +101,7 @@ impl PartialEq for Tuple {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub struct Vector(pub Tuple);
 
 impl Vector {
@@ -130,7 +130,7 @@ impl Vector {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
 pub struct Point(pub Tuple);
 
 impl Point {

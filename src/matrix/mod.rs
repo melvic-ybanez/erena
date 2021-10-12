@@ -229,7 +229,7 @@ impl Mul<Tuple> for Matrix {
 
         for r in 0..Tuple::LEN {
             for c in 0..Tuple::LEN {
-                elems[r] += self[(r, c)] * rhs[c];
+                elems[r] += self.borrow()[(r, c)] * rhs[c];
             }
         }
 
