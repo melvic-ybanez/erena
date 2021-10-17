@@ -57,7 +57,7 @@ impl Matrix {
 
     /// Identity for 4 x 4 matrix
     #[inline(always)]
-    fn id44() -> Matrix {
+    pub(crate) fn id44() -> Matrix {
         Matrix::new44(&[
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,

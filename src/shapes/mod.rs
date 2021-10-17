@@ -1,21 +1,24 @@
 use crate::rays::{Ray, Intersection};
 use crate::tuples::points::Point;
+use crate::matrix::Matrix;
 
 pub trait Shape: Sized {
     fn intersect(&self, ray: Ray) -> Vec<Intersection<Self>>;
 }
 
-#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
-pub struct Sphere {}
+#[derive(Debug, PartialEq,  Clone)]
+pub struct Sphere {
+    pub transformation: Box<Matrix>,
+}
 
 impl Sphere {
     pub(crate) fn new() -> Sphere {
-        Sphere {}
+        Sphere { transformation: Box::new(Matrix::id44()) }
     }
 }
 
 impl Shape for Sphere {
-    fn intersect(&self, ray: Ray) -> Vec<Intersection<Sphere>> {
+    fn intersect(&self, ray: Ray) -> Vec<Intersection<'_, Sphere>> {
         // note: sphere's center is at world origin
         let sphere_to_ray = ray.origin - Point::origin();
 
@@ -28,8 +31,8 @@ impl Shape for Sphere {
             vec![]
         } else {
             vec![
-                Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), *self),     // t1
-                Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), *self),     // t2
+                Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), self),     // t1
+                Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), self),     // t2
             ]
         }
     }
