@@ -1,10 +1,11 @@
 use crate::rays::Ray;
-use crate::tuples::{Point, Vector};
 use crate::shapes::{Sphere, Shape};
+use crate::tuples::{points, vectors};
+use crate::tuples::points::Point;
 
 #[test]
 fn test_two_point_intersection() {
-    let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
     let xs = Sphere::new().intersect(ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, 4.0);
@@ -13,7 +14,7 @@ fn test_two_point_intersection() {
 
 #[test]
 fn test_tangent_intersection() {
-    let ray = Ray::new(Point::new(0.0, 1.0, -5.0), Vector::new(0.0, 0.0, 1.0));
+    let ray = Ray::new(points::new(0.0, 1.0, -5.0), vectors::new(0.0, 0.0, 1.0));
     let xs = Sphere::new().intersect(ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, 5.0);
@@ -22,7 +23,7 @@ fn test_tangent_intersection() {
 
 #[test]
 fn test_ray_missing() {
-    let ray = Ray::new(Point::new(0.0, 2.0, -5.0), Vector::new(0.0, 0.0, 1.0));
+    let ray = Ray::new(points::new(0.0, 2.0, -5.0), vectors::new(0.0, 0.0, 1.0));
     let xs = Sphere::new().intersect(ray);
     assert_eq!(xs.len(), 0);
 }
@@ -30,7 +31,7 @@ fn test_ray_missing() {
 /// Tests a ray originating inside the sphere
 #[test]
 fn test_ray_originating_inside() {
-    let ray = Ray::new(Point::origin(), Vector::new(0.0, 0.0, 1.0));
+    let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
     let xs = Sphere::new().intersect(ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, -1.0);
@@ -39,7 +40,7 @@ fn test_ray_originating_inside() {
 
 #[test]
 fn test_a_sphere_behind_ray() {
-    let ray = Ray::new(Point::new(0.0, 0.0, 5.0), Vector::new(0.0, 0.0, 1.0));
+    let ray = Ray::new(points::new(0.0, 0.0, 5.0), vectors::new(0.0, 0.0, 1.0));
     let xs = Sphere::new().intersect(ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, -6.0);
@@ -48,7 +49,7 @@ fn test_a_sphere_behind_ray() {
 
 #[test]
 fn test_object_of_intersection() {
-    let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector::new(0.0, 0.0, 1.0));
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
     let sphere = Sphere::new();
     let xs = sphere.intersect(ray);
     assert_eq!(xs.len(), 2);

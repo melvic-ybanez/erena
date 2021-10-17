@@ -1,11 +1,11 @@
 use std::borrow::Borrow;
 use std::ops::{Index, IndexMut, Mul};
 
-use crate::math;
+use crate::{math, tuples};
 use crate::math::Real;
-use crate::tuples::{Point, Tuple, Vector};
 
 pub use transformations::*;
+use crate::tuples::TupleLike;
 
 #[derive(Debug, Clone)]
 pub struct Matrix {
@@ -221,35 +221,27 @@ impl Mul for Matrix {
     }
 }
 
-impl Mul<Tuple> for Matrix {
-    type Output = Tuple;
+impl<T> Mul<TupleLike<T>> for Matrix {
+    type Output = TupleLike<T>;
 
-    fn mul(self, rhs: Tuple) -> Self::Output {
-        let mut elems = [0.0; Tuple::LEN];
+    fn mul(self, rhs: TupleLike<T>) -> Self::Output {
+        let mut elems = [0.0; tuples::LEN];
 
-        for r in 0..Tuple::LEN {
-            for c in 0..Tuple::LEN {
+        for r in 0..tuples::LEN {
+            for c in 0..tuples::LEN {
                 elems[r] += self.borrow()[(r, c)] * rhs[c];
             }
         }
 
-        Tuple::from_array(&elems)
+        TupleLike::from_array(&elems)
     }
 }
 
-impl<P: Borrow<Point>> Mul<P> for Matrix {
-    type Output = Point;
+impl<T: Copy> Mul<&TupleLike<T>> for Matrix {
+    type Output = TupleLike<T>;
 
-    fn mul(self, rhs: P) -> Self::Output {
-        Point(self * rhs.borrow().0)
-    }
-}
-
-impl Mul<Vector> for Matrix {
-    type Output = Vector;
-
-    fn mul(self, rhs: Vector) -> Self::Output {
-        Vector(self * rhs.0)
+    fn mul(self, rhs: &TupleLike<T>) -> Self::Output {
+        self * *rhs
     }
 }
 

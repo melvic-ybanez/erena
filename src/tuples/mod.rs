@@ -1,26 +1,30 @@
 use std::ops;
 
 use crate::math::Real;
-use crate::math;
+use crate::{math, tuples};
 use std::ops::Index;
+use std::marker::PhantomData;
+use crate::tuples::vectors::Vector;
 
 #[derive(Debug, Copy, Clone, PartialOrd)]
-pub struct Tuple {
+pub struct TupleLike<T> {
     pub x: Real,
     pub y: Real,
     pub z: Real,
     pub w: Real,
+    _phantom: PhantomData<T>
 }
 
-impl Tuple {
-    pub(crate) const LEN: usize = 4;
+pub const LEN: usize = 4;
 
-    pub(crate) fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
-        Tuple { x, y, z, w }
+impl<T> TupleLike<T> {
+
+    pub(crate) fn new(x: Real, y: Real, z: Real, w: Real) -> TupleLike<T> {
+        TupleLike { x, y, z, w, _phantom: PhantomData }
     }
 
-    pub(crate) fn from_array(elems: &[Real; Tuple::LEN]) -> Tuple {
-        Tuple::new(elems[0], elems[1], elems[2], elems[3])
+    pub(crate) fn from_array(elems: &[Real; LEN]) -> TupleLike<T> {
+        TupleLike::new(elems[0], elems[1], elems[2], elems[3])
     }
 
     fn is_point(&self) -> bool {
@@ -35,53 +39,61 @@ impl Tuple {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
     }
 
-    pub(crate) fn dot(&self, that: Tuple) -> Real {
+    pub fn dot<S>(&self, that: TupleLike<S>) -> Real {
         self.x * that.x + self.y * that.y + self.z * that.z + self.w * that.w
     }
-}
 
-impl ops::Add<Tuple> for Tuple {
-    type Output = Tuple;
+    pub fn to_vector(&self) -> Vector {
+        vectors::new(self.x, self.y, self.z)
+    }
 
-    fn add(self, that: Tuple) -> Self::Output {
-        Tuple::new(self.x + that.x, self.y + that.y, self.z + that.z, self.w + that.w)
+    pub fn to_tuple(&self) -> Tuple {
+        tuples::new(self.x, self.y, self.z, self.w)
     }
 }
 
-impl ops::Sub<Tuple> for Tuple {
-    type Output = Tuple;
+impl<T, S> ops::Add<TupleLike<S>> for TupleLike<T> {
+    type Output = TupleLike<T>;
 
-    fn sub(self, that: Tuple) -> Self::Output {
-        Tuple::new(self.x - that.x, self.y - that.y, self.z - that.z, self.w - that.w)
+    fn add(self, that: TupleLike<S>) -> Self::Output {
+        TupleLike::new(self.x + that.x, self.y + that.y, self.z + that.z, self.w + that.w)
     }
 }
 
-impl ops::Neg for Tuple {
-    type Output = Tuple;
+impl<T, S> ops::Sub<TupleLike<S>> for TupleLike<T> {
+    type Output = TupleLike<T>;
+
+    fn sub(self, rhs: TupleLike<S>) -> Self::Output {
+        TupleLike::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w)
+    }
+}
+
+impl<T> ops::Neg for TupleLike<T> {
+    type Output = TupleLike<T>;
 
     fn neg(self) -> Self::Output {
-        Tuple::new(-self.x, -self.y, -self.z, -self.w)
+        TupleLike::new(-self.x, -self.y, -self.z, -self.w)
     }
 }
 
-impl ops::Mul<Real> for Tuple {
-    type Output = Tuple;
+impl<T> ops::Mul<Real> for TupleLike<T> {
+    type Output = TupleLike<T>;
 
     /// Scalar multiplication
     fn mul(self, scalar: Real) -> Self::Output {
-        Tuple::new(self.x * scalar, self.y * scalar, self.z * scalar, self.w * scalar)
+        TupleLike::new(self.x * scalar, self.y * scalar, self.z * scalar, self.w * scalar)
     }
 }
 
-impl ops::Div<Real> for Tuple {
-    type Output = Tuple;
+impl<T> ops::Div<Real> for TupleLike<T> {
+    type Output = TupleLike<T>;
 
     fn div(self, scalar: Real) -> Self::Output {
         self * (1.0 / scalar)
     }
 }
 
-impl Index<usize> for Tuple {
+impl<T> Index<usize> for TupleLike<T> {
     type Output = Real;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -95,95 +107,122 @@ impl Index<usize> for Tuple {
     }
 }
 
-impl PartialEq for Tuple {
+impl<T> PartialEq for TupleLike<T> {
     fn eq(&self, other: &Self) -> bool {
         (0..4).all(|i| math::compare_reals(self[i], other[i]))
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
-pub struct Vector(pub Tuple);
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+pub struct TupleT;
+pub type Tuple = TupleLike<TupleT>;
 
-impl Vector {
-    pub(crate) fn new(x: Real, y: Real, z: Real) -> Vector {
-        Vector(Tuple::new(x, y, z, 0.0))
+pub fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
+    TupleLike::new(x, y, z, w)
+}
+
+pub(crate) mod vectors {
+    use crate::tuples::TupleLike;
+    use crate::math::Real;
+
+    #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+    pub struct VectorT;
+    pub type Vector = TupleLike<VectorT>;
+
+    pub fn new(x: Real, y: Real, z: Real) -> Vector {
+        TupleLike::new(x, y, z, 0.0)
     }
 
-    #[inline(always)]
-    fn zero() -> Vector {
-        Vector::new(0.0, 0.0, 0.0)
-    }
+    impl Vector {
+        #[inline(always)]
+        pub(crate) fn zero() -> Vector {
+            new(0.0, 0.0, 0.0)
+        }
 
-    fn normalize(&self) -> Vector {
-        let magnitude = self.0.magnitude();
-        Vector(Tuple::new(
-            self.0.x / magnitude, self.0.y / magnitude, self.0.z / magnitude, self.0.w / magnitude)
-        )
-    }
+        pub(crate) fn normalize(&self) -> Vector {
+            let magnitude = self.magnitude();
+            TupleLike::new(
+                self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude
+            )
+        }
 
-    fn cross(&self, that: Vector) -> Vector {
-        Vector::new(
-            self.0.y * that.0.z - self.0.z * that.0.y,
-            self.0.z * that.0.x - self.0.x * that.0.z,
-            self.0.x * that.0.y - self.0.y * that.0.x,
-        )
+        pub(crate) fn cross(&self, that: Vector) -> Vector {
+            new(
+                self.y * that.z - self.z * that.y,
+                self.z * that.x - self.x * that.z,
+                self.x * that.y - self.y * that.x,
+            )
+        }
     }
 }
 
-#[derive(Debug, PartialEq, PartialOrd, Copy, Clone)]
-pub struct Point(pub Tuple);
+pub(crate) mod points {
+    use crate::tuples::TupleLike;
+    use crate::math::Real;
 
-impl Point {
-    pub(crate) fn new(x: Real, y: Real, z: Real) -> Point {
-        Point(Tuple::new(x, y, z, 1.0))
+    #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+    pub struct PointT;
+    pub type Point = TupleLike<PointT>;
+
+    pub fn new(x: Real, y: Real, z: Real) -> Point {
+        TupleLike::new(x, y, z, 1.0)
     }
 
-    #[inline(always)]
-    pub(crate) fn origin() -> Point {
-        Point::new(0.0, 0.0, 0.0)
-    }
-}
-
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Color(pub Tuple);
-
-impl Color {
-    pub(crate) fn new(red: Real, green: Real, blue: Real) -> Color {
-        Color(Tuple::new(red, green, blue, 0.0))
-    }
-
-    pub(crate) fn red_value(&self) -> Real {
-        self.0.x
-    }
-
-    pub(crate) fn green_value(&self) -> Real {
-        self.0.y
-    }
-
-    pub(crate) fn blue_value(&self) -> Real {
-        self.0.z
-    }
-
-    #[inline(always)]
-    pub(crate) fn black() -> Color {
-        Color::new(0.0, 0.0, 0.0)
-    }
-
-    #[inline(always)]
-    pub(crate) fn red() -> Color {
-        Color::new(1.0, 0.0, 0.0)
+    impl Point {
+        #[inline(always)]
+        pub(crate) fn origin() -> Point {
+            new(0.0, 0.0, 0.0)
+        }
     }
 }
 
-impl ops::Mul for Color {
-    type Output = Color;
+pub(crate) mod colors {
+    use crate::tuples::TupleLike;
+    use crate::math::Real;
+    use std::ops;
 
-    /// Hadamard product
-    fn mul(self, other: Self) -> Self::Output {
-        let r = self.red_value() * other.red_value();
-        let g = self.green_value() * other.green_value();
-        let b = self.blue_value() * other.blue_value();
-        Color::new(r, g, b)
+    #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+    pub struct ColorT;
+    pub type Color = TupleLike<ColorT>;
+
+    pub fn new(red: Real, green: Real, blue: Real) -> Color {
+        TupleLike::new(red, green, blue, 0.0)
+    }
+
+    impl Color {
+        pub(crate) fn red_value(&self) -> Real {
+            self.x
+        }
+
+        pub(crate) fn green_value(&self) -> Real {
+            self.y
+        }
+
+        pub(crate) fn blue_value(&self) -> Real {
+            self.z
+        }
+
+        #[inline(always)]
+        pub(crate) fn black() -> Color {
+            new(0.0, 0.0, 0.0)
+        }
+
+        #[inline(always)]
+        pub(crate) fn red() -> Color {
+            new(1.0, 0.0, 0.0)
+        }
+    }
+
+    impl ops::Mul for Color {
+        type Output = Color;
+
+        /// Hadamard product
+        fn mul(self, other: Self) -> Self::Output {
+            let r = self.red_value() * other.red_value();
+            let g = self.green_value() * other.green_value();
+            let b = self.blue_value() * other.blue_value();
+            new(r, g, b)
+        }
     }
 }
 

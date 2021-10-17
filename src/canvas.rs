@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
-use crate::tuples::{Color, Tuple};
 use crate::math;
+use crate::tuples::colors::Color;
 
 struct Canvas {
     width: usize,
@@ -18,11 +18,11 @@ impl Canvas {
 
         fn row(chunk: &[Color]) -> Vec<String> {
             let row: Vec<_> = chunk.iter().map(|color| {
-                let Tuple { x: r, y: g, z: b, .. } = color.0;
+                let Color { x: r, y: g, z: b, .. } = color;
                 let max_value = Ppm::MAX_COLOR_VALUE as i32;
-                let r = math::scale_to(max_value, r);
-                let g = math::scale_to(max_value, g);
-                let b = math::scale_to(max_value, b);
+                let r = math::scale_to(max_value, *r);
+                let g = math::scale_to(max_value, *g);
+                let b = math::scale_to(max_value, *b);
                 format!("{} {} {}", r, g, b)
             }).collect();
             Canvas::wrap(row.join(" "))
@@ -82,7 +82,8 @@ impl IndexMut<math::Idx> for Canvas {
 #[cfg(test)]
 mod tests {
     use crate::canvas::Canvas;
-    use crate::tuples::Color;
+    use crate::tuples::colors;
+    use crate::tuples::colors::Color;
 
     #[test]
     fn test_canvas_creation() {
@@ -110,9 +111,9 @@ mod tests {
     #[test]
     fn test_ppm_pixel_data() {
         let mut canvas = Canvas::new(5, 3);
-        let c1 = Color::new(1.5, 0.0, 0.0);
-        let c2 = Color::new(0.0, 0.5, 0.0);
-        let c3 = Color::new(-0.5, 0.0, 1.0);
+        let c1 = colors::new(1.5, 0.0, 0.0);
+        let c2 = colors::new(0.0, 0.5, 0.0);
+        let c3 = colors::new(-0.5, 0.0, 1.0);
         canvas[(0, 0)] = c1;
         canvas[(2, 1)] = c2;
         canvas[(4, 2)] = c3;
@@ -129,7 +130,7 @@ mod tests {
         let mut canvas = Canvas::new(10, 2);
         for i in 0..10 {
             for j in 0..2 {
-                canvas[(i, j)] = Color::new(1.0, 0.8, 0.6);
+                canvas[(i, j)] = colors::new(1.0, 0.8, 0.6);
             }
         }
         let ppm = canvas.to_ppm();
