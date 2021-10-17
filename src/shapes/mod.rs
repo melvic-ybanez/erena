@@ -1,9 +1,14 @@
 use crate::rays::{Ray, Intersection};
 use crate::tuples::points::Point;
 use crate::matrix::Matrix;
+use crate::tuples::vectors::Vector;
 
 pub trait Shape: Sized {
     fn intersect(&self, ray: Ray) -> Vec<Intersection<Self>>;
+
+    fn transform(&mut self, transformation: Matrix);
+
+    fn normal_at(&self, point: Point) -> Vector;
 }
 
 #[derive(Debug, PartialEq,  Clone)]
@@ -14,10 +19,6 @@ pub struct Sphere {
 impl Sphere {
     pub fn new() -> Sphere {
         Sphere { transformation: Box::new(Matrix::id44()) }
-    }
-
-    pub fn transform(&mut self, transformation: Matrix) {
-        self.transformation = Box::new(transformation)
     }
 }
 
@@ -42,6 +43,14 @@ impl Shape for Sphere {
                 Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), self),     // t2
             ]
         }
+    }
+
+    fn transform(&mut self, transformation: Matrix) {
+        self.transformation = Box::new(transformation)
+    }
+
+    fn normal_at(&self, point: Point) -> Vector {
+        (point - Point::origin()).to_vector().normalize()
     }
 }
 

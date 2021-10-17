@@ -88,3 +88,40 @@ fn test_intersect_with_translated_sphere() {
     let xs = sphere.intersect(ray);
     assert_eq!(xs.len(), 0);
 }
+
+#[test]
+fn test_normal_at_point_on_x_axis() {
+    let sphere = Sphere::new();
+    let n = sphere.normal_at(points::new(1.0, 0.0, 0.0));
+    assert_eq!(n, vectors::new(1.0, 0.0, 0.0));
+}
+
+#[test]
+fn test_normal_at_point_on_y_axis() {
+    let sphere = Sphere::new();
+    let n = sphere.normal_at(points::new(0.0, 1.0, 0.0));
+    assert_eq!(n, vectors::new(0.0, 1.0, 0.0));
+}
+
+#[test]
+fn test_normal_at_point_on_z_axis() {
+    let sphere = Sphere::new();
+    let n = sphere.normal_at(points::new(0.0, 0.0, 1.0));
+    assert_eq!(n, vectors::new(0.0, 0.0, 1.0));
+}
+
+#[test]
+fn test_normal_at_nonaxial_point() {
+    let sphere = Sphere::new();
+    let component = 3_f64.sqrt() / 3.0;
+    let n = sphere.normal_at(points::new(component, component, component));
+    assert_eq!(n, vectors::new(component, component, component));
+}
+
+#[test]
+fn test_normal_is_normalized() {
+    let sphere = Sphere::new();
+    let component = 3_f64.sqrt() / 3.0;
+    let n = sphere.normal_at(points::new(component, component, component));
+    assert_eq!(n, n.normalize());
+}
