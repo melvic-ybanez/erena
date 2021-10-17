@@ -5,6 +5,7 @@ use crate::{math, tuples};
 use std::ops::Index;
 use std::marker::PhantomData;
 use crate::tuples::vectors::Vector;
+use crate::tuples::points::Point;
 
 #[derive(Debug, Copy, Clone, PartialOrd)]
 pub struct TupleLike<T> {
@@ -28,11 +29,11 @@ impl<T> TupleLike<T> {
     }
 
     fn is_point(&self) -> bool {
-        self.w == 1.0
+        self.w == Point::W
     }
 
     fn is_vector(&self) -> bool {
-        self.w == 0.0
+        self.w == Vector::W
     }
 
     fn magnitude(&self) -> Real {
@@ -130,10 +131,12 @@ pub(crate) mod vectors {
     pub type Vector = TupleLike<VectorT>;
 
     pub fn new(x: Real, y: Real, z: Real) -> Vector {
-        TupleLike::new(x, y, z, 0.0)
+        TupleLike::new(x, y, z, Vector::W)
     }
 
     impl Vector {
+        pub const W: Real = 0.0;
+
         #[inline(always)]
         pub(crate) fn zero() -> Vector {
             new(0.0, 0.0, 0.0)
@@ -165,10 +168,12 @@ pub(crate) mod points {
     pub type Point = TupleLike<PointT>;
 
     pub fn new(x: Real, y: Real, z: Real) -> Point {
-        TupleLike::new(x, y, z, 1.0)
+        TupleLike::new(x, y, z, Point::W)
     }
 
     impl Point {
+        pub const W: Real = 1.0;
+
         #[inline(always)]
         pub(crate) fn origin() -> Point {
             new(0.0, 0.0, 0.0)
