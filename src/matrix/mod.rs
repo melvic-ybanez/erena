@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::ops::{Index, IndexMut, Mul};
 
 use crate::{math, tuples};
@@ -229,7 +228,7 @@ impl<T> Mul<TupleLike<T>> for Matrix {
 
         for r in 0..tuples::LEN {
             for c in 0..tuples::LEN {
-                elems[r] += self.borrow()[(r, c)] * rhs[c];
+                elems[r] += self[(r, c)] * rhs[c];
             }
         }
 
