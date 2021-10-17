@@ -12,13 +12,20 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub(crate) fn new() -> Sphere {
+    pub fn new() -> Sphere {
         Sphere { transformation: Box::new(Matrix::id44()) }
+    }
+
+    pub fn transform(&mut self, transformation: Matrix) {
+        self.transformation = Box::new(transformation)
     }
 }
 
 impl Shape for Sphere {
     fn intersect(&self, ray: Ray) -> Vec<Intersection<'_, Sphere>> {
+        let transformation = self.transformation.inverse().expect("Can not inverse transformation");
+        let ray = ray.transform(&transformation);
+
         // note: sphere's center is at world origin
         let sphere_to_ray = ray.origin - Point::origin();
 

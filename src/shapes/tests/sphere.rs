@@ -2,7 +2,7 @@ use crate::rays::Ray;
 use crate::shapes::{Sphere, Shape};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
-use crate::matrix::Matrix;
+use crate::matrix::{Matrix, scaling, translation};
 
 #[test]
 fn test_two_point_intersection() {
@@ -67,4 +67,24 @@ fn test_object_of_intersection() {
 fn test_default_transformation() {
     let sphere = Sphere::new();
     assert_eq!(*sphere.transformation, Matrix::id44());
+}
+
+#[test]
+fn test_intersect_with_scaled_sphere() {
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
+    let mut sphere = Sphere::new();
+    sphere.transform(scaling(2.0, 2.0, 2.0));
+    let xs = sphere.intersect(ray);
+    assert_eq!(xs.len(), 2);
+    assert_eq!(xs[0].t, 3.0);
+    assert_eq!(xs[1].t, 7.0);
+}
+
+#[test]
+fn test_intersect_with_translated_sphere() {
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
+    let mut sphere = Sphere::new();
+    sphere.transform(translation(5.0, 0.0, 0.0));
+    let xs = sphere.intersect(ray);
+    assert_eq!(xs.len(), 0);
 }

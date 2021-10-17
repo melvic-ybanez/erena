@@ -21,7 +21,7 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    fn transform(&self, transformation: &Matrix) -> Ray {
+    pub(crate) fn transform(&self, transformation: &Matrix) -> Ray {
         Ray::new(transformation.clone() * self.origin, transformation.clone() * self.direction)
     }
 }

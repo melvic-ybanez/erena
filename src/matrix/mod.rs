@@ -126,7 +126,7 @@ impl Matrix {
     /// 1. Make a new matrix M composed of the cofactors of the given the matrix M0.
     /// 2. Transpose M into M'.
     /// 3. For every element E in M', divide E by the determinant of M0.
-    fn inverse(&self) -> Option<Matrix> {
+    pub(crate) fn inverse(&self) -> Option<Matrix> {
         if !self.is_invertible() {
             None
         } else {
