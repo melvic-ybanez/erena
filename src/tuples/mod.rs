@@ -152,19 +152,23 @@ pub(crate) mod vectors {
             new(0.0, 0.0, 0.0)
         }
 
-        pub(crate) fn normalize(&self) -> Vector {
+        pub fn normalize(&self) -> Vector {
             let magnitude = self.magnitude();
             TupleLike::new(
                 self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude
             )
         }
 
-        pub(crate) fn cross(&self, that: Vector) -> Vector {
+        pub fn cross(&self, that: Vector) -> Vector {
             new(
                 self.y * that.z - self.z * that.y,
                 self.z * that.x - self.x * that.z,
                 self.x * that.y - self.y * that.x,
             )
+        }
+
+        pub fn reflect(&self, normal: Vector) -> Vector {
+            *self - normal * 2.0 * self.dot(normal)
         }
     }
 }

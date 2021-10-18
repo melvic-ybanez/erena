@@ -170,3 +170,19 @@ fn test_hadamard_product() {
     let c2 = colors::new(0.9, 1.0, 0.1);
     assert_eq!(c1 * c2, colors::new(0.9, 0.2, 0.04));
 }
+
+#[test]
+fn test_reflecting_a_vector_approaching_at_45() {
+    let vector = vectors::new(1.0, -1.0, 0.0);
+    let n = vectors::new(0.0, 1.0, 0.0);
+    let r = vector.reflect(n);
+    assert_eq!(r, vectors::new(1.0, 1.0, 0.0));
+}
+
+#[test]
+fn test_reflecting_a_vector_off_a_slanted_surface() {
+    let vector = vectors::new(0.0, -1.0, 0.0);
+    let n = vectors::new(2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0, 0.0);
+    let r = vector.reflect(n);
+    assert_eq!(r, vectors::new(1.0, 0.0, 0.0));
+}
