@@ -230,6 +230,11 @@ pub(crate) mod colors {
         pub(crate) fn red() -> Color {
             new(1.0, 0.0, 0.0)
         }
+
+        #[inline(always)]
+        pub fn white() -> Color {
+            new(1.0, 1.0, 1.0)
+        }
     }
 
     impl ops::Mul for Color {
