@@ -10,6 +10,8 @@ pub trait Shape: Sized {
     fn transform(&mut self, transformation: Matrix) -> &Self;
 
     fn normal_at(&self, point: Point) -> Vector;
+
+    fn with_material(&mut self, material: Material) -> &Self;
 }
 
 #[derive(Debug, PartialEq,  Clone)]
@@ -61,6 +63,11 @@ impl Shape for Sphere {
         let object_normal = object_point - Point::origin();
         let world_normal = inverse.transpose() * object_normal;
         world_normal.to_vector().normalize()
+    }
+
+    fn with_material(&mut self, material: Material) -> &Self {
+        self.material = material;
+        self
     }
 }
 
