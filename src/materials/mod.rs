@@ -1,6 +1,7 @@
 use crate::tuples::colors::Color;
 use crate::math::Real;
 
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct Material {
     pub color: Color,
     pub ambient: Real,

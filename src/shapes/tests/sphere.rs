@@ -4,6 +4,7 @@ use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 use crate::matrix::{Matrix, scaling, translation, rotation_z};
 use std::f64::consts::{FRAC_1_SQRT_2, PI};
+use crate::materials::Material;
 
 #[test]
 fn test_two_point_intersection() {
@@ -142,4 +143,11 @@ fn test_normal_on_transformed_sphere() {
     sphere.transform(m);
     let n = sphere.normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
     assert_eq!(n.round_items(), vectors::new(0.0, 0.97014, -0.24254));
+}
+
+#[test]
+fn test_default_material() {
+    let sphere = Sphere::new();
+    let mat = Material::default();
+    assert_eq!(sphere.material, mat);
 }

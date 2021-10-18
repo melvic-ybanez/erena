@@ -2,6 +2,7 @@ use crate::rays::{Ray, Intersection};
 use crate::tuples::points::Point;
 use crate::matrix::Matrix;
 use crate::tuples::vectors::Vector;
+use crate::materials::Material;
 
 pub trait Shape: Sized {
     fn intersect(&self, ray: Ray) -> Vec<Intersection<Self>>;
@@ -14,11 +15,15 @@ pub trait Shape: Sized {
 #[derive(Debug, PartialEq,  Clone)]
 pub struct Sphere {
     pub transformation: Box<Matrix>,
+    pub material: Material,
 }
 
 impl Sphere {
     pub fn new() -> Sphere {
-        Sphere { transformation: Box::new(Matrix::id44()) }
+        Sphere {
+            transformation: Box::new(Matrix::id44()),
+            material: Material::default()
+        }
     }
 }
 
