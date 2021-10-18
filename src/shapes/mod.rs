@@ -6,7 +6,7 @@ use crate::tuples::vectors::Vector;
 pub trait Shape: Sized {
     fn intersect(&self, ray: Ray) -> Vec<Intersection<Self>>;
 
-    fn transform(&mut self, transformation: Matrix);
+    fn transform(&mut self, transformation: Matrix) -> &Self;
 
     fn normal_at(&self, point: Point) -> Vector;
 }
@@ -24,7 +24,7 @@ impl Sphere {
 
 impl Shape for Sphere {
     fn intersect(&self, ray: Ray) -> Vec<Intersection<'_, Sphere>> {
-        let transformation = self.transformation.inverse().expect("Can not inverse transformation");
+        let transformation = self.transformation.inverse_or_id44();
         let ray = ray.transform(&transformation);
 
         // note: sphere's center is at world origin
@@ -45,12 +45,17 @@ impl Shape for Sphere {
         }
     }
 
-    fn transform(&mut self, transformation: Matrix) {
-        self.transformation = Box::new(transformation)
+    fn transform(&mut self, transformation: Matrix) -> &Self {
+        self.transformation = Box::new(transformation);
+        self
     }
 
-    fn normal_at(&self, point: Point) -> Vector {
-        (point - Point::origin()).to_vector().normalize()
+    fn normal_at(&self, world_point: Point) -> Vector {
+        let inverse = self.transformation.inverse_or_id44();
+        let object_point = &inverse * world_point;
+        let object_normal = object_point - Point::origin();
+        let world_normal = inverse.transpose() * object_normal;
+        world_normal.to_vector().normalize()
     }
 }
 

@@ -2,7 +2,8 @@ use crate::rays::Ray;
 use crate::shapes::{Sphere, Shape};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
-use crate::matrix::{Matrix, scaling, translation};
+use crate::matrix::{Matrix, scaling, translation, rotation_z};
+use std::f64::consts::{FRAC_1_SQRT_2, PI};
 
 #[test]
 fn test_two_point_intersection() {
@@ -124,4 +125,21 @@ fn test_normal_is_normalized() {
     let component = 3_f64.sqrt() / 3.0;
     let n = sphere.normal_at(points::new(component, component, component));
     assert_eq!(n, n.normalize());
+}
+
+#[test]
+fn test_normal_on_translated_sphere() {
+    let mut sphere = Sphere::new();
+    sphere.transform(translation(0.0, 1.0, 0.0));
+    let n = sphere.normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
+    assert_eq!(n, vectors::new(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
+}
+
+#[test]
+fn test_normal_on_transformed_sphere() {
+    let mut sphere = Sphere::new();
+    let m = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
+    sphere.transform(m);
+    let n = sphere.normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
+    assert_eq!(n.round_items(), vectors::new(0.0, 0.97014, -0.24254));
 }

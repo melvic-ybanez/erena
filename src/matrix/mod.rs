@@ -66,7 +66,7 @@ impl Matrix {
         ])
     }
 
-    fn transpose(&self) -> Matrix {
+    pub(crate) fn transpose(&self) -> Matrix {
         let mut matrix = Matrix::with_nxn(self.width);
         for r in 0..self.height {
             for c in 0..self.width {
@@ -126,7 +126,7 @@ impl Matrix {
     /// 1. Make a new matrix M composed of the cofactors of the given the matrix M0.
     /// 2. Transpose M into M'.
     /// 3. For every element E in M', divide E by the determinant of M0.
-    pub(crate) fn inverse(&self) -> Option<Matrix> {
+    pub fn inverse(&self) -> Option<Matrix> {
         if !self.is_invertible() {
             None
         } else {
@@ -141,6 +141,10 @@ impl Matrix {
             }
             Some(matrix)
         }
+    }
+
+    pub fn inverse_or_id44(&self) -> Matrix {
+        self.inverse().unwrap_or(Matrix::id44())
     }
 
     /// This is used mainly for testing purposes
@@ -220,7 +224,7 @@ impl Mul for Matrix {
     }
 }
 
-impl<T> Mul<TupleLike<T>> for Matrix {
+impl<T> Mul<TupleLike<T>> for &Matrix {
     type Output = TupleLike<T>;
 
     fn mul(self, rhs: TupleLike<T>) -> Self::Output {
@@ -233,6 +237,14 @@ impl<T> Mul<TupleLike<T>> for Matrix {
         }
 
         TupleLike::from_array(&elems)
+    }
+}
+
+impl<T> Mul<TupleLike<T>> for Matrix {
+    type Output = TupleLike<T>;
+
+    fn mul(self, rhs: TupleLike<T>) -> Self::Output {
+        &self * rhs
     }
 }
 

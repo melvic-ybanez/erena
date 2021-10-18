@@ -51,6 +51,16 @@ impl<T> TupleLike<T> {
     pub fn to_tuple(&self) -> Tuple {
         tuples::new(self.x, self.y, self.z, self.w)
     }
+
+    /// This is primarily used for testing
+    pub(crate) fn round_items(&self) -> TupleLike<T> {
+        TupleLike::new(
+            math::round_to_5(self.x),
+            math::round_to_5(self.y),
+            math::round_to_5(self.z),
+            math::round_to_5(self.w)
+        )
+    }
 }
 
 impl<T, S> ops::Add<TupleLike<S>> for TupleLike<T> {

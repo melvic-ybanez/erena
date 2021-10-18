@@ -29,3 +29,7 @@ pub(crate) fn round(value: Real, limit: u32) -> Real {
     let limit = 10f64.powf(limit as Real);
     (value * limit).round() / limit
 }
+
+pub(crate) fn round_to_5(value: Real) -> Real {
+    round(value, 5)
+}
