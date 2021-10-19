@@ -5,7 +5,7 @@ use crate::tuples::vectors::Vector;
 use crate::materials::Material;
 
 pub trait Shape: Sized {
-    fn intersect(&self, ray: Ray) -> Vec<Intersection<Self>>;
+    fn intersect(&self, ray: &Ray) -> Vec<Intersection<Self>>;
 
     fn transform(&mut self, transformation: Matrix) -> &Self;
 
@@ -30,7 +30,7 @@ impl Sphere {
 }
 
 impl Shape for Sphere {
-    fn intersect(&self, ray: Ray) -> Vec<Intersection<'_, Sphere>> {
+    fn intersect(&self, ray: &Ray) -> Vec<Intersection<'_, Sphere>> {
         let transformation = self.transformation.inverse_or_id44();
         let ray = ray.transform(&transformation);
 

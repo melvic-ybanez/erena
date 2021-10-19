@@ -2,18 +2,18 @@ use std::ops::{Index, IndexMut};
 use crate::math;
 use crate::tuples::colors::Color;
 
-struct Canvas {
+pub struct Canvas {
     width: usize,
     height: usize,
     pixels: Vec<Color>,
 }
 
 impl Canvas {
-    fn new(width: usize, height: usize) -> Canvas {
+    pub fn new(width: usize, height: usize) -> Canvas {
         Canvas { width, height, pixels: vec![Color::black(); width * height] }
     }
 
-    fn to_ppm(&self) -> Ppm {
+    pub fn to_ppm(&self) -> Ppm {
         let header = format!("P3\n{} {}\n{}", self.width, self.height, Ppm::MAX_COLOR_VALUE);
 
         fn row(chunk: &[Color]) -> Vec<String> {
@@ -50,7 +50,7 @@ impl Canvas {
     }
 }
 
-struct Ppm {
+pub struct Ppm {
     header: String,
     data: Vec<String>,
 }
@@ -76,6 +76,12 @@ impl IndexMut<math::Idx> for Canvas {
     fn index_mut(&mut self, index: math::Idx) -> &mut Self::Output {
         let (x, y) = index;
         &mut self.pixels[math::index_of(x, y, self.width)]
+    }
+}
+
+impl ToString for Ppm {
+    fn to_string(&self) -> String {
+        format!("{}\n{}\n", self.header, self.data.join("\n"))
     }
 }
 

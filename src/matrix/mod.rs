@@ -3,6 +3,8 @@ use std::ops::{Index, IndexMut, Mul};
 use crate::{math, tuples};
 use crate::math::Real;
 
+mod transformations;
+
 pub use transformations::*;
 use crate::tuples::TupleLike;
 
@@ -257,5 +259,4 @@ impl<T: Copy> Mul<&TupleLike<T>> for Matrix {
 }
 
 #[cfg(test)]
-mod transformations;
 mod tests;

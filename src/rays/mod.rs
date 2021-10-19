@@ -17,7 +17,7 @@ impl Ray {
         Ray { origin, direction }
     }
 
-    fn position(&self, t: Real) -> Point {
+    pub(crate) fn position(&self, t: Real) -> Point {
         self.origin + self.direction * t
     }
 
