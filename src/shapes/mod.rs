@@ -4,7 +4,11 @@ use crate::matrix::Matrix;
 use crate::tuples::vectors::Vector;
 use crate::materials::Material;
 
-pub trait Shape: Sized {
+pub trait Object {
+    fn id(&self) -> String;
+}
+
+pub trait Shape: Sized + Object {
     fn intersect(&self, ray: &Ray) -> Vec<Intersection<Self>>;
 
     fn transform(&mut self, transformation: Matrix) -> &Self;
@@ -14,7 +18,7 @@ pub trait Shape: Sized {
     fn with_material(&mut self, material: Material) -> &Self;
 }
 
-#[derive(Debug, PartialEq,  Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Sphere {
     pub transformation: Box<Matrix>,
     pub material: Material,
@@ -68,6 +72,18 @@ impl Shape for Sphere {
     fn with_material(&mut self, material: Material) -> &Self {
         self.material = material;
         self
+    }
+}
+
+impl Object for Sphere {
+    fn id(&self) -> String {
+        String::from("Sphere")
+    }
+}
+
+impl PartialEq for dyn Object {
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id()
     }
 }
 

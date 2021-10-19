@@ -6,7 +6,6 @@ use crate::lights::PointLight;
 use crate::canvas::Canvas;
 use crate::rays::{Ray, Intersection};
 use std::fs::File;
-use std::io::{Write, BufWriter, Error};
 use std::fs;
 
 pub(crate) fn render_scene() {
