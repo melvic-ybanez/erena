@@ -20,14 +20,14 @@ pub trait Shape: Sized + Object {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sphere {
-    pub transformation: Box<Matrix>,
+    pub transformation: Matrix,
     pub material: Material,
 }
 
 impl Sphere {
     pub fn new() -> Sphere {
         Sphere {
-            transformation: Box::new(Matrix::id44()),
+            transformation: Matrix::id44(),
             material: Material::default()
         }
     }
@@ -57,7 +57,7 @@ impl Shape for Sphere {
     }
 
     fn transform(&mut self, transformation: Matrix) -> &Self {
-        self.transformation = Box::new(transformation);
+        self.transformation = transformation;
         self
     }
 

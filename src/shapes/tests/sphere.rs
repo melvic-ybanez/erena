@@ -68,7 +68,7 @@ fn test_object_of_intersection() {
 #[test]
 fn test_default_transformation() {
     let sphere = Sphere::new();
-    assert_eq!(*sphere.transformation, Matrix::id44());
+    assert_eq!(sphere.transformation, Matrix::id44());
 }
 
 #[test]
