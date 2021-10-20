@@ -3,39 +3,70 @@ use crate::tuples::points::Point;
 use crate::matrix::Matrix;
 use crate::tuples::vectors::Vector;
 use crate::materials::Material;
+use crate::shapes::Space3D::Sphere;
 
-pub trait Object {
-    fn id(&self) -> String;
-}
-
-pub trait Shape: Sized + Object {
-    fn intersect(&self, ray: &Ray) -> Vec<Intersection<Self>>;
-
-    fn transform(&mut self, transformation: Matrix) -> &Self;
-
-    fn normal_at(&self, point: Point) -> Vector;
-
-    fn with_material(&mut self, material: Material) -> &Self;
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Sphere {
+#[derive(Debug, PartialEq)]
+pub struct Object<S: PartialEq> {
     pub transformation: Matrix,
     pub material: Material,
+    pub shape: S,
 }
 
-impl Sphere {
-    pub fn new() -> Sphere {
-        Sphere {
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum Space3D {
+    Sphere,
+}
+
+pub type Shape = Object<Space3D>;
+
+impl Shape {
+    pub fn new(space3d: Space3D) -> Shape {
+        Object {
             transformation: Matrix::id44(),
-            material: Material::default()
+            material: Material::default(),
+            shape: space3d
+        }
+    }
+
+    pub fn sphere() -> Shape {
+        Shape::new(Sphere)
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> Vec<Intersection<Space3D>> {
+        match self.shape {
+            Sphere => sphere::intersect(self, ray)
+        }
+    }
+
+    pub fn transform(&mut self, transformation: Matrix) -> &Self {
+        match self.shape {
+            Sphere => sphere::transform(self, transformation)
+        }
+    }
+
+    pub fn normal_at(&self, point: Point) -> Vector {
+        match self.shape {
+            Sphere => sphere::normal_at(self, point)
+        }
+    }
+
+    pub fn with_material(&mut self, material: Material) -> &Self {
+        match self.shape {
+            Sphere => sphere::with_material(self, material)
         }
     }
 }
 
-impl Shape for Sphere {
-    fn intersect(&self, ray: &Ray) -> Vec<Intersection<'_, Sphere>> {
-        let transformation = self.transformation.inverse_or_id44();
+mod sphere {
+    use crate::shapes::{Shape, Space3D};
+    use crate::rays::{Ray, Intersection};
+    use crate::tuples::points::Point;
+    use crate::matrix::Matrix;
+    use crate::tuples::vectors::Vector;
+    use crate::materials::Material;
+
+    pub fn intersect<'a>(sphere: &'a Shape, ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
+        let transformation = sphere.transformation.inverse_or_id44();
         let ray = ray.transform(&transformation);
 
         // note: sphere's center is at world origin
@@ -50,40 +81,28 @@ impl Shape for Sphere {
             vec![]
         } else {
             vec![
-                Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), self),     // t1
-                Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), self),     // t2
+                Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), sphere),     // t1
+                Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), sphere),     // t2
             ]
         }
     }
 
-    fn transform(&mut self, transformation: Matrix) -> &Self {
-        self.transformation = transformation;
-        self
+    pub fn transform(sphere: &mut Shape, transformation: Matrix) -> &Shape {
+        sphere.transformation = transformation;
+        sphere
     }
 
-    fn normal_at(&self, world_point: Point) -> Vector {
-        let inverse = self.transformation.inverse_or_id44();
+    pub fn normal_at(sphere: &Shape, world_point: Point) -> Vector {
+        let inverse = sphere.transformation.inverse_or_id44();
         let object_point = &inverse * world_point;
         let object_normal = object_point - Point::origin();
         let world_normal = inverse.transpose() * object_normal;
         world_normal.to_vector().normalize()
     }
 
-    fn with_material(&mut self, material: Material) -> &Self {
-        self.material = material;
-        self
-    }
-}
-
-impl Object for Sphere {
-    fn id(&self) -> String {
-        String::from("Sphere")
-    }
-}
-
-impl PartialEq for dyn Object {
-    fn eq(&self, other: &Self) -> bool {
-        self.id() == other.id()
+    pub fn with_material(sphere: &mut Shape, material: Material) -> &Shape {
+        sphere.material = material;
+        sphere
     }
 }
 

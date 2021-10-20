@@ -1,16 +1,18 @@
-use crate::shapes::{Shape, Object, Sphere};
+use crate::shapes::{Shape, Object, Space3D};
 use crate::tuples::{colors, points};
 use crate::matrix::scaling;
 use crate::lights::PointLight;
 use crate::tuples::colors::Color;
 
-pub struct World {
-    pub objects: Vec<Box<dyn Object>>,
+pub struct World<S: PartialEq> {
+    pub objects: Vec<Object<S>>,
     pub light: Option<PointLight>,
 }
 
-impl World {
-    fn new() -> World {
+pub type World3D = World<Space3D>;
+
+impl<S: PartialEq> World<S> {
+    fn new() -> World<S> {
         World { objects: vec![], light: None }
     }
 
@@ -18,29 +20,31 @@ impl World {
         self.objects.is_empty() && self.light.is_none()
     }
 
-    fn add_shape(&mut self, object: Box<dyn Object>) {
+    fn add_shape(&mut self, object: Object<S>) {
         self.objects.push(object);
     }
 
-    fn default() -> World {
+    fn contains(&self, shape: Object<S>) -> bool {
+        self.objects.contains(&shape)
+    }
+}
+
+impl World3D {
+    fn default() -> World3D {
         let mut world = World::new();
 
-        let mut sphere1 = Sphere::new();
+        let mut sphere1 = Shape::sphere();
         sphere1.material.color = colors::new(0.8, 1.0, 0.6);
         sphere1.material.diffuse = 0.7;
         sphere1.material.specular = 0.2;
 
-        let mut sphere2 = Sphere::new();
+        let mut sphere2 = Shape::sphere();
         sphere2.transform(scaling(0.5, 0.5, 0.5));
 
-        world.add_shape(Box::new(sphere1));
-        world.add_shape(Box::new(sphere2));
+        world.add_shape(sphere1);
+        world.add_shape(sphere2);
         world.light = Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()));
         world
-    }
-
-    fn contains(&self, shape: Box<dyn Object>) -> bool {
-        self.objects.contains(&shape)
     }
 }
 

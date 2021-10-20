@@ -1,5 +1,5 @@
 use crate::rays::Ray;
-use crate::shapes::{Sphere, Shape};
+use crate::shapes::Shape;
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 use crate::matrix::{Matrix, scaling, translation, rotation_z};
@@ -9,7 +9,7 @@ use crate::materials::Material;
 #[test]
 fn test_two_point_intersection() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, 4.0);
@@ -19,7 +19,7 @@ fn test_two_point_intersection() {
 #[test]
 fn test_tangent_intersection() {
     let ray = Ray::new(points::new(0.0, 1.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, 5.0);
@@ -29,7 +29,7 @@ fn test_tangent_intersection() {
 #[test]
 fn test_ray_missing() {
     let ray = Ray::new(points::new(0.0, 2.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 0);
 }
@@ -38,7 +38,7 @@ fn test_ray_missing() {
 #[test]
 fn test_ray_originating_inside() {
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, -1.0);
@@ -48,7 +48,7 @@ fn test_ray_originating_inside() {
 #[test]
 fn test_a_sphere_behind_ray() {
     let ray = Ray::new(points::new(0.0, 0.0, 5.0), vectors::new(0.0, 0.0, 1.0));
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, -6.0);
@@ -58,7 +58,7 @@ fn test_a_sphere_behind_ray() {
 #[test]
 fn test_object_of_intersection() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(*xs[0].object, sphere);
@@ -67,14 +67,14 @@ fn test_object_of_intersection() {
 
 #[test]
 fn test_default_transformation() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     assert_eq!(sphere.transformation, Matrix::id44());
 }
 
 #[test]
 fn test_intersect_with_scaled_sphere() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let mut sphere = Sphere::new();
+    let mut sphere = Shape::sphere();
     sphere.transform(scaling(2.0, 2.0, 2.0));
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
@@ -85,7 +85,7 @@ fn test_intersect_with_scaled_sphere() {
 #[test]
 fn test_intersect_with_translated_sphere() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let mut sphere = Sphere::new();
+    let mut sphere = Shape::sphere();
     sphere.transform(translation(5.0, 0.0, 0.0));
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 0);
@@ -93,28 +93,28 @@ fn test_intersect_with_translated_sphere() {
 
 #[test]
 fn test_normal_at_point_on_x_axis() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let n = sphere.normal_at(points::new(1.0, 0.0, 0.0));
     assert_eq!(n, vectors::new(1.0, 0.0, 0.0));
 }
 
 #[test]
 fn test_normal_at_point_on_y_axis() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let n = sphere.normal_at(points::new(0.0, 1.0, 0.0));
     assert_eq!(n, vectors::new(0.0, 1.0, 0.0));
 }
 
 #[test]
 fn test_normal_at_point_on_z_axis() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let n = sphere.normal_at(points::new(0.0, 0.0, 1.0));
     assert_eq!(n, vectors::new(0.0, 0.0, 1.0));
 }
 
 #[test]
 fn test_normal_at_nonaxial_point() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let component = 3_f64.sqrt() / 3.0;
     let n = sphere.normal_at(points::new(component, component, component));
     assert_eq!(n, vectors::new(component, component, component));
@@ -122,7 +122,7 @@ fn test_normal_at_nonaxial_point() {
 
 #[test]
 fn test_normal_is_normalized() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let component = 3_f64.sqrt() / 3.0;
     let n = sphere.normal_at(points::new(component, component, component));
     assert_eq!(n, n.normalize());
@@ -130,7 +130,7 @@ fn test_normal_is_normalized() {
 
 #[test]
 fn test_normal_on_translated_sphere() {
-    let mut sphere = Sphere::new();
+    let mut sphere = Shape::sphere();
     sphere.transform(translation(0.0, 1.0, 0.0));
     let n = sphere.normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
     assert_eq!(n, vectors::new(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
@@ -138,7 +138,7 @@ fn test_normal_on_translated_sphere() {
 
 #[test]
 fn test_normal_on_transformed_sphere() {
-    let mut sphere = Sphere::new();
+    let mut sphere = Shape::sphere();
     let m = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
     sphere.transform(m);
     let n = sphere.normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
@@ -147,14 +147,14 @@ fn test_normal_on_transformed_sphere() {
 
 #[test]
 fn test_default_material() {
-    let sphere = Sphere::new();
+    let sphere = Shape::sphere();
     let mat = Material::default();
     assert_eq!(sphere.material, mat);
 }
 
 #[test]
 fn test_material_update() {
-    let mut sphere = Sphere::new();
+    let mut sphere = Shape::sphere();
     let mut mat = Material::default();
     mat.ambient = 1.0;
     sphere.with_material(mat);

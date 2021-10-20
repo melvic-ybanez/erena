@@ -1,11 +1,10 @@
-use crate::shapes::{Sphere, Shape};
+use crate::shapes::Shape;
 use crate::materials::Material;
 use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
 use crate::lights::PointLight;
 use crate::canvas::Canvas;
 use crate::rays::{Ray, Intersection};
-use std::fs::File;
 use std::fs;
 
 pub(crate) fn render_scene() {
@@ -16,7 +15,7 @@ pub(crate) fn render_scene() {
     let pixel_size = wall_size / (canvas_pixels as f64);
     let half = wall_size / 2.0;
 
-    let mut sphere = Sphere::new();
+    let mut sphere = Shape::sphere();
     sphere.material = Material::default();
     sphere.material.color = colors::new(1.0, 0.2, 0.1);
 
