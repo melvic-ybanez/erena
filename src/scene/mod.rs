@@ -3,7 +3,7 @@ use crate::tuples::{colors, points};
 use crate::matrix::scaling;
 use crate::lights::PointLight;
 use crate::tuples::colors::Color;
-use crate::rays::{Ray, Intersection};
+use crate::rays::{Ray, Intersection, Comps3D};
 
 pub struct World<S> {
     pub objects: Vec<Object<S>>,
@@ -56,6 +56,14 @@ impl World3D {
             .collect();
         intersections.sort_by(Intersection::compare);
         intersections
+    }
+
+    fn shade_hit(&self, comps: Comps3D) -> Color {
+        match self.light {
+            None => Color::black(),
+            Some(light) =>
+                comps.object.material.lighting(light, comps.point, comps.eye_vec, comps.normal_vec)
+        }
     }
 }
 

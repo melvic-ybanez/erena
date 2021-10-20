@@ -4,7 +4,8 @@ use crate::tuples::{points, colors, vectors};
 use crate::tuples::colors::Color;
 use crate::shapes::Shape;
 use crate::matrix::scaling;
-use crate::rays::Ray;
+use crate::rays::{Ray, Intersection, Comps3D};
+use crate::tuples::points::Point;
 
 #[test]
 fn test_creating_world() {
@@ -42,4 +43,29 @@ fn test_intersect() {
     assert_eq!(xs[1].t, 4.5);
     assert_eq!(xs[2].t, 5.5);
     assert_eq!(xs[3].t, 6.0);
+}
+
+#[test]
+fn test_shading_an_intersection() {
+    let world = World::default();
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
+    let shape = &world.objects[0];
+    let i = Intersection::new(4.0, shape);
+    let comps = Comps3D::prepare(i, &ray);
+    let color = world.shade_hit(comps);
+    assert_eq!(color.round_items(), colors::new(0.38066, 0.47583, 0.28550));
+}
+
+
+/// Tests shading an intersection from the inside
+#[test]
+fn test_shading_from_inside() {
+    let mut world = World::default();
+    world.light = Some(PointLight::new(points::new(0.0, 0.25, 0.0), Color::white()));
+    let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
+    let shape = &world.objects[1];
+    let i = Intersection::new(0.5, shape);
+    let comps = Comps3D::prepare(i, &ray);
+    let color = world.shade_hit(comps);
+    assert_eq!(color.round_items(), colors::new(0.90498, 0.90498, 0.90498));
 }

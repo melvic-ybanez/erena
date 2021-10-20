@@ -3,6 +3,7 @@ mod comps;
 
 use crate::math::Real;
 pub use intersections::Intersection;
+pub use comps::*;
 use crate::matrix::Matrix;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;

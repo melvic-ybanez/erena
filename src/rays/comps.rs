@@ -22,7 +22,7 @@ impl<'a, S> Comps<'a, S> {
 pub type Comps3D<'a> = Comps<'a, Space3D>;
 
 impl<'a> Comps3D<'a> {
-    fn prepare(intersection: Intersection<'a, Space3D>, ray: &Ray) -> Comps3D<'a> {
+    pub fn prepare(intersection: Intersection<'a, Space3D>, ray: &Ray) -> Comps3D<'a> {
         // same as the values of the corresponding intersection properties
         let t = intersection.t;
         let object = intersection.object;
