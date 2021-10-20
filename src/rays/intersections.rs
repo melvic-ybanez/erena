@@ -1,6 +1,8 @@
 use crate::math::Real;
 use crate::shapes::Object;
 use std::cmp::Ordering::Equal;
+use std::cmp::Ordering;
+use crate::math;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Intersection<'a, S: PartialEq> {
@@ -27,8 +29,12 @@ impl<'a, S: Clone + PartialEq> Intersection<'a, S> {
         Intersection::hit_refs(xs.iter().collect::<Vec<_>>())
     }
 
-    pub(crate) fn agg(shape: &'a Object<S>, ts: &[Real]) -> Vec<Intersection<'a, S>> {
+    pub fn agg(shape: &'a Object<S>, ts: &[Real]) -> Vec<Intersection<'a, S>> {
         ts.iter().map(|&t| Intersection::new(t, shape)).collect()
+    }
+
+    pub(crate) fn compare(i1: &Intersection<'a, S>, i2: &Intersection<'a, S>) -> Ordering {
+        math::order_reals(i1.t, i2.t)
     }
 }
 

@@ -3,6 +3,7 @@ use crate::tuples::{colors, points};
 use crate::matrix::scaling;
 use crate::lights::PointLight;
 use crate::tuples::colors::Color;
+use crate::rays::{Ray, Intersection};
 
 pub struct World<S: PartialEq> {
     pub objects: Vec<Object<S>>,
@@ -45,6 +46,16 @@ impl World3D {
         world.add_shape(sphere2);
         world.light = Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()));
         world
+    }
+
+    fn intersect(&self, ray: &Ray) -> Vec<Intersection<Space3D>> {
+        let mut intersections: Vec<_> = self.objects
+            .iter()
+            .map(|obj| obj.intersect(ray))
+            .flatten()
+            .collect();
+        intersections.sort_by(Intersection::compare);
+        intersections
     }
 }
 

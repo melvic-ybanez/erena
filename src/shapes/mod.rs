@@ -5,7 +5,7 @@ use crate::tuples::vectors::Vector;
 use crate::materials::Material;
 use crate::shapes::Space3D::Sphere;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Object<S: PartialEq> {
     pub transformation: Matrix,
     pub material: Material,

@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 pub(crate) type Real = f64;
 
 const EPSILON: Real = 0.000001;
@@ -32,4 +34,14 @@ pub(crate) fn round(value: Real, limit: u32) -> Real {
 
 pub(crate) fn round_to_5(value: Real) -> Real {
     round(value, 5)
+}
+
+pub fn order_reals(a: Real, b: Real) -> Ordering {
+    if a < b {
+        Ordering::Less
+    } else if b < a {
+        Ordering::Greater
+    } else {
+        Ordering::Equal
+    }
 }
