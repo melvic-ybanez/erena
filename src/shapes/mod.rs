@@ -6,7 +6,7 @@ use crate::materials::Material;
 use crate::shapes::Space3D::Sphere;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Object<S: PartialEq> {
+pub struct Object<S> {
     pub transformation: Matrix,
     pub material: Material,
     pub shape: S,

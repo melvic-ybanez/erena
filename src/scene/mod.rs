@@ -5,14 +5,14 @@ use crate::lights::PointLight;
 use crate::tuples::colors::Color;
 use crate::rays::{Ray, Intersection};
 
-pub struct World<S: PartialEq> {
+pub struct World<S> {
     pub objects: Vec<Object<S>>,
     pub light: Option<PointLight>,
 }
 
 pub type World3D = World<Space3D>;
 
-impl<S: PartialEq> World<S> {
+impl<S> World<S> {
     fn new() -> World<S> {
         World { objects: vec![], light: None }
     }
@@ -25,7 +25,7 @@ impl<S: PartialEq> World<S> {
         self.objects.push(object);
     }
 
-    fn contains(&self, shape: Object<S>) -> bool {
+    fn contains(&self, shape: Object<S>) -> bool where S: PartialEq {
         self.objects.contains(&shape)
     }
 }

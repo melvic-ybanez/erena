@@ -1,4 +1,5 @@
 mod intersections;
+mod comps;
 
 use crate::math::Real;
 pub use intersections::Intersection;

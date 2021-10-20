@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use crate::math;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Intersection<'a, S: PartialEq> {
+pub struct Intersection<'a, S> {
     pub t: Real,
     pub object: &'a Object<S>,
 }
