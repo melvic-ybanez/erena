@@ -56,7 +56,6 @@ fn test_shading_an_intersection() {
     assert_eq!(color.round_items(), colors::new(0.38066, 0.47583, 0.28550));
 }
 
-
 /// Tests shading an intersection from the inside
 #[test]
 fn test_shading_from_inside() {
@@ -68,4 +67,32 @@ fn test_shading_from_inside() {
     let comps = Comps3D::prepare(i, &ray);
     let color = world.shade_hit(comps);
     assert_eq!(color.round_items(), colors::new(0.90498, 0.90498, 0.90498));
+}
+
+#[test]
+fn test_missed_ray_color() {
+    let world = World::default();
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 1.0, 0.0));
+    let color = world.color_at(&ray);
+    assert_eq!(color, Color::black());
+}
+
+/// Tests the color with an intersection behind the ray
+#[test]
+fn test_behind_ray_color() {
+    let mut world = World::default();
+
+    let (ray, inner_color) = {
+        let outer = &mut world.objects[0];
+        outer.material.ambient = 1.0;
+        let inner = &mut world.objects[1];
+        inner.material.ambient = 1.0;
+
+        // ray is inside the outer sphere, but outside the inner sphere
+        let ray = Ray::new(points::new(0.0, 0.0, 0.75), vectors::new(0.0, 0.0, -1.0));
+        (ray, inner.material.color)
+    };
+
+    let color = world.color_at(&ray);
+    assert_eq!(color, inner_color);
 }

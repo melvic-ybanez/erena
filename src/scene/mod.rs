@@ -5,6 +5,7 @@ use crate::lights::PointLight;
 use crate::tuples::colors::Color;
 use crate::rays::{Ray, Intersection, Comps3D};
 
+#[derive(Clone)]
 pub struct World<S> {
     pub objects: Vec<Object<S>>,
     pub light: Option<PointLight>,
@@ -27,6 +28,14 @@ impl<S> World<S> {
 
     fn contains(&self, shape: Object<S>) -> bool where S: PartialEq {
         self.objects.contains(&shape)
+    }
+
+    fn shade_hit(&self, comps: Comps3D) -> Color {
+        match self.light {
+            None => Color::black(),
+            Some(light) =>
+                comps.object.material.lighting(light, comps.point, comps.eye_vec, comps.normal_vec)
+        }
     }
 }
 
@@ -58,11 +67,13 @@ impl World3D {
         intersections
     }
 
-    fn shade_hit(&self, comps: Comps3D) -> Color {
-        match self.light {
+    fn color_at(&self, ray: &Ray) -> Color {
+        match Intersection::hit(self.intersect(ray)) {
             None => Color::black(),
-            Some(light) =>
-                comps.object.material.lighting(light, comps.point, comps.eye_vec, comps.normal_vec)
+            Some(hit) => {
+                let comps = Comps3D::prepare(hit, ray);
+                self.shade_hit(comps)
+            }
         }
     }
 }
