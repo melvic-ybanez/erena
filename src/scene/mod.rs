@@ -40,7 +40,7 @@ impl<S> World<S> {
 }
 
 impl World3D {
-    fn default() -> World3D {
+    pub(crate) fn default() -> World3D {
         let mut world = World::new();
 
         let mut sphere1 = Shape::sphere();
@@ -67,7 +67,7 @@ impl World3D {
         intersections
     }
 
-    fn color_at(&self, ray: &Ray) -> Color {
+    pub(crate) fn color_at(&self, ray: &Ray) -> Color {
         match Intersection::hit(self.intersect(ray)) {
             None => Color::black(),
             Some(hit) => {

@@ -176,6 +176,7 @@ pub(crate) mod vectors {
 pub(crate) mod points {
     use crate::tuples::TupleLike;
     use crate::math::Real;
+    use crate::tuples::vectors::Vector;
 
     #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
     pub struct PointT;
@@ -191,6 +192,10 @@ pub(crate) mod points {
         #[inline(always)]
         pub(crate) fn origin() -> Point {
             new(0.0, 0.0, 0.0)
+        }
+
+        pub fn normalize(&self) -> Vector {
+            self.to_vector().normalize()
         }
     }
 }

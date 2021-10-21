@@ -67,7 +67,7 @@ pub fn shearing(
 }
 
 pub fn view_transformation(from: Point, to: Point, up: Vector) -> Matrix {
-    let forward = (to - from).to_vector().normalize();
+    let forward = (to - from).normalize();
     let left = forward.cross(up.normalize());
     let true_up = left.cross(forward);
     let orientation = Matrix::new44(&[

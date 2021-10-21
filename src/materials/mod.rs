@@ -33,7 +33,7 @@ impl Material {
         let effective_color = self.color * light.intensity;
 
         // direction of the light source
-        let light_vec = (light.position - point).to_vector().normalize();
+        let light_vec = (light.position - point).normalize();
 
         let ambient = effective_color * self.ambient;
 
