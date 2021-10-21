@@ -42,7 +42,7 @@ impl<S> World<S> {
         match self.light {
             None => Color::black(),
             Some(light) =>
-                comps.object.material.lighting(light, comps.point, comps.eye_vec, comps.normal_vec)
+                comps.object.material.lighting(light, comps.point, comps.eye_vec, comps.normal_vec, false)
         }
     }
 }

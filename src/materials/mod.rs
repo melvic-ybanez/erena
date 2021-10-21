@@ -28,7 +28,13 @@ impl Material {
         Material { color, ambient, diffuse, specular, shininess }
     }
 
-    pub fn lighting(&self, light: PointLight, point: Point, eye_vec: Vector, normal_vec: Vector) -> Color {
+    pub fn lighting(
+        &self, light: PointLight,
+        point: Point,
+        eye_vec: Vector,
+        normal_vec: Vector,
+        in_shadow: bool,
+    ) -> Color {
         // combine the surface color with the light's color
         let effective_color = self.color * light.intensity;
 
@@ -41,7 +47,7 @@ impl Material {
         let light_dot_normal = light_vec.dot(normal_vec);
 
         // if the cosine is negative, the light is on the other side of the surface
-        let (diffuse, specular) = if light_dot_normal < 0.0 {
+        let (diffuse, specular) = if light_dot_normal < 0.0 || in_shadow {
             (Color::black(), Color::black())
         } else {
             let diffuse = effective_color * self.diffuse * light_dot_normal;
