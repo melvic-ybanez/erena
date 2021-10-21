@@ -9,7 +9,7 @@ use crate::tuples::points::Point;
 
 #[test]
 fn test_creating_world() {
-    let world = World3D::new();
+    let world = World3D::empty();
     assert!(world.is_empty());
 }
 

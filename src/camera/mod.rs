@@ -10,13 +10,13 @@ pub struct Camera {
     pub height: usize,
     pub field_of_view: f64,
     pub transformation: Matrix,
-    pub pixel_size: f64,
-    pub half_width: f64,
-    pub half_height: f64,
+    pixel_size: f64,
+    half_width: f64,
+    half_height: f64,
 }
 
 impl Camera {
-    fn new(width: usize, height: usize, field_of_view: f64) -> Camera {
+    pub(crate) fn new(width: usize, height: usize, field_of_view: f64) -> Camera {
         let half_view = (field_of_view / 2.0).tan();
         let aspect = width as f64 / height as f64;
 
@@ -57,7 +57,7 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
-    fn render(&self, world: World3D) -> Canvas {
+    pub(crate) fn render(&self, world: World3D) -> Canvas {
         let mut image = Canvas::new(self.width, self.height);
 
         for y in 0..self.height {
