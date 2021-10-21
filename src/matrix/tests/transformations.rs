@@ -1,6 +1,7 @@
-use crate::matrix::{translation, scaling, rotation_x, rotation_y, rotation_z, shearing};
+use crate::matrix::{translation, scaling, rotation_x, rotation_y, rotation_z, shearing, view_transformation, Matrix};
 use crate::math;
 use crate::tuples::{vectors, points};
+use crate::tuples::points::Point;
 
 #[test]
 fn test_translation() {
@@ -49,7 +50,7 @@ fn test_inverse_scaling() {
         Some(inv) => {
             let vec = vectors::new(-4.0, 6.0, 8.0);
             assert_eq!(inv * vec, vectors::new(-2.0, 2.0, 2.0));
-        },
+        }
         None => assert!(false)
     }
 }
@@ -152,4 +153,47 @@ fn test_transformations_reverse_order() {
     let c = translation(10.0, 5.0, 7.0);
     let transformations = c * b * a;
     assert_eq!(transformations * point, points::new(15.0, 0.0, 7.0));
+}
+
+/// Tests the transformation matrix for the default orientation
+#[test]
+fn test_view_default_orientation() {
+    let from = Point::origin();
+    let to = points::new(0.0, 0.0, -1.0);
+    let up = vectors::new(0.0, 1.0, 0.0);
+    let t = view_transformation(from, to, up);
+    assert_eq!(t, Matrix::id44());
+}
+
+/// Tests a view transformation matrix looking in positive z direction
+#[test]
+fn test_view_positive_z_direction() {
+    let from = Point::origin();
+    let to = points::new(0.0, 0.0, 1.0);
+    let up = vectors::new(0.0, 1.0, 0.0);
+    let t = view_transformation(from, to, up);
+    assert_eq!(t, scaling(-1.0, 1.0, -1.0));
+}
+
+#[test]
+fn test_view_transformation_moves_the_world() {
+    let from = points::new(0.0, 0.0, 8.0);
+    let to = Point::origin();
+    let up = vectors::new(0.0, 1.0, 0.0);
+    let t = view_transformation(from, to, up);
+    assert_eq!(t, translation(0.0, 0.0, -8.0));
+}
+
+#[test]
+fn test_an_arbitrary_view_transformation() {
+    let from = points::new(1.0, 3.0, 2.0);
+    let to = points::new(4.0, -2.0, 8.0);
+    let up = vectors::new(1.0, 1.0, 0.0);
+    let t = view_transformation(from, to, up);
+    assert_eq!(t.round_items(5), Matrix::new44(&[
+        -0.50709, 0.50709, 0.67612, -2.36643,
+        0.76772, 0.60609, 0.12122, -2.82843,
+        -0.35857, 0.59761, -0.71714, 0.00000,
+        0.00000, 0.00000, 0.00000, 1.00000,
+    ]));
 }

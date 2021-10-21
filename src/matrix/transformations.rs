@@ -1,5 +1,7 @@
 use crate::math::Real;
 use crate::matrix::Matrix;
+use crate::tuples::vectors::Vector;
+use crate::tuples::points::Point;
 
 #[inline(always)]
 pub fn translation(x: Real, y: Real, z: Real) -> Matrix {
@@ -62,4 +64,17 @@ pub fn shearing(
         zx, zy, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0,
     ])
+}
+
+pub fn view_transformation(from: Point, to: Point, up: Vector) -> Matrix {
+    let forward = (to - from).to_vector().normalize();
+    let left = forward.cross(up.normalize());
+    let true_up = left.cross(forward);
+    let orientation = Matrix::new44(&[
+        left.x, left.y, left.z, 0.0,
+        true_up.x, true_up.y, true_up.z, 0.0,
+        -forward.x, -forward.y, -forward.z, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    ]);
+    orientation * translation(-from.x, -from.y, -from.z)
 }
