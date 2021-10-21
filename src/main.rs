@@ -8,6 +8,7 @@ mod lights;
 mod materials;
 mod renderer;
 mod scene;
+mod camera;
 
 fn main() {
     renderer::render_scene();
