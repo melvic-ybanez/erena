@@ -36,7 +36,7 @@ impl<T> TupleLike<T> {
         self.w == Vector::W
     }
 
-    fn magnitude(&self) -> Real {
+    pub fn magnitude(&self) -> Real {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2) + self.w.powi(2)).sqrt()
     }
 

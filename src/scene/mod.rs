@@ -4,6 +4,7 @@ use crate::matrix::scaling;
 use crate::lights::PointLight;
 use crate::tuples::colors::Color;
 use crate::rays::{Ray, Intersection, Comps3D};
+use crate::tuples::points::Point;
 
 #[derive(Clone)]
 pub struct World<S> {
@@ -75,7 +76,23 @@ impl World3D {
         intersections
     }
 
-    pub(crate) fn color_at(&self, ray: &Ray) -> Color {
+    fn is_shadowed(&self, point: Point) -> bool {
+        let light = self.light.expect("Light source is required");
+
+        let v = (light.position - point).to_vector();
+        let distance = v.magnitude();
+        let direction = v.normalize();
+
+        let ray = Ray::new(point, direction);
+        let intersections = self.intersect(&ray);
+
+        match Intersection::hit(intersections) {
+            None => false,
+            Some(hit) => hit.t < distance
+        }
+    }
+
+    pub fn color_at(&self, ray: &Ray) -> Color {
         match Intersection::hit(self.intersect(ray)) {
             None => Color::black(),
             Some(hit) => {

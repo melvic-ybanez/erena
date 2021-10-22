@@ -31,7 +31,6 @@ fn test_default_world() {
     assert!(world.contains(s2));
 }
 
-
 /// Tests intersect a world with ray
 #[test]
 fn test_intersect() {
@@ -95,4 +94,38 @@ fn test_behind_ray_color() {
 
     let color = world.color_at(&ray);
     assert_eq!(color, inner_color);
+}
+
+/// Tests that there is no shadow when nothing is collinear with the point
+/// and light. It means nothing lies along the vector connecting the light
+/// source and the object.
+#[test]
+fn test_no_collinear() {
+    let world = World::default();
+    let point = points::new(0.0, 10.0, 0.0);
+    assert!(!world.is_shadowed(point));
+}
+
+/// Tests the shadow when an object is between the point and the light
+#[test]
+fn test_object_shadow_between_point_and_light() {
+    let world = World::default();
+    let point = points::new(10.0, -10.0, 10.0);
+    assert!(world.is_shadowed(point));
+}
+
+/// Tests that there is no shadow when an object is behind the light
+#[test]
+fn test_no_object_shadow_behind_light() {
+    let world = World::default();
+    let point = points::new(-20.0, 20.0, -20.0);
+    assert!(!world.is_shadowed(point));
+}
+
+/// Tests that there is no shadow when an object is behind the point
+#[test]
+fn test_no_object_shadow_behind_point() {
+    let world = World::default();
+    let point = points::new(-2.0, 2.0, -2.0);
+    assert!(!world.is_shadowed(point));
 }
