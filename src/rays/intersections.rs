@@ -3,13 +3,15 @@ use std::cmp::Ordering::Equal;
 
 use crate::math;
 use crate::math::Real;
-use crate::shapes::Object;
+use crate::shapes::{Object, Space3D};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Intersection<'a, S> {
     pub t: Real,
     pub object: &'a Object<S>,
 }
+
+pub type Intersection3D<'a> = Intersection<'a, Space3D>;
 
 impl<'a, S: Clone + PartialEq> Intersection<'a, S> {
     pub fn new(t: Real, object: &'a Object<S>) -> Intersection<S> {

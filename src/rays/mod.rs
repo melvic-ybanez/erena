@@ -1,5 +1,5 @@
 pub use comps::*;
-pub use intersections::Intersection;
+pub use intersections::{Intersection, Intersection3D};
 
 use crate::math::Real;
 use crate::matrix::Matrix;
@@ -9,7 +9,7 @@ use crate::tuples::vectors::Vector;
 mod intersections;
 mod comps;
 
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub struct Ray {
     pub(crate) origin: Point,
     pub(crate) direction: Vector
@@ -24,8 +24,8 @@ impl Ray {
         self.origin + self.direction * t
     }
 
-    pub(crate) fn transform(&self, transformation: &Matrix) -> Ray {
-        Ray::new(transformation.clone() * self.origin, transformation.clone() * self.direction)
+    pub(crate) fn transform(&self, transformation: Matrix) -> Ray {
+        Ray::new(transformation.clone() * self.origin, transformation * self.direction)
     }
 }
 
@@ -58,7 +58,7 @@ mod tests {
     fn test_ray_translation() {
         let ray = Ray::new(points::new(1.0, 2.0, 3.0), vectors::new(0.0, 1.0, 0.0));
         let matrix = translation(3.0, 4.0, 5.0);
-        let ray = ray.transform(&matrix);
+        let ray = ray.transform(matrix);
         assert_eq!(ray.origin, points::new(4.0, 6.0, 8.0));
         assert_eq!(ray.direction, vectors::new(0.0, 1.0, 0.0));
     }
@@ -67,7 +67,7 @@ mod tests {
     fn test_ray_scaling() {
         let ray = Ray::new(points::new(1.0, 2.0, 3.0), vectors::new(0.0, 1.0, 0.0));
         let matrix = scaling(2.0, 3.0, 4.0);
-        let ray = ray.transform(&matrix);
+        let ray = ray.transform(matrix);
         assert_eq!(ray.origin, points::new(2.0, 6.0, 12.0));
         assert_eq!(ray.direction, vectors::new(0.0, 3.0, 0.0));
     }

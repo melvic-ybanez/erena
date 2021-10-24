@@ -1,7 +1,7 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
-use crate::rays::{Intersection, Ray};
-use crate::shapes::Space3D::Sphere;
+use crate::rays::{Ray, Intersection3D};
+use crate::shapes::Space3D::{Sphere, TestShape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
@@ -15,6 +15,7 @@ pub struct Object<S> {
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Space3D {
     Sphere,
+    TestShape,
 }
 
 pub type Shape = Object<Space3D>;
@@ -32,65 +33,29 @@ impl Shape {
         Shape::new(Sphere)
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Vec<Intersection<Space3D>> {
+    pub fn test() -> Shape {
+        Shape::new(TestShape)
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
+        let local_ray = ray.transform(self.transformation.inverse_or_id44());
+
         match self.shape {
-            Sphere => sphere::intersect(self, ray)
+            Sphere => sphere::intersect(self, &local_ray),
+            TestShape => test::intersect(self, &local_ray)
         }
     }
 
     pub fn normal_at(&self, point: Point) -> Vector {
         match self.shape {
-            Sphere => sphere::normal_at(self, point)
+            Sphere => sphere::normal_at(self, point),
+            TestShape => unimplemented!()
         }
     }
 
-    pub fn with_material(&mut self, material: Material) -> &Self {
-        match self.shape {
-            Sphere => sphere::with_material(self, material)
-        }
-    }
-}
-
-mod sphere {
-    use crate::materials::Material;
-    use crate::rays::{Intersection, Ray};
-    use crate::shapes::{Shape, Space3D};
-    use crate::tuples::points::Point;
-    use crate::tuples::vectors::Vector;
-
-    pub fn intersect<'a>(sphere: &'a Shape, ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
-        let transformation = sphere.transformation.inverse_or_id44();
-        let ray = ray.transform(&transformation);
-
-        // note: sphere's center is at world origin
-        let sphere_to_ray = ray.origin - Point::origin();
-
-        let a = ray.direction.dot(ray.direction);
-        let b = 2.0 * ray.direction.dot(sphere_to_ray);
-        let c = sphere_to_ray.dot(sphere_to_ray) - 1.0;
-        let discriminant = b.powf(2.0) - 4.0 * a * c;
-
-        if discriminant < 0.0 {
-            vec![]
-        } else {
-            vec![
-                Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), sphere),     // t1
-                Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), sphere),     // t2
-            ]
-        }
-    }
-
-    pub fn normal_at(sphere: &Shape, world_point: Point) -> Vector {
-        let inverse = sphere.transformation.inverse_or_id44();
-        let object_point = &inverse * world_point;
-        let object_normal = object_point - Point::origin();
-        let world_normal = inverse.transpose() * object_normal;
-        world_normal.to_vector().normalize()
-    }
-
-    pub fn with_material(sphere: &mut Shape, material: Material) -> &Shape {
-        sphere.material = material;
-        sphere
+    pub fn with_material(mut self, material: Material) -> Shape {
+        self.material = material;
+        self
     }
 }
 
@@ -105,5 +70,25 @@ impl<S> CanTransform for Object<S> {
     }
 }
 
+mod test {
+    use crate::rays::{Ray, Intersection3D};
+    use crate::shapes::Shape;
+    use crate::shapes::Space3D::TestShape;
+
+    pub static mut SAVED_RAY: Option<Ray> = None;
+
+    pub fn intersect<'a>(shape: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
+        if let TestShape = shape.shape {
+            unsafe {
+                SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
+            }
+        }
+
+        vec![]
+    }
+}
+
 #[cfg(test)]
 mod tests;
+
+mod sphere;
