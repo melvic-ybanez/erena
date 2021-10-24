@@ -40,16 +40,31 @@ fn test_intersection_with_scale() {
     let shape = Shape::test().scale(2.0, 2.0, 2.0);
     shape.intersect(&ray);
 
-    if let TestShape = shape.shape {
-        unsafe {
-            if let Some(ray) = shapes::test::SAVED_RAY {
-                assert_eq!(ray.origin, points::new(0.0, 0.0, -2.5));
-                assert_eq!(ray.direction, vectors::new(0.0, 0.0, 0.5));
-            } else {
-                assert!(false);
-            }
+    assert_eq!(TestShape, shape.shape);
+    unsafe {
+        if let Some(ray) = shapes::test::SAVED_RAY {
+            assert_eq!(ray.origin, points::new(0.0, 0.0, -2.5));
+            assert_eq!(ray.direction, vectors::new(0.0, 0.0, 0.5));
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
+    }
+}
+
+/// Tests intersecting a translated shape with a ray
+#[test]
+fn test_intersection_with_translation() {
+    let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
+    let shape = Shape::test().translate(5.0, 0.0, 0.0);
+    shape.intersect(&ray);
+
+    assert_eq!(TestShape, shape.shape);
+    unsafe {
+        if let Some(ray) = shapes::test::SAVED_RAY {
+            assert_eq!(ray.origin, points::new(-5.0, 0.0, -5.0));
+            assert_eq!(ray.direction, vectors::new(0.0, 0.0, 1.0));
+        } else {
+            assert!(false);
+        }
     }
 }
