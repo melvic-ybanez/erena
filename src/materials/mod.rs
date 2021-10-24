@@ -1,6 +1,6 @@
-use crate::tuples::colors::Color;
-use crate::math::Real;
 use crate::lights::PointLight;
+use crate::math::Real;
+use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 

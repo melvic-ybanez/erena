@@ -1,6 +1,6 @@
+use crate::lights::PointLight;
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
-use crate::lights::PointLight;
 
 /// Tests that a point light has a position and intensity
 #[test]

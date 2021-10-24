@@ -1,8 +1,9 @@
+use std::cmp::Ordering;
+use std::cmp::Ordering::Equal;
+
+use crate::math;
 use crate::math::Real;
 use crate::shapes::Object;
-use std::cmp::Ordering::Equal;
-use std::cmp::Ordering;
-use crate::math;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Intersection<'a, S> {
@@ -40,8 +41,12 @@ impl<'a, S: Clone + PartialEq> Intersection<'a, S> {
 
 #[cfg(test)]
 mod tests {
-    use crate::shapes::Shape;
     use crate::rays::intersections::Intersection;
+    use crate::shapes::Shape;
+    use crate::rays::{Ray, Comps};
+    use crate::tuples::{points, vectors};
+    use crate::matrix::CanTransform;
+    use crate::math;
 
     #[test]
     fn test_intersection_fields() {
@@ -85,5 +90,17 @@ mod tests {
             5.0, 7.0, -3.0, 2.0,
         ]);
         assert_eq!(Intersection::hit(xs), Some(Intersection::new(2.0, &sphere)));
+    }
+
+    /// Tests that the hit should offset the point
+    #[test]
+    fn test_hit_offset() {
+        let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
+        let shape = Shape::sphere().translate(0.0, 0.0, 1.0);
+        let i = Intersection::new(5.0, &shape);
+        let comps = Comps::prepare(i, &ray);
+
+        assert!(comps.get_overpoint().z < -math::EPSILON / 2.0);
+        assert!(comps.point.z > comps.get_overpoint().z);
     }
 }

@@ -1,4 +1,4 @@
-use crate::tuples::{points, colors, vectors};
+use crate::tuples::{colors, points, vectors};
 use crate::tuples;
 use crate::tuples::vectors::Vector;
 

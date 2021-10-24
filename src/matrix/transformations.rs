@@ -1,7 +1,7 @@
 use crate::math::Real;
 use crate::matrix::Matrix;
-use crate::tuples::vectors::Vector;
 use crate::tuples::points::Point;
+use crate::tuples::vectors::Vector;
 
 #[inline(always)]
 pub fn translation(x: Real, y: Real, z: Real) -> Matrix {
@@ -77,4 +77,35 @@ pub fn view_transformation(from: Point, to: Point, up: Vector) -> Matrix {
         0.0, 0.0, 0.0, 1.0,
     ]);
     orientation * translation(-from.x, -from.y, -from.z)
+}
+
+pub trait CanTransform: Sized {
+    fn get_transformation(&self) -> &Matrix;
+
+    fn set_transformation(self, transformation: Matrix) -> Self;
+
+    fn transform(self, transformation: Matrix) -> Self {
+        let transformation = self.get_transformation() * transformation;
+        self.set_transformation(transformation)
+    }
+
+    fn scale(self, x: Real, y: Real, z: Real) -> Self {
+        self.set_transformation(scaling(x, y, z))
+    }
+
+    fn translate(self, x: Real, y: Real, z: Real) -> Self {
+        self.set_transformation(translation(x, y, z))
+    }
+
+    fn rotate_x(self, rad: Real) -> Self {
+        self.set_transformation(rotation_x(rad))
+    }
+
+    fn rotate_y(self, rad: Real) -> Self {
+        self.set_transformation(rotation_y(rad))
+    }
+
+    fn rotate_z(self, rad: Real) -> Self {
+        self.set_transformation(rotation_z(rad))
+    }
 }

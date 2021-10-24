@@ -1,6 +1,6 @@
-use crate::matrix::{translation, scaling, rotation_x, rotation_y, rotation_z, shearing, view_transformation, Matrix};
 use crate::math;
-use crate::tuples::{vectors, points};
+use crate::matrix::{Matrix, rotation_x, rotation_y, rotation_z, scaling, shearing, translation, view_transformation};
+use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 
 #[test]

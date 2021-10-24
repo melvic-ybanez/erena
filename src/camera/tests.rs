@@ -1,9 +1,9 @@
-use crate::math;
 use crate::camera::Camera;
+use crate::math;
 use crate::matrix::{Matrix, rotation_y, translation, view_transformation};
-use crate::tuples::points::Point;
-use crate::tuples::{vectors, points, colors};
 use crate::scene::World;
+use crate::tuples::{colors, points, vectors};
+use crate::tuples::points::Point;
 
 #[test]
 fn test_constructing_camera() {

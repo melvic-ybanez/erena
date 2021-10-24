@@ -1,12 +1,12 @@
 use std::ops::{Index, IndexMut, Mul};
 
+pub use transformations::*;
+
 use crate::{math, tuples};
 use crate::math::Real;
+use crate::tuples::TupleLike;
 
 mod transformations;
-
-pub use transformations::*;
-use crate::tuples::TupleLike;
 
 #[derive(Debug, Clone)]
 pub struct Matrix {
@@ -215,6 +215,14 @@ impl Mul for &Matrix {
         }
 
         matrix
+    }
+}
+
+impl Mul<Matrix> for &Matrix {
+    type Output = Matrix;
+
+    fn mul(self, rhs: Matrix) -> Self::Output {
+        self * &rhs
     }
 }
 

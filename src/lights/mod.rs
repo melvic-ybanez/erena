@@ -1,5 +1,5 @@
-use crate::tuples::points::Point;
 use crate::tuples::colors::Color;
+use crate::tuples::points::Point;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct PointLight {

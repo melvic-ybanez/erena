@@ -1,10 +1,11 @@
+use std::f64::consts::{FRAC_1_SQRT_2, PI};
+
+use crate::materials::Material;
+use crate::matrix::{CanTransform, Matrix, rotation_z, scaling, translation};
 use crate::rays::Ray;
 use crate::shapes::Shape;
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
-use crate::matrix::{Matrix, scaling, translation, rotation_z};
-use std::f64::consts::{FRAC_1_SQRT_2, PI};
-use crate::materials::Material;
 
 #[test]
 fn test_two_point_intersection() {
@@ -74,8 +75,7 @@ fn test_default_transformation() {
 #[test]
 fn test_intersect_with_scaled_sphere() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let mut sphere = Shape::sphere();
-    sphere.transform(scaling(2.0, 2.0, 2.0));
+    let sphere = Shape::sphere().transform(scaling(2.0, 2.0, 2.0));
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 2);
     assert_eq!(xs[0].t, 3.0);
@@ -85,8 +85,7 @@ fn test_intersect_with_scaled_sphere() {
 #[test]
 fn test_intersect_with_translated_sphere() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let mut sphere = Shape::sphere();
-    sphere.transform(translation(5.0, 0.0, 0.0));
+    let sphere = Shape::sphere().transform(translation(5.0, 0.0, 0.0));
     let xs = sphere.intersect(&ray);
     assert_eq!(xs.len(), 0);
 }
@@ -130,17 +129,15 @@ fn test_normal_is_normalized() {
 
 #[test]
 fn test_normal_on_translated_sphere() {
-    let mut sphere = Shape::sphere();
-    sphere.transform(translation(0.0, 1.0, 0.0));
+    let sphere = Shape::sphere().transform(translation(0.0, 1.0, 0.0));
     let n = sphere.normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
     assert_eq!(n, vectors::new(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
 }
 
 #[test]
 fn test_normal_on_transformed_sphere() {
-    let mut sphere = Shape::sphere();
     let m = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
-    sphere.transform(m);
+    let sphere = Shape::sphere().transform(m);
     let n = sphere.normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
     assert_eq!(n.round_items(), vectors::new(0.0, 0.97014, -0.24254));
 }

@@ -1,10 +1,10 @@
-use crate::scene::{World, World3D};
 use crate::lights::PointLight;
-use crate::tuples::{points, colors, vectors};
-use crate::tuples::colors::Color;
+use crate::matrix::{CanTransform, scaling};
+use crate::rays::{Comps3D, Intersection, Ray, Comps};
+use crate::scene::{World, World3D};
 use crate::shapes::Shape;
-use crate::matrix::scaling;
-use crate::rays::{Ray, Intersection, Comps3D};
+use crate::tuples::{colors, points, vectors};
+use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 
 #[test]
@@ -22,13 +22,12 @@ fn test_default_world() {
     s1.material.diffuse = 0.7;
     s1.material.specular = 0.2;
 
-    let mut s2 = Shape::sphere();
-    s2.transform(scaling(0.5, 0.5, 0.5));
+    let s2 = Shape::sphere().transform(scaling(0.5, 0.5, 0.5));
 
     let world = World::default();
     assert_eq!(world.light, Some(light));
-    assert!(world.contains(s1));
-    assert!(world.contains(s2));
+    assert!(world.contains(&s1));
+    assert!(world.contains(&s2));
 }
 
 /// Tests intersect a world with ray
@@ -128,4 +127,25 @@ fn test_no_object_shadow_behind_point() {
     let world = World::default();
     let point = points::new(-2.0, 2.0, -2.0);
     assert!(!world.is_shadowed(point));
+}
+
+/// Tests that shade-hit is given an intersection in shadow
+#[test]
+fn test_shade_hit_intersection_in_shadow() {
+    let mut world = World::empty();
+    world.add_light(PointLight::new(points::new(0.0, 0.0, -10.0), Color::white()));
+
+    let sphere1 = Shape::sphere();
+    world.add_object(&sphere1);
+
+    let sphere2 = Shape::sphere().translate(0.0, 0.0, 10.0);
+    world.add_object(&sphere2);
+
+    let ray = Ray::new(points::new(0.0, 0.0, 5.0), vectors::new(0.0, 0.0, 1.0));
+    let intersection = Intersection::new(4.0, &sphere2);
+
+    let comps = Comps::prepare(intersection, &ray);
+    let result = world.shade_hit(comps);
+
+    assert_eq!(result, colors::new(0.1, 0.1, 0.1));
 }

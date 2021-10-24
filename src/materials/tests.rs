@@ -1,8 +1,8 @@
+use crate::lights::PointLight;
 use crate::materials::Material;
+use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
-use crate::tuples::{vectors, points, colors};
-use crate::lights::PointLight;
 
 fn set_up() -> (Material, Point) {
     (Material::default(), Point::origin())

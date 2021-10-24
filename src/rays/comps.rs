@@ -1,8 +1,9 @@
 use crate::math::Real;
+use crate::rays::{Intersection, Ray};
 use crate::shapes::{Object, Space3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::rays::{Intersection, Ray};
+use crate::math;
 
 pub struct Comps<'a, S> {
     pub t: Real,
@@ -11,11 +12,12 @@ pub struct Comps<'a, S> {
     pub eye_vec: Vector,
     pub normal_vec: Vector,
     pub inside: bool,
+    over_point: Option<Point>,
 }
 
 impl<'a, S> Comps<'a, S> {
     pub fn new(t: Real, object: &Object<S>, point: Point, eye_vec: Vector, normal_vec: Vector) -> Comps<S> {
-        Comps { t, object, point, eye_vec, normal_vec, inside: false }
+        Comps { t, object, point, eye_vec, normal_vec, inside: false, over_point: None }
     }
 }
 
@@ -38,16 +40,22 @@ impl<'a> Comps3D<'a> {
             comps.inside = false;
         }
 
+        comps.over_point = Some(comps.point + comps.normal_vec * math::EPSILON);
+
         comps
+    }
+
+    pub fn get_overpoint(&self) -> Point {
+        self.over_point.expect("Invalid state")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::rays::{Ray, Intersection};
-    use crate::tuples::{points, vectors};
-    use crate::shapes::Shape;
+    use crate::rays::{Intersection, Ray};
     use crate::rays::comps::{Comps, Comps3D};
+    use crate::shapes::Shape;
+    use crate::tuples::{points, vectors};
     use crate::tuples::points::Point;
 
     /// Tests precomputing the state of an intersection

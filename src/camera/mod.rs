@@ -1,9 +1,9 @@
+use crate::canvas::Canvas;
 use crate::matrix::Matrix;
 use crate::rays::Ray;
+use crate::scene::World3D;
 use crate::tuples::points;
 use crate::tuples::points::Point;
-use crate::canvas::Canvas;
-use crate::scene::{World, World3D};
 
 pub struct Camera {
     pub width: usize,

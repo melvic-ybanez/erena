@@ -1,12 +1,13 @@
-mod intersections;
-mod comps;
+pub use comps::*;
+pub use intersections::Intersection;
 
 use crate::math::Real;
-pub use intersections::Intersection;
-pub use comps::*;
 use crate::matrix::Matrix;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+
+mod intersections;
+mod comps;
 
 #[derive(Debug, PartialOrd, PartialEq)]
 pub struct Ray {
@@ -30,8 +31,8 @@ impl Ray {
 
 #[cfg(test)]
 mod tests {
+    use crate::matrix::{scaling, translation};
     use crate::rays::Ray;
-    use crate::matrix::{translation, scaling};
     use crate::tuples::{points, vectors};
 
     #[test]

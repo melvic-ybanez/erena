@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 pub(crate) type Real = f64;
 
-const EPSILON: Real = 0.000001;
+pub(crate) const EPSILON: Real = 0.000001;
 
 pub(crate) const PI: Real = std::f64::consts::PI;
 

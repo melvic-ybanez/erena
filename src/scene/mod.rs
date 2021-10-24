@@ -1,9 +1,9 @@
-use crate::shapes::{Shape, Object, Space3D};
-use crate::tuples::{colors, points};
-use crate::matrix::scaling;
 use crate::lights::PointLight;
+use crate::matrix::{CanTransform, scaling};
+use crate::rays::{Comps3D, Intersection, Ray};
+use crate::shapes::{Object, Shape, Space3D};
+use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
-use crate::rays::{Ray, Intersection, Comps3D};
 use crate::tuples::points::Point;
 
 #[derive(Clone)]
@@ -27,24 +27,22 @@ impl<S> World<S> {
         self.objects.is_empty() && self.light.is_none()
     }
 
-    pub fn add_object(&mut self, object: Object<S>) {
-        self.objects.push(object);
+    pub fn add_object(&mut self, object: &Object<S>) where S: Clone {
+        self.objects.push((*object).clone());
     }
 
-    pub fn add_objects(&mut self, objects: &mut Vec<Object<S>>) {
-        self.objects.append(objects);
-    }
-
-    fn contains(&self, shape: Object<S>) -> bool where S: PartialEq {
-        self.objects.contains(&shape)
-    }
-
-    fn shade_hit(&self, comps: Comps3D) -> Color {
-        match self.light {
-            None => Color::black(),
-            Some(light) =>
-                comps.object.material.lighting(light, comps.point, comps.eye_vec, comps.normal_vec, false)
+    pub fn add_objects(&mut self, objects: &Vec<&Object<S>>) where S: Clone {
+        for obj in objects {
+            self.add_object(obj);
         }
+    }
+
+    fn contains(&self, shape: &Object<S>) -> bool where S: PartialEq {
+        self.objects.contains(shape)
+    }
+
+    pub fn add_light(&mut self, point_light: PointLight) {
+        self.light = Some(point_light);
     }
 }
 
@@ -57,11 +55,10 @@ impl World3D {
         sphere1.material.diffuse = 0.7;
         sphere1.material.specular = 0.2;
 
-        let mut sphere2 = Shape::sphere();
-        sphere2.transform(scaling(0.5, 0.5, 0.5));
+        let sphere2 = Shape::sphere().transform(scaling(0.5, 0.5, 0.5));
 
-        world.add_object(sphere1);
-        world.add_object(sphere2);
+        world.add_object(&sphere1);
+        world.add_object(&sphere2);
         world.light = Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()));
         world
     }
@@ -93,12 +90,22 @@ impl World3D {
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
-        match Intersection::hit(self.intersect(ray)) {
-            None => Color::black(),
-            Some(hit) => {
-                let comps = Comps3D::prepare(hit, ray);
-                self.shade_hit(comps)
-            }
+        if let Some(hit) = Intersection::hit(self.intersect(ray)) {
+            let comps = Comps3D::prepare(hit, ray);
+            self.shade_hit(comps)
+        } else {
+            Color::black()
+        }
+    }
+
+    fn shade_hit(&self, comps: Comps3D) -> Color {
+        if let Some(light) = self.light {
+            let shadowed = self.is_shadowed(comps.get_overpoint());
+            comps.object.material.lighting(
+                light, comps.get_overpoint(), comps.eye_vec, comps.normal_vec, shadowed,
+            )
+        } else {
+            Color::black()
         }
     }
 }

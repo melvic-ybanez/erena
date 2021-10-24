@@ -1,4 +1,5 @@
 use std::ops::{Index, IndexMut};
+
 use crate::math;
 use crate::tuples::colors::Color;
 

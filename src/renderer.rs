@@ -1,15 +1,14 @@
-use crate::shapes::Shape;
+use std::fs;
+
+use crate::camera::Camera;
+use crate::lights::PointLight;
 use crate::materials::Material;
+use crate::math;
+use crate::matrix::{rotation_x, rotation_y, scaling, translation, view_transformation};
+use crate::scene::World3D;
+use crate::shapes::Shape;
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
-use crate::lights::PointLight;
-use crate::canvas::Canvas;
-use crate::rays::{Ray, Intersection};
-use std::fs;
-use crate::matrix::{scaling, translation, rotation_y, rotation_x, view_transformation};
-use crate::math;
-use crate::scene::World3D;
-use crate::camera::Camera;
 
 pub(crate) fn render_scene() {
     let mut floor = Shape::sphere();
@@ -53,7 +52,7 @@ pub(crate) fn render_scene() {
     left.material.diffuse = 0.7;
     left.material.specular = 0.3;
 
-    let mut world = World3D::new(
+    let world = World3D::new(
         vec![floor, left_wall, middle, right_wall, right, left],
         Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()))
     );
@@ -62,7 +61,7 @@ pub(crate) fn render_scene() {
     camera.transformation = view_transformation(
         points::new(0.0, 1.5, -5.0),
         points::new(0.0, 1.0, 0.0),
-        vectors::new(0.0, 1.0, 0.0)
+        vectors::new(0.0, 1.0, 0.0),
     );
 
     let canvas = camera.render(world);

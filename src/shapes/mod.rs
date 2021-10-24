@@ -1,9 +1,9 @@
-use crate::rays::{Ray, Intersection};
-use crate::tuples::points::Point;
-use crate::matrix::Matrix;
-use crate::tuples::vectors::Vector;
 use crate::materials::Material;
+use crate::matrix::{CanTransform, Matrix};
+use crate::rays::{Intersection, Ray};
 use crate::shapes::Space3D::Sphere;
+use crate::tuples::points::Point;
+use crate::tuples::vectors::Vector;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Object<S> {
@@ -38,12 +38,6 @@ impl Shape {
         }
     }
 
-    pub fn transform(&mut self, transformation: Matrix) -> &Self {
-        match self.shape {
-            Sphere => sphere::transform(self, transformation)
-        }
-    }
-
     pub fn normal_at(&self, point: Point) -> Vector {
         match self.shape {
             Sphere => sphere::normal_at(self, point)
@@ -58,12 +52,11 @@ impl Shape {
 }
 
 mod sphere {
-    use crate::shapes::{Shape, Space3D};
-    use crate::rays::{Ray, Intersection};
-    use crate::tuples::points::Point;
-    use crate::matrix::Matrix;
-    use crate::tuples::vectors::Vector;
     use crate::materials::Material;
+    use crate::rays::{Intersection, Ray};
+    use crate::shapes::{Shape, Space3D};
+    use crate::tuples::points::Point;
+    use crate::tuples::vectors::Vector;
 
     pub fn intersect<'a>(sphere: &'a Shape, ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
         let transformation = sphere.transformation.inverse_or_id44();
@@ -87,11 +80,6 @@ mod sphere {
         }
     }
 
-    pub fn transform(sphere: &mut Shape, transformation: Matrix) -> &Shape {
-        sphere.transformation = transformation;
-        sphere
-    }
-
     pub fn normal_at(sphere: &Shape, world_point: Point) -> Vector {
         let inverse = sphere.transformation.inverse_or_id44();
         let object_point = &inverse * world_point;
@@ -103,6 +91,17 @@ mod sphere {
     pub fn with_material(sphere: &mut Shape, material: Material) -> &Shape {
         sphere.material = material;
         sphere
+    }
+}
+
+impl<S> CanTransform for Object<S> {
+    fn get_transformation(&self) -> &Matrix {
+        &self.transformation
+    }
+
+    fn set_transformation(mut self, transformation: Matrix) -> Self {
+        self.transformation = transformation;
+        self
     }
 }
 

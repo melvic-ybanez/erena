@@ -1,11 +1,11 @@
-use std::ops;
-
-use crate::math::Real;
-use crate::{math, tuples};
-use std::ops::Index;
 use std::marker::PhantomData;
-use crate::tuples::vectors::Vector;
+use std::ops;
+use std::ops::Index;
+
+use crate::{math, tuples};
+use crate::math::Real;
 use crate::tuples::points::Point;
+use crate::tuples::vectors::Vector;
 
 #[derive(Debug, Copy, Clone, PartialOrd)]
 pub struct TupleLike<T> {
@@ -133,8 +133,8 @@ pub fn new(x: Real, y: Real, z: Real, w: Real) -> Tuple {
 }
 
 pub(crate) mod vectors {
-    use crate::tuples::TupleLike;
     use crate::math::Real;
+    use crate::tuples::TupleLike;
 
     #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
     pub struct VectorT;
@@ -174,8 +174,8 @@ pub(crate) mod vectors {
 }
 
 pub(crate) mod points {
-    use crate::tuples::TupleLike;
     use crate::math::Real;
+    use crate::tuples::TupleLike;
     use crate::tuples::vectors::Vector;
 
     #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
@@ -201,9 +201,10 @@ pub(crate) mod points {
 }
 
 pub(crate) mod colors {
-    use crate::tuples::TupleLike;
-    use crate::math::Real;
     use std::ops;
+
+    use crate::math::Real;
+    use crate::tuples::TupleLike;
 
     #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
     pub struct ColorT;
