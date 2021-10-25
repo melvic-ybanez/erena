@@ -3,6 +3,14 @@ use crate::matrix::Matrix;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
+///
+/// The translation matrix.
+/// For any point P, the translation matrix T will increase the components
+/// of P by multiplying P with T, effectively changing P's location.
+///
+/// Note: Applying this matrix to any vector V should yield V (unaltered)
+/// because V's fourth component is 0 (it cancels the fourth column)
+///
 #[inline(always)]
 pub fn translation(x: Real, y: Real, z: Real) -> Matrix {
     Matrix::new44(&[
@@ -13,6 +21,11 @@ pub fn translation(x: Real, y: Real, z: Real) -> Matrix {
     ])
 }
 
+/// The scaling matrix.
+/// For any point or vector P, multiply the scaling matrix S with P to scale P.
+/// The operation will multiply each component of P by S[i, i], where i is the index
+/// of P's component, effectively changing the "size" of P.
+/// This works for both point and vector.
 #[inline(always)]
 pub fn scaling(x: Real, y: Real, z: Real) -> Matrix {
     Matrix::new44(&[
@@ -23,6 +36,8 @@ pub fn scaling(x: Real, y: Real, z: Real) -> Matrix {
     ])
 }
 
+/// Clockwise rotation along the x-axis.
+/// Note: This rotation is based on the lef-hand rule.
 #[inline(always)]
 pub fn rotation_x(rad: Real) -> Matrix {
     Matrix::new44(&[
@@ -33,6 +48,8 @@ pub fn rotation_x(rad: Real) -> Matrix {
     ])
 }
 
+/// Clockwise rotation along the y-axis.
+/// Note: This rotation is based on the lef-hand rule.
 #[inline(always)]
 pub fn rotation_y(rad: Real) -> Matrix {
     Matrix::new44(&[
@@ -43,6 +60,8 @@ pub fn rotation_y(rad: Real) -> Matrix {
     ])
 }
 
+/// Clockwise rotation along the z-axis.
+/// Note: This rotation is based on the lef-hand rule.
 #[inline(always)]
 pub fn rotation_z(rad: Real) -> Matrix {
     Matrix::new44(&[
