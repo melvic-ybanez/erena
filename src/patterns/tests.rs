@@ -1,6 +1,6 @@
 use crate::patterns::{Pattern, PatternType};
 use crate::tuples::colors::Color;
-use crate::tuples::points;
+use crate::tuples::{points, colors};
 use crate::tuples::points::Point;
 use crate::shapes::Shape;
 use crate::matrix::CanTransform;
@@ -73,4 +73,14 @@ fn test_stripes_with_both_transformation() {
     let pattern = default_stripe().translate(0.5, 0.0, 0.0);
     let c = pattern.at_object(&object, points::new(2.5, 0.0, 0.0));
     assert_eq!(c, Color::white());
+}
+
+/// A gradient linearly interpolates between colors
+#[test]
+fn test_gradient_linear_interpolation() {
+    let pattern = Pattern::gradient(Color::white(), Color::black());
+    assert_eq!(pattern.at(Point::origin()), Color::white());
+    assert_eq!(pattern.at(points::new(0.25, 0.0, 0.0)), colors::new(0.75, 0.75, 0.75));
+    assert_eq!(pattern.at(points::new(0.5, 0.0, 0.0)), colors::new(0.5, 0.5, 0.5));
+    assert_eq!(pattern.at(points::new(0.75, 0.0, 0.0)), colors::new(0.25, 0.25, 0.25));
 }

@@ -2,7 +2,7 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::matrix::{CanTransform, Matrix};
 use crate::shapes::Object;
-use crate::patterns::PatternType::Stripe;
+use crate::patterns::PatternType::{Stripe, Gradient};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Pattern {
@@ -13,6 +13,7 @@ pub struct Pattern {
 #[derive(Clone, PartialEq, Debug)]
 pub enum PatternType {
     Stripe(Color, Color),
+    Gradient(Color, Color),
 }
 
 impl Pattern {
@@ -24,6 +25,10 @@ impl Pattern {
         Pattern::new(Stripe(first, second))
     }
 
+    pub fn gradient(first: Color, second: Color) -> Pattern {
+        Pattern::new(Gradient(first, second))
+    }
+
     pub fn at(&self, point: Point) -> Color {
         match self.pattern_type {
             Stripe(first, second) =>
@@ -31,7 +36,12 @@ impl Pattern {
                     first
                 } else {
                     second
-                }
+                },
+            Gradient(first, second) => {
+                let distance = second - first;
+                let fraction = point.x - point.x.floor();
+                first + distance * fraction
+            }
         }
     }
 
