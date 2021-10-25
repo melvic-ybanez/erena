@@ -1,7 +1,7 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::Space3D::{Sphere, TestShape};
+use crate::shapes::Space3D::{Sphere, TestShape, Plane};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
@@ -16,6 +16,7 @@ pub struct Object<S> {
 pub enum Space3D {
     Sphere,
     TestShape,
+    Plane,
 }
 
 pub type Shape = Object<Space3D>;
@@ -37,12 +38,17 @@ impl Shape {
         Shape::new(TestShape)
     }
 
+    pub fn plane() -> Shape {
+        Shape::new(Plane)
+    }
+
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
         match self.shape {
-            Sphere => sphere::intersect(self, &local_ray),
-            TestShape => test::intersect(self, &local_ray)
+            Sphere => spheres::intersect(self, &local_ray),
+            TestShape => test::intersect(self, &local_ray),
+            Plane => unimplemented!()
         }
     }
 
@@ -51,8 +57,9 @@ impl Shape {
         let local_point = &inverse * point;
 
         let local_normal = match self.shape {
-            Sphere => sphere::normal_at(local_point),
-            TestShape => test::normal_at(local_point)
+            Sphere => spheres::normal_at(local_point),
+            TestShape => test::normal_at(local_point),
+            Plane => planes::normal_at()
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -103,4 +110,5 @@ mod test {
 #[cfg(test)]
 mod tests;
 
-mod sphere;
+mod spheres;
+mod planes;

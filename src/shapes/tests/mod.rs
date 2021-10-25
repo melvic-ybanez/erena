@@ -1,2 +1,3 @@
-mod sphere;
+mod spheres;
 mod test;
+mod planes;
