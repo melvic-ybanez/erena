@@ -102,7 +102,9 @@ impl World3D {
         if let Some(light) = self.light {
             let shadowed = self.is_shadowed(comps.get_overpoint());
             comps.object.material.lighting(
-                light, comps.get_overpoint(), comps.eye_vec, comps.normal_vec, shadowed,
+                comps.object, light,
+                comps.get_overpoint(), comps.eye_vec,
+                comps.normal_vec, shadowed,
             )
         } else {
             Color::black()

@@ -4,6 +4,7 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::patterns::Stripe;
+use crate::shapes::Object;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Material {
@@ -27,8 +28,10 @@ impl Material {
         }
     }
 
-    pub fn lighting(
-        &self, light: PointLight,
+    pub fn lighting<S>(
+        &self,
+        object: &Object<S>,
+        light: PointLight,
         point: Point,
         eye_vec: Vector,
         normal_vec: Vector,
@@ -36,7 +39,7 @@ impl Material {
     ) -> Color {
         let color = match &self.pattern {
             None => self.color,
-            Some(pattern) => pattern.at(point)
+            Some(pattern) => pattern.at_object(object, point)
         };
 
         // combine the surface color with the light's color
