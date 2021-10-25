@@ -2,7 +2,6 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::matrix::{CanTransform, Matrix};
 use crate::shapes::Object;
-use crate::patterns::PatternType::{Stripe, Gradient};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Pattern {
@@ -14,6 +13,7 @@ pub struct Pattern {
 pub enum PatternType {
     Stripe(Color, Color),
     Gradient(Color, Color),
+    Ring(Color, Color),
 }
 
 impl Pattern {
@@ -22,26 +22,36 @@ impl Pattern {
     }
 
     pub fn stripe(first: Color, second: Color) -> Pattern {
-        Pattern::new(Stripe(first, second))
+        Pattern::new(PatternType::Stripe(first, second))
     }
 
     pub fn gradient(first: Color, second: Color) -> Pattern {
-        Pattern::new(Gradient(first, second))
+        Pattern::new(PatternType::Gradient(first, second))
+    }
+
+    pub fn ring(first: Color, second: Color) -> Pattern {
+        Pattern::new(PatternType::Ring(first, second))
     }
 
     pub fn at(&self, point: Point) -> Color {
         match self.pattern_type {
-            Stripe(first, second) =>
+            PatternType::Stripe(first, second) =>
                 if point.x.floor() % 2.0 == 0.0 {
                     first
                 } else {
                     second
                 },
-            Gradient(first, second) => {
+            PatternType::Gradient(first, second) => {
                 let distance = second - first;
                 let fraction = point.x - point.x.floor();
                 first + distance * fraction
-            }
+            },
+            PatternType::Ring(first, second) =>
+                if point.x.powi(2) + point.z.powi(2) % 2.0 == 0.0 {
+                    first
+                } else {
+                    second
+                }
         }
     }
 

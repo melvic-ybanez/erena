@@ -84,3 +84,14 @@ fn test_gradient_linear_interpolation() {
     assert_eq!(pattern.at(points::new(0.5, 0.0, 0.0)), colors::new(0.5, 0.5, 0.5));
     assert_eq!(pattern.at(points::new(0.75, 0.0, 0.0)), colors::new(0.25, 0.25, 0.25));
 }
+
+/// A ring should extend in both x and z
+#[test]
+fn test_ring_extension() {
+    let pattern = Pattern::ring(Color::white(), Color::black());
+    assert_eq!(pattern.at(Point::origin()), Color::white());
+    assert_eq!(pattern.at(points::new(1.0, 0.0, 0.0)), Color::black());
+    assert_eq!(pattern.at(points::new(0.0, 0.0, 1.0)), Color::black());
+    /// 0.708 is just slightly more than 2.sqrt() / 2
+    assert_eq!(pattern.at(points::new(0.708, 0.0, 0.708)), Color::black());
+}
