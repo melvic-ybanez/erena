@@ -5,7 +5,7 @@ use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::patterns::Stripe;
 
-#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Material {
     pub color: Color,
     pub ambient: Real,
@@ -34,7 +34,7 @@ impl Material {
         normal_vec: Vector,
         in_shadow: bool,
     ) -> Color {
-        let color = match (*self).pattern {
+        let color = match &self.pattern {
             None => self.color,
             Some(pattern) => pattern.at(point)
         };
@@ -75,8 +75,8 @@ impl Material {
         ambient + diffuse + specular
     }
 
-    pub fn with_pattern(mut self, pattern: Stripe) -> Self {
-        self.pattern = Some(pattern);
+    pub fn with_pattern(mut self, pattern: &Stripe) -> Self {
+        self.pattern = Some(pattern.clone());
         self
     }
 }

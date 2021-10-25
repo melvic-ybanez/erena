@@ -30,7 +30,7 @@ fn test_set_material() {
     let mut mat = Material::default();
     mat.ambient = 1.0;
 
-    let shape = Shape::test().with_material(mat);
+    let shape = Shape::test().with_material(&mat);
     assert_eq!(shape.material, mat);
 }
 

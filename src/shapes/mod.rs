@@ -66,8 +66,8 @@ impl Shape {
         world_normal.to_vector().normalize()
     }
 
-    pub fn with_material(mut self, material: Material) -> Shape {
-        self.material = material;
+    pub fn with_material(mut self, material: &Material) -> Shape {
+        self.material = material.clone();
         self
     }
 }
