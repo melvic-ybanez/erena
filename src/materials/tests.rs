@@ -3,6 +3,7 @@ use crate::materials::Material;
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
+use crate::patterns::Stripe;
 
 fn set_up() -> (Material, Point) {
     (Material::default(), Point::origin())
@@ -84,4 +85,22 @@ fn test_lighting_in_shadow() {
     let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
     let result = mat.lighting(light, position, eye_vec, normal_vec, true);
     assert_eq!(result, colors::new(0.1, 0.1, 0.1));
+}
+
+#[test]
+fn test_lighting_with_pattern() {
+    let mut mat = Material::default()
+        .with_pattern(Stripe::new(Color::white(), Color::black()));
+    mat.ambient = 1.0;
+    mat.diffuse = 0.0;
+    mat.specular = 0.0;
+
+    let eye_vec = vectors::new(0.0, 0.0, -1.0);
+    let normal_vec = vectors::new(0.0, 0.0, -1.0);
+    let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
+    let c1 = mat.lighting(light, points::new(0.9, 0.0, 0.0), eye_vec, normal_vec, false);
+    let c2 = mat.lighting(light, points::new(1.1, 0.0, 0.0), eye_vec, normal_vec, false);
+
+    assert_eq!(c1, Color::white());
+    assert_eq!(c2, Color::black());
 }

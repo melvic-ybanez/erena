@@ -1,6 +1,7 @@
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 
+#[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
 pub struct Stripe(Color, Color);
 
 impl Stripe {

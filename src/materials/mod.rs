@@ -3,6 +3,7 @@ use crate::math::Real;
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use crate::patterns::Stripe;
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct Material {
@@ -11,6 +12,7 @@ pub struct Material {
     pub diffuse: Real,
     pub specular: Real,
     pub shininess: Real,
+    pub pattern: Option<Stripe>,
 }
 
 impl Material {
@@ -21,11 +23,8 @@ impl Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            pattern: None,
         }
-    }
-
-    pub fn new(color: Color, ambient: Real, diffuse: Real, specular: Real, shininess: Real) -> Material {
-        Material { color, ambient, diffuse, specular, shininess }
     }
 
     pub fn lighting(
@@ -35,8 +34,13 @@ impl Material {
         normal_vec: Vector,
         in_shadow: bool,
     ) -> Color {
+        let color = match (*self).pattern {
+            None => self.color,
+            Some(pattern) => pattern.at(point)
+        };
+
         // combine the surface color with the light's color
-        let effective_color = self.color * light.intensity;
+        let effective_color = color * light.intensity;
 
         // direction of the light source
         let light_vec = (light.position - point).normalize();
@@ -69,6 +73,11 @@ impl Material {
         };
 
         ambient + diffuse + specular
+    }
+
+    pub fn with_pattern(mut self, pattern: Stripe) -> Self {
+        self.pattern = Some(pattern);
+        self
     }
 }
 
