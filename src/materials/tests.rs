@@ -3,8 +3,8 @@ use crate::materials::Material;
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
-use crate::patterns::Stripe;
 use crate::shapes::Shape;
+use crate::patterns::Pattern;
 
 fn set_up() -> (Material, Point) {
     (Material::default(), Point::origin())
@@ -91,7 +91,7 @@ fn test_lighting_in_shadow() {
 #[test]
 fn test_lighting_with_pattern() {
     let mut mat = Material::default()
-        .with_pattern(&Stripe::new(Color::white(), Color::black()));
+        .with_pattern(&Pattern::stripe(Color::white(), Color::black()));
     mat.ambient = 1.0;
     mat.diffuse = 0.0;
     mat.specular = 0.0;

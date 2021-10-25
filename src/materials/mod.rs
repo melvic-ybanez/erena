@@ -3,7 +3,7 @@ use crate::math::Real;
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::patterns::Stripe;
+use crate::patterns::Pattern;
 use crate::shapes::Object;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -13,7 +13,7 @@ pub struct Material {
     pub diffuse: Real,
     pub specular: Real,
     pub shininess: Real,
-    pub pattern: Option<Stripe>,
+    pub pattern: Option<Pattern>,
 }
 
 impl Material {
@@ -78,7 +78,7 @@ impl Material {
         ambient + diffuse + specular
     }
 
-    pub fn with_pattern(mut self, pattern: &Stripe) -> Self {
+    pub fn with_pattern(mut self, pattern: &Pattern) -> Self {
         self.pattern = Some(pattern.clone());
         self
     }

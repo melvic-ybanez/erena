@@ -1,19 +1,23 @@
-use crate::patterns::Stripe;
+use crate::patterns::{Pattern, PatternType};
 use crate::tuples::colors::Color;
 use crate::tuples::points;
 use crate::tuples::points::Point;
 use crate::shapes::Shape;
 use crate::matrix::CanTransform;
 
-fn default_stripe() -> Stripe {
-    Stripe::new(Color::white(), Color::black())
+fn default_stripe() -> Pattern {
+    Pattern::stripe(Color::white(), Color::black())
 }
 
 #[test]
 fn test_creating_stripe() {
     let pattern = default_stripe();
-    assert_eq!(pattern.0, Color::white());
-    assert_eq!(pattern.1, Color::black());
+    if let PatternType::Stripe(first, second) = pattern.pattern_type {
+        assert_eq!(first, Color::white());
+        assert_eq!(second, Color::black());
+    } else {
+        assert!(false);
+    }
 }
 
 /// A stripe pattern is constant in y
