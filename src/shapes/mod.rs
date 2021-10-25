@@ -48,7 +48,7 @@ impl Shape {
         match self.shape {
             Sphere => spheres::intersect(self, &local_ray),
             TestShape => test::intersect(self, &local_ray),
-            Plane => unimplemented!()
+            Plane => planes::intersect(self, &local_ray)
         }
     }
 
