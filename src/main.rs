@@ -11,6 +11,7 @@ mod materials;
 mod renderer;
 mod scene;
 mod camera;
+mod patterns;
 
 fn main() {
     println!("Rendering...");

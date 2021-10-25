@@ -11,25 +11,7 @@ use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 
 pub(crate) fn render_scene() {
-    let mut floor = Shape::sphere();
-    floor.transformation = scaling(10.0, 0.01, 10.0);
-    floor.material = Material::default();
-    floor.material.color = colors::new(1.0, 0.9, 0.9);
-    floor.material.specular = 0.0;
-
-    let mut left_wall = Shape::sphere();
-    left_wall.transformation = translation(0.0, 0.0, 5.0)
-        * rotation_y(-math::PI / 4.0)
-        * rotation_x(math::PI / 2.0)
-        * scaling(10.0, 0.01, 10.0);
-    left_wall.material = floor.material;
-
-    let mut right_wall = Shape::sphere();
-    right_wall.transformation = translation(0.0, 0.0, 5.0)
-        * rotation_y(math::PI / 4.0)
-        * rotation_x(math::PI / 2.0)
-        * scaling(10.0, 0.01, 10.0);
-    right_wall.material = floor.material;
+    let floor = Shape::plane();
 
     let mut middle = Shape::sphere();
     middle.transformation = translation(-0.5, 1.0, 0.5);
@@ -53,7 +35,7 @@ pub(crate) fn render_scene() {
     left.material.specular = 0.3;
 
     let world = World3D::new(
-        vec![floor, left_wall, middle, right_wall, right, left],
+        vec![floor, middle, right, left],
         Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()))
     );
 
