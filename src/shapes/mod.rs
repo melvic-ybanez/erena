@@ -47,10 +47,16 @@ impl Shape {
     }
 
     pub fn normal_at(&self, point: Point) -> Vector {
-        match self.shape {
-            Sphere => sphere::normal_at(self, point),
-            TestShape => unimplemented!()
-        }
+        let inverse = self.transformation.inverse_or_id44();
+        let local_point = &inverse * point;
+
+        let local_normal = match self.shape {
+            Sphere => sphere::normal_at(local_point),
+            TestShape => test::normal_at(local_point)
+        };
+
+        let world_normal = inverse.transpose() * local_normal;
+        world_normal.to_vector().normalize()
     }
 
     pub fn with_material(mut self, material: Material) -> Shape {
@@ -74,6 +80,8 @@ mod test {
     use crate::rays::{Ray, Intersection3D};
     use crate::shapes::Shape;
     use crate::shapes::Space3D::TestShape;
+    use crate::tuples::points::Point;
+    use crate::tuples::vectors::Vector;
 
     pub static mut SAVED_RAY: Option<Ray> = None;
 
@@ -85,6 +93,10 @@ mod test {
         }
 
         vec![]
+    }
+
+    pub fn normal_at(local_point: Point) -> Vector {
+        local_point.to_vector()
     }
 }
 

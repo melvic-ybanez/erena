@@ -3,12 +3,12 @@ use crate::shapes::{Shape, Space3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
-pub fn intersect<'a>(sphere: &'a Shape, ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
+pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
     // note: sphere's center is at world origin
-    let sphere_to_ray = ray.origin - Point::origin();
+    let sphere_to_ray = transformed_ray.origin - Point::origin();
 
-    let a = ray.direction.dot(ray.direction);
-    let b = 2.0 * ray.direction.dot(sphere_to_ray);
+    let a = transformed_ray.direction.dot(transformed_ray.direction);
+    let b = 2.0 * transformed_ray.direction.dot(sphere_to_ray);
     let c = sphere_to_ray.dot(sphere_to_ray) - 1.0;
     let discriminant = b.powf(2.0) - 4.0 * a * c;
 
@@ -22,10 +22,6 @@ pub fn intersect<'a>(sphere: &'a Shape, ray: &Ray) -> Vec<Intersection<'a, Space
     }
 }
 
-pub fn normal_at(sphere: &Shape, world_point: Point) -> Vector {
-    let inverse = sphere.transformation.inverse_or_id44();
-    let object_point = &inverse * world_point;
-    let object_normal = object_point - Point::origin();
-    let world_normal = inverse.transpose() * object_normal;
-    world_normal.to_vector().normalize()
+pub fn normal_at(local_point: Point) -> Vector {
+    (local_point - Point::origin()).to_vector()
 }
