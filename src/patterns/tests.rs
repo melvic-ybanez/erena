@@ -12,9 +12,9 @@ fn default_stripe() -> Pattern {
 #[test]
 fn test_creating_stripe() {
     let pattern = default_stripe();
-    if let PatternType::Stripe(first, second) = pattern.pattern_type {
-        assert_eq!(first, Color::white());
-        assert_eq!(second, Color::black());
+    if let PatternType::Stripe = pattern.pattern_type {
+        assert_eq!(pattern.first, Color::white());
+        assert_eq!(pattern.second, Color::black());
     } else {
         assert!(false);
     }
@@ -94,4 +94,30 @@ fn test_ring_extension() {
     assert_eq!(pattern.at(points::new(0.0, 0.0, 1.0)), Color::black());
     /// 0.708 is just slightly more than 2.sqrt() / 2
     assert_eq!(pattern.at(points::new(0.708, 0.0, 0.708)), Color::black());
+}
+
+/// Checkers should repeat in x
+#[test]
+fn test_checkers_x_repeat() {
+    let pattern = Pattern::checkers(Color::white(), Color::black());
+    assert_eq!(pattern.at(Point::origin()), Color::white());
+    assert_eq!(pattern.at(points::new(0.99, 0.0, 0.0)), Color::white());
+    assert_eq!(pattern.at(points::new(1.01, 0.0, 0.0)), Color::black());
+}
+
+/// Checkers should repeat in y
+#[test]
+fn test_checkers_y_repeat() {
+    let pattern = Pattern::checkers(Color::white(), Color::black());
+    assert_eq!(pattern.at(Point::origin()), Color::white());
+    assert_eq!(pattern.at(points::new(0.0, 0.99, 0.0)), Color::white());
+    assert_eq!(pattern.at(points::new(0.0, 1.01, 0.0)), Color::black());
+}
+
+#[test]
+fn test_checkers_z_repeat() {
+    let pattern = Pattern::checkers(Color::white(), Color::black());
+    assert_eq!(pattern.at(Point::origin()), Color::white());
+    assert_eq!(pattern.at(points::new(0.0, 0.0, 0.99)), Color::white());
+    assert_eq!(pattern.at(points::new(0.0, 0.0, 1.01)), Color::black());
 }

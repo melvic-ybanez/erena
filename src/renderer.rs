@@ -4,7 +4,7 @@ use crate::camera::Camera;
 use crate::lights::PointLight;
 use crate::materials::Material;
 use crate::math;
-use crate::matrix::{rotation_x, rotation_y, scaling, translation, view_transformation};
+use crate::matrix::{scaling, translation, view_transformation};
 use crate::scene::World3D;
 use crate::shapes::Shape;
 use crate::tuples::{colors, points, vectors};

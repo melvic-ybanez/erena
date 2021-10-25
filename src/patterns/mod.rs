@@ -2,56 +2,63 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::matrix::{CanTransform, Matrix};
 use crate::shapes::Object;
+use crate::math::Real;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Pattern {
     pub pattern_type: PatternType,
     pub transformation: Matrix,
+    first: Color,
+    second: Color,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum PatternType {
-    Stripe(Color, Color),
-    Gradient(Color, Color),
-    Ring(Color, Color),
+    Stripe,
+    Gradient,
+    Ring,
+    Checkers,
 }
 
 impl Pattern {
-    fn new(pattern_type: PatternType) -> Pattern {
-        Pattern { pattern_type, transformation: Matrix::id44() }
+    fn new(pattern_type: PatternType, first: Color, second: Color) -> Pattern {
+        Pattern { pattern_type, first, second, transformation: Matrix::id44() }
     }
 
     pub fn stripe(first: Color, second: Color) -> Pattern {
-        Pattern::new(PatternType::Stripe(first, second))
+        Pattern::new(PatternType::Stripe, first, second)
     }
 
     pub fn gradient(first: Color, second: Color) -> Pattern {
-        Pattern::new(PatternType::Gradient(first, second))
+        Pattern::new(PatternType::Gradient, first, second)
     }
 
     pub fn ring(first: Color, second: Color) -> Pattern {
-        Pattern::new(PatternType::Ring(first, second))
+        Pattern::new(PatternType::Ring, first, second)
+    }
+
+    pub fn checkers(first: Color, second: Color) -> Pattern {
+        Pattern::new(PatternType::Checkers, first, second)
     }
 
     pub fn at(&self, point: Point) -> Color {
+        let choose = |value: Real| {
+            if value % 2.0 == 0.0 {
+                self.first
+            } else {
+                self.second
+            }
+        };
+
         match self.pattern_type {
-            PatternType::Stripe(first, second) =>
-                if point.x.floor() % 2.0 == 0.0 {
-                    first
-                } else {
-                    second
-                },
-            PatternType::Gradient(first, second) => {
-                let distance = second - first;
+            PatternType::Stripe => choose(point.x.floor()),
+            PatternType::Gradient => {
+                let distance = self.second - self.first;
                 let fraction = point.x - point.x.floor();
-                first + distance * fraction
+                self.first + distance * fraction
             },
-            PatternType::Ring(first, second) =>
-                if point.x.powi(2) + point.z.powi(2) % 2.0 == 0.0 {
-                    first
-                } else {
-                    second
-                }
+            PatternType::Ring => choose(point.x.powi(2) + point.z.powi(2)),
+            PatternType::Checkers => choose(point.x.floor() + point.y.floor() + point.z.floor())
         }
     }
 
