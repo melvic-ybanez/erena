@@ -17,6 +17,7 @@ pub(crate) fn render_scene() {
         .material(
             Material::default()
                 .pattern(Pattern::checkers(Color::white(), colors::new(0.5, 0.5, 0.5)))
+                .reflective(0.2)
         );
 
     let middle = Shape::sphere()
@@ -32,15 +33,7 @@ pub(crate) fn render_scene() {
                 .color(colors::new(0.1, 1.0, 0.5))
                 .diffuse(0.7)
                 .specular(0.3)
-        );
-
-    let right = Shape::sphere()
-        .transform(translation(1.1, 1.0, 0.7) * scaling(0.5, 0.5, 0.5))
-        .material(
-            Material::default()
-                .color(colors::new(1.0, 0.5, 0.5))
-                .diffuse(0.7)
-                .specular(0.3)
+                .reflective(0.5)
         );
 
     let left = Shape::sphere()
@@ -52,6 +45,17 @@ pub(crate) fn render_scene() {
                     .rotate_x(-math::PI / 4.0))
                 .diffuse(0.7)
                 .specular(0.3)
+                .reflective(0.5)
+        );
+
+    let right = Shape::sphere()
+        .transform(translation(1.1, 1.0, 0.7) * scaling(0.5, 0.5, 0.5))
+        .material(
+            Material::default()
+                .color(colors::new(1.0, 0.5, 0.5))
+                .diffuse(0.7)
+                .specular(0.3)
+                .reflective(0.5)
         );
 
     let mut small_spheres: Vec<Shape> = vec![];
@@ -70,6 +74,7 @@ pub(crate) fn render_scene() {
                         .diffuse(0.7)
                         .specular(0.3)
                         .pattern_opt(if i % 2 == 0 { Some(pattern) } else { None })
+                        .reflective(0.5)
                 )
         )
     };
