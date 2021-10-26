@@ -28,7 +28,9 @@ impl<'a> Comps3D<'a> {
 
         //let mut comps = Comps::new(t, object, point, -ray.direction, object.normal_at(point));
         let mut comps = Comps {
-            t, object, point,
+            t,
+            object,
+            point,
             eye_vec: -ray.direction,
             normal_vec: object.normal_at(point),
             reflect_vec: Vector::zero(),
@@ -48,7 +50,8 @@ impl<'a> Comps3D<'a> {
 
         comps
     }
-
+}
+impl<'a, S> Comps<'a, S> {
     pub fn get_overpoint(&self) -> Point {
         self.over_point.expect("Invalid state")
     }
@@ -61,7 +64,7 @@ impl<'a> Comps3D<'a> {
         self.eye_vec
     }
 
-    pub fn get_object(&self) -> &Shape {
+    pub fn get_object(&self) -> &'a Object<S> {
         self.object
     }
 

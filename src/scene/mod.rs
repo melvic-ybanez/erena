@@ -1,6 +1,6 @@
 use crate::lights::PointLight;
 use crate::matrix::{CanTransform, scaling};
-use crate::rays::{Comps3D, Intersection, Ray, Intersection3D};
+use crate::rays::{Comps3D, Intersection, Ray, Intersection3D, Comps};
 use crate::shapes::{Object, Shape, Space3D};
 use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
@@ -13,6 +13,8 @@ pub struct World<S> {
 }
 
 pub type World3D = World<Space3D>;
+
+const DEFAULT_DEPTH: u8 = 4;
 
 impl<S> World<S> {
     pub fn new(objects: Vec<Object<S>>, light: Option<PointLight>) -> World<S> {
@@ -43,6 +45,10 @@ impl<S> World<S> {
 
     pub fn add_light(&mut self, point_light: PointLight) {
         self.light = Some(point_light);
+    }
+
+    pub fn update_object<F>(&mut self, i: usize, f: F) where S: Clone, F: Fn(Object<S>) -> (Object<S>) {
+        self.objects[i] = f(self.objects[i].clone());
     }
 }
 
@@ -89,24 +95,51 @@ impl World3D {
     }
 
     pub fn color_at(&self, ray: &Ray) -> Color {
+        self.color_at_with_depth(ray, DEFAULT_DEPTH)
+    }
+
+    pub fn color_at_with_depth(&self, ray: &Ray, depth: u8) -> Color {
         if let Some(hit) = Intersection::hit(self.intersect(ray)) {
             let comps = Comps3D::prepare(hit, ray);
-            self.shade_hit(comps)
+            self.shade_hit_with_depth(comps, depth)
         } else {
             Color::black()
         }
     }
 
     fn shade_hit(&self, comps: Comps3D) -> Color {
+        self.shade_hit_with_depth(comps, DEFAULT_DEPTH)
+    }
+
+    fn shade_hit_with_depth(&self, comps: Comps3D, depth: u8) -> Color {
         if let Some(light) = self.light {
             let shadowed = self.is_shadowed(comps.get_overpoint());
-            comps.get_object().material.lighting(
-                comps.get_object(), light,
-                comps.get_overpoint(), comps.get_eye_vec(),
-                comps.get_normal_vec(), shadowed,
-            )
+            let surface = comps.get_object().material.lighting(
+                comps.get_object(),
+                light,
+                comps.get_overpoint(),
+                comps.get_eye_vec(),
+                comps.get_normal_vec(),
+                shadowed,
+            );
+            let reflected = self.reflected_color_with_depth(comps, depth);
+            surface + reflected
         } else {
             Color::black()
+        }
+    }
+
+    pub fn reflected_color(&self, comps: Comps3D) -> Color {
+        self.reflected_color_with_depth(comps, DEFAULT_DEPTH)
+    }
+
+    pub fn reflected_color_with_depth(&self, comps: Comps3D, depth: u8) -> Color {
+        if depth == 0 || comps.get_object().material.reflective == 0.0 {
+            Color::black()
+        } else {
+            let reflect_ray = Ray::new(comps.get_overpoint(), comps.get_reflect_vec());
+            let color = self.color_at_with_depth(&reflect_ray, depth - 1);
+            color * comps.get_object().material.reflective
         }
     }
 }

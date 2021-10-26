@@ -112,6 +112,11 @@ impl Material {
         self.ambient = ambient;
         self
     }
+
+    pub fn reflective(mut self, reflective: Real) -> Self {
+        self.reflective = reflective;
+        self
+    }
 }
 
 #[cfg(test)]
