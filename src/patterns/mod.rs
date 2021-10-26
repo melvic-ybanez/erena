@@ -57,7 +57,7 @@ impl Pattern {
                 let fraction = point.x - point.x.floor();
                 self.first + distance * fraction
             },
-            PatternType::Ring => choose(point.x.powi(2) + point.z.powi(2)),
+            PatternType::Ring => choose((point.x.powi(2) + point.z.powi(2)).sqrt().floor()),
             PatternType::Checkers => choose(point.x.floor() + point.y.floor() + point.z.floor())
         }
     }
