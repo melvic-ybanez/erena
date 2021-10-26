@@ -54,14 +54,35 @@ pub(crate) fn render_scene() {
                 .specular(0.3)
         );
 
+    let mut small_spheres: Vec<Shape> = vec![];
+    for i in 0..5 {
+        let component_scale = 0.5 + 0.1 * (i as Real);
+        let pattern = Pattern::gradient(
+            colors::new(1.0, 0.8, 0.1),
+            colors::new(220.0 / 255.0, 20.0 / 255.0, 60.0 / 255.0)
+        );
+        small_spheres.push(
+            left.clone().transform(translation(i as Real, 0.0, 0.0) *
+                scaling(component_scale, component_scale, component_scale))
+                .material(
+                    Material::default()
+                        .color(colors::new(0.5, 0.6, 1.0))
+                        .diffuse(0.7)
+                        .specular(0.3)
+                        .pattern_opt(if i % 2 == 0 { Some(pattern) } else { None })
+                )
+        )
+    };
+
     let mut objects = vec![floor, middle, right, left];
+    objects.append(&mut small_spheres);
 
     let world = World3D::new(
         objects,
         Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white())),
     );
 
-    let mut camera = Camera::new(200, 100, math::PI / 3.0);
+    let mut camera = Camera::new(1000, 600, math::PI / 3.0);
     camera.transformation = view_transformation(
         points::new(0.0, 1.5, -5.0),
         points::new(0.0, 1.0, 0.0),
