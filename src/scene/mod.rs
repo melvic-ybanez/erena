@@ -100,10 +100,10 @@ impl World3D {
     fn shade_hit(&self, comps: Comps3D) -> Color {
         if let Some(light) = self.light {
             let shadowed = self.is_shadowed(comps.get_overpoint());
-            comps.object.material.lighting(
-                comps.object, light,
-                comps.get_overpoint(), comps.eye_vec,
-                comps.normal_vec, shadowed,
+            comps.get_object().material.lighting(
+                comps.get_object(), light,
+                comps.get_overpoint(), comps.get_eye_vec(),
+                comps.get_normal_vec(), shadowed,
             )
         } else {
             Color::black()

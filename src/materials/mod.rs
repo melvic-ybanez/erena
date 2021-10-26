@@ -14,6 +14,7 @@ pub struct Material {
     pub specular: Real,
     pub shininess: Real,
     pub pattern: Option<Pattern>,
+    pub reflective: Real,
 }
 
 impl Material {
@@ -25,6 +26,7 @@ impl Material {
             specular: 0.9,
             shininess: 200.0,
             pattern: None,
+            reflective: 0.0,
         }
     }
 

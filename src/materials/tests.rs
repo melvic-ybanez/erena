@@ -105,3 +105,9 @@ fn test_lighting_with_pattern() {
     assert_eq!(c1, Color::white());
     assert_eq!(c2, Color::black());
 }
+
+#[test]
+fn test_default_reflective() {
+    let mat = Material::default();
+    assert_eq!(mat.reflective, 0.0);
+}

@@ -103,6 +103,18 @@ mod tests {
         let comps = Comps::prepare(i, &ray);
 
         assert!(comps.get_overpoint().z < -math::EPSILON / 2.0);
-        assert!(comps.point.z > comps.get_overpoint().z);
+        assert!(comps.get_point().z > comps.get_overpoint().z);
+    }
+
+    #[test]
+    fn test_precompute_reflection_vector() {
+        let shape = Shape::plane();
+        let ray = Ray::new(
+            points::new(0.0, 1.0, 1.0),
+            vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2())
+        );
+        let i = Intersection::new(2_f64.sqrt(), &shape);
+        let comps = Comps::prepare(i, &ray);
+        assert_eq!(comps.get_reflect_vec(), vectors::new(0.0, math::two_sqrt_div_2(), math::two_sqrt_div_2()));
     }
 }

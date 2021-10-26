@@ -1,37 +1,40 @@
 use crate::math::Real;
-use crate::rays::{Intersection, Ray};
-use crate::shapes::{Object, Space3D};
+use crate::rays::{Intersection, Ray, Intersection3D};
+use crate::shapes::{Object, Space3D, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;
 
 pub struct Comps<'a, S> {
-    pub t: Real,
-    pub object: &'a Object<S>,
-    pub point: Point,
-    pub eye_vec: Vector,
-    pub normal_vec: Vector,
-    pub inside: bool,
+    t: Real,
+    object: &'a Object<S>,
+    point: Point,
+    eye_vec: Vector,
+    normal_vec: Vector,
+    reflect_vec: Vector,
+    inside: bool,
     over_point: Option<Point>,
-}
-
-impl<'a, S> Comps<'a, S> {
-    pub fn new(t: Real, object: &Object<S>, point: Point, eye_vec: Vector, normal_vec: Vector) -> Comps<S> {
-        Comps { t, object, point, eye_vec, normal_vec, inside: false, over_point: None }
-    }
 }
 
 pub type Comps3D<'a> = Comps<'a, Space3D>;
 
 impl<'a> Comps3D<'a> {
-    pub fn prepare(intersection: Intersection<'a, Space3D>, ray: &Ray) -> Comps3D<'a> {
+    pub fn prepare(intersection: Intersection3D<'a>, ray: &Ray) -> Comps3D<'a> {
         // same as the values of the corresponding intersection properties
         let t = intersection.t;
         let object = intersection.object;
 
         let point = ray.position(t);
 
-        let mut comps = Comps::new(t, object, point, -ray.direction, object.normal_at(point));
+        //let mut comps = Comps::new(t, object, point, -ray.direction, object.normal_at(point));
+        let mut comps = Comps {
+            t, object, point,
+            eye_vec: -ray.direction,
+            normal_vec: object.normal_at(point),
+            reflect_vec: Vector::zero(),
+            inside: false,
+            over_point: None,
+        };
 
         if comps.normal_vec.dot(comps.eye_vec) < 0.0 {
             comps.inside = true;
@@ -41,12 +44,33 @@ impl<'a> Comps3D<'a> {
         }
 
         comps.over_point = Some(comps.point + comps.normal_vec * math::EPSILON);
+        comps.reflect_vec = ray.direction.reflect(comps.normal_vec);
 
         comps
     }
 
     pub fn get_overpoint(&self) -> Point {
         self.over_point.expect("Invalid state")
+    }
+
+    pub fn get_reflect_vec(&self) -> Vector {
+        self.reflect_vec
+    }
+
+    pub fn get_eye_vec(&self) -> Vector {
+        self.eye_vec
+    }
+
+    pub fn get_object(&self) -> &Shape {
+        self.object
+    }
+
+    pub fn get_point(&self) -> Point {
+        self.point
+    }
+
+    pub fn get_normal_vec(&self) -> Vector {
+        self.normal_vec
     }
 }
 

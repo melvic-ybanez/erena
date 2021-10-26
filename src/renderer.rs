@@ -82,7 +82,7 @@ pub(crate) fn render_scene() {
         Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white())),
     );
 
-    let mut camera = Camera::new(200, 100, math::PI / 3.0);
+    let mut camera = Camera::new(1000, 600, math::PI / 3.0);
     camera.transformation = view_transformation(
         points::new(0.0, 1.5, -5.0),
         points::new(0.0, 1.0, 0.0),
