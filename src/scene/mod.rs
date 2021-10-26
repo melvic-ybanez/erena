@@ -1,6 +1,6 @@
 use crate::lights::PointLight;
 use crate::matrix::{CanTransform, scaling};
-use crate::rays::{Comps3D, Intersection, Ray};
+use crate::rays::{Comps3D, Intersection, Ray, Intersection3D};
 use crate::shapes::{Object, Shape, Space3D};
 use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
@@ -64,11 +64,10 @@ impl World3D {
     }
 
     fn intersect(&self, ray: &Ray) -> Vec<Intersection<Space3D>> {
-        let mut intersections: Vec<_> = self.objects
-            .iter()
-            .map(|obj| obj.intersect(ray))
-            .flatten()
-            .collect();
+        let mut intersections: Vec<Intersection3D> = vec![];
+        for obj in self.objects.iter() {
+            intersections.append(&mut obj.intersect(ray));
+        }
         intersections.sort_by(Intersection::compare);
         intersections
     }

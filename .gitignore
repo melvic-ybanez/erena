@@ -15,3 +15,5 @@ testData
 /native-helper/target
 
 *.ppm
+*.svg
+perf.*
