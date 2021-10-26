@@ -1,4 +1,3 @@
-use crate::lights::PointLight;
 use crate::matrix::{CanTransform, scaling};
 use crate::rays::{Comps3D, Intersection, Ray, Comps};
 use crate::scene::{World, World3D};
@@ -8,7 +7,7 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::materials::Material;
 use crate::math;
-use crate::math::two_sqrt_div_2;
+use crate::rays::lights::PointLight;
 
 #[test]
 fn test_creating_world() {

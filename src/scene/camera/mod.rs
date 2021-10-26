@@ -35,7 +35,7 @@ impl Camera {
             transformation: Matrix::id44(),
             pixel_size,
             half_width,
-            half_height
+            half_height,
         }
     }
 
@@ -45,7 +45,7 @@ impl Camera {
         let y_offset = (y as f64 + 0.5) * self.pixel_size;
 
         // compute the untransformed coordinates of the pixel in the world space
-        // note: the camera looks toward -z, so +x is to the left
+        // note: the scene.camera looks toward -z, so +x is to the left
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
 
@@ -57,17 +57,43 @@ impl Camera {
         Ray::new(origin, direction)
     }
 
-    pub(crate) fn render(&self, world: World3D) -> Canvas {
-        let mut image = Canvas::new(self.width, self.height);
+    pub(crate) fn render(&self, world: World3D, antialias: bool) -> Canvas {
+        if antialias {
+            // set to higher resolution first if antialiasing is considered
+            let mut high_res_cam = Camera::new(self.width * 2, self.height * 2, self.field_of_view);
+            high_res_cam.transformation = self.transformation.clone();
 
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let ray = self.ray_for_pixel(x, y);
-                image[(x, y)] = world.color_at(&ray);
+            let high_res_canvas = high_res_cam.render(world, false);
+            let mut canvas = Canvas::new(self.width, self.height);
+
+            // apply down-sampling to remove jagged edges
+            for y in 0..canvas.height {
+                let source_y = y * 2;
+                for x in 0..canvas.width {
+                    let source_x = x * 2;
+
+                    // computes the average...
+                    canvas[(x, y)] = (high_res_canvas[(source_x, source_y)] +
+                        high_res_canvas[(source_x, source_y + 1)] +
+                        high_res_canvas[(source_x + 1, source_y)] +
+                        high_res_canvas[(source_x + 1, source_y + 1)]
+                    ) * 0.25;
+                }
             }
-        }
 
-        image
+            canvas
+        } else {
+            let mut image = Canvas::new(self.width, self.height);
+
+            for y in 0..self.height {
+                for x in 0..self.width {
+                    let ray = self.ray_for_pixel(x, y);
+                    image[(x, y)] = world.color_at(&ray);
+                }
+            }
+
+            image
+        }
     }
 }
 

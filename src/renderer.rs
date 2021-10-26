@@ -1,7 +1,5 @@
 use std::fs;
 
-use crate::camera::Camera;
-use crate::lights::PointLight;
 use crate::materials::Material;
 use crate::math;
 use crate::matrix::{scaling, translation, view_transformation, CanTransform};
@@ -11,6 +9,8 @@ use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::patterns::Pattern;
 use crate::math::Real;
+use crate::rays::lights::PointLight;
+use crate::scene::camera::Camera;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane()
@@ -94,7 +94,7 @@ pub(crate) fn render_scene() {
         vectors::new(0.0, 1.0, 0.0),
     );
 
-    let canvas = camera.render(world);
+    let canvas = camera.render(world, true);
 
     fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
 }

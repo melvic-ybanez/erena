@@ -1,10 +1,10 @@
-use crate::lights::PointLight;
 use crate::math::Real;
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::patterns::Pattern;
 use crate::shapes::Object;
+use crate::rays::lights::PointLight;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Material {

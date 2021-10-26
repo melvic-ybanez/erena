@@ -4,8 +4,8 @@ use crate::math;
 use crate::tuples::colors::Color;
 
 pub struct Canvas {
-    width: usize,
-    height: usize,
+    pub(crate) width: usize,
+    pub(crate) height: usize,
     pixels: Vec<Color>,
 }
 

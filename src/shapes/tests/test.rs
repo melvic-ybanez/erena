@@ -1,5 +1,5 @@
 use crate::shapes::Shape;
-use crate::matrix::{Matrix, CanTransform, translation, scaling};
+use crate::matrix::{Matrix, CanTransform, translation};
 use crate::materials::Material;
 use crate::rays::Ray;
 use crate::tuples::{points, vectors};

@@ -1,10 +1,12 @@
-use crate::lights::PointLight;
 use crate::matrix::{CanTransform, scaling};
-use crate::rays::{Comps3D, Intersection, Ray, Intersection3D, Comps};
+use crate::rays::{Comps3D, Intersection, Ray, Intersection3D};
 use crate::shapes::{Object, Shape, Space3D};
 use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
+use crate::rays::lights::PointLight;
+
+pub mod camera;
 
 #[derive(Clone)]
 pub struct World<S> {
@@ -47,7 +49,7 @@ impl<S> World<S> {
         self.light = Some(point_light);
     }
 
-    pub fn update_object<F>(&mut self, i: usize, f: F) where S: Clone, F: Fn(Object<S>) -> (Object<S>) {
+    pub fn update_object<F>(&mut self, i: usize, f: F) where S: Clone, F: Fn(Object<S>) -> Object<S> {
         self.objects[i] = f(self.objects[i].clone());
     }
 }

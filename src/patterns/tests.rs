@@ -92,7 +92,7 @@ fn test_ring_extension() {
     assert_eq!(pattern.at(Point::origin()), Color::white());
     assert_eq!(pattern.at(points::new(1.0, 0.0, 0.0)), Color::black());
     assert_eq!(pattern.at(points::new(0.0, 0.0, 1.0)), Color::black());
-    /// 0.708 is just slightly more than 2.sqrt() / 2
+    // 0.708 is just slightly more than 2.sqrt() / 2
     assert_eq!(pattern.at(points::new(0.708, 0.0, 0.708)), Color::black());
 }
 

@@ -8,6 +8,7 @@ use crate::tuples::vectors::Vector;
 
 mod intersections;
 mod comps;
+pub mod lights;
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub struct Ray {

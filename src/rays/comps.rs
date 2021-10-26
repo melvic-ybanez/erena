@@ -1,6 +1,6 @@
 use crate::math::Real;
-use crate::rays::{Intersection, Ray, Intersection3D};
-use crate::shapes::{Object, Space3D, Shape};
+use crate::rays::{Ray, Intersection3D};
+use crate::shapes::{Object, Space3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;

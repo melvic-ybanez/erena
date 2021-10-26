@@ -6,11 +6,9 @@ mod canvas;
 mod matrix;
 mod rays;
 mod shapes;
-mod lights;
 mod materials;
 mod renderer;
 mod scene;
-mod camera;
 mod patterns;
 
 fn main() {

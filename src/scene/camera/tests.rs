@@ -1,9 +1,9 @@
-use crate::camera::Camera;
 use crate::math;
 use crate::matrix::{Matrix, rotation_y, translation, view_transformation};
 use crate::scene::World;
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::points::Point;
+use crate::scene::camera::Camera;
 
 #[test]
 fn test_constructing_camera() {
@@ -51,7 +51,7 @@ fn test_ray_through_corner() {
     assert_eq!(ray.direction.round_items(), vectors::new(0.66519, 0.33259, -0.66851));
 }
 
-/// Tests constructing a ray when the camera is transformed
+/// Tests constructing a ray when the scene.camera is transformed
 #[test]
 fn test_ray_with_transformed_camera() {
     let mut camera = Camera::new(201, 101, math::PI / 2.0);
@@ -62,7 +62,7 @@ fn test_ray_with_transformed_camera() {
     assert_eq!(ray.direction, vectors::new(2_f64.sqrt() / 2.0, 0.0, -2_f64.sqrt() / 2.0));
 }
 
-/// Tests rendering a world with a camera
+/// Tests rendering a world with a scene.camera
 #[test]
 fn test_render_camera() {
     let world = World::default();
@@ -71,6 +71,6 @@ fn test_render_camera() {
     let to = Point::origin();
     let up = vectors::new(0.0, 1.0, 0.0);
     camera.transformation = view_transformation(from, to, up);
-    let image = camera.render(world);
+    let image = camera.render(world, false);
     assert_eq!(image[(5, 5)].round_items(), colors::new(0.38066, 0.47583, 0.28550));
 }
