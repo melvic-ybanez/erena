@@ -104,27 +104,27 @@ pub trait CanTransform: Sized {
     fn set_transformation(self, transformation: Matrix) -> Self;
 
     fn transform(self, transformation: Matrix) -> Self {
-        let transformation = self.get_transformation() * transformation;
+        let transformation = &transformation * self.get_transformation();
         self.set_transformation(transformation)
     }
 
     fn scale(self, x: Real, y: Real, z: Real) -> Self {
-        self.set_transformation(scaling(x, y, z))
+        self.transform(scaling(x, y, z))
     }
 
     fn translate(self, x: Real, y: Real, z: Real) -> Self {
-        self.set_transformation(translation(x, y, z))
+        self.transform(translation(x, y, z))
     }
 
     fn rotate_x(self, rad: Real) -> Self {
-        self.set_transformation(rotation_x(rad))
+        self.transform(rotation_x(rad))
     }
 
     fn rotate_y(self, rad: Real) -> Self {
-        self.set_transformation(rotation_y(rad))
+        self.transform(rotation_y(rad))
     }
 
     fn rotate_z(self, rad: Real) -> Self {
-        self.set_transformation(rotation_z(rad))
+        self.transform(rotation_z(rad))
     }
 }

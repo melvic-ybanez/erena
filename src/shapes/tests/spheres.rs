@@ -153,6 +153,6 @@ fn test_default_material() {
 fn test_material_update() {
     let mut mat = Material::default();
     mat.ambient = 1.0;
-    let sphere = Shape::sphere().with_material(&mat);
+    let sphere = Shape::sphere().material_ref(&mat);
     assert_eq!(sphere.material, mat);
 }

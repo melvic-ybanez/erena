@@ -91,7 +91,7 @@ fn test_lighting_in_shadow() {
 #[test]
 fn test_lighting_with_pattern() {
     let mut mat = Material::default()
-        .with_pattern(&Pattern::stripe(Color::white(), Color::black()));
+        .pattern_ref(&Pattern::stripe(Color::white(), Color::black()));
     mat.ambient = 1.0;
     mat.diffuse = 0.0;
     mat.specular = 0.0;

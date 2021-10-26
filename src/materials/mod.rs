@@ -78,8 +78,36 @@ impl Material {
         ambient + diffuse + specular
     }
 
-    pub fn with_pattern(mut self, pattern: &Pattern) -> Self {
-        self.pattern = Some(pattern.clone());
+    pub fn pattern_ref(mut self, pattern: &Pattern) -> Self {
+        self.pattern(pattern.clone())
+    }
+
+    pub fn pattern(mut self, pattern: Pattern) -> Self {
+        self.pattern_opt(Some(pattern))
+    }
+
+    pub fn pattern_opt(mut self, pattern: Option<Pattern>) -> Self {
+        self.pattern = pattern;
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+
+    pub fn diffuse(mut self, diffuse: Real) -> Self {
+        self.diffuse = diffuse;
+        self
+    }
+
+    pub fn specular(mut self, specular: Real) -> Self {
+        self.specular = specular;
+        self
+    }
+
+    pub fn ambient(mut self, ambient: Real) -> Self {
+        self.ambient = ambient;
         self
     }
 }

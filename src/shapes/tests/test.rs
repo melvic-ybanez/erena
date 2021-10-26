@@ -1,5 +1,5 @@
 use crate::shapes::Shape;
-use crate::matrix::{Matrix, CanTransform, translation};
+use crate::matrix::{Matrix, CanTransform, translation, scaling};
 use crate::materials::Material;
 use crate::rays::Ray;
 use crate::tuples::{points, vectors};
@@ -30,7 +30,7 @@ fn test_set_material() {
     let mut mat = Material::default();
     mat.ambient = 1.0;
 
-    let shape = Shape::test().with_material(&mat);
+    let shape = Shape::test().material_ref(&mat);
     assert_eq!(shape.material, mat);
 }
 
