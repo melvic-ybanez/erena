@@ -3,6 +3,7 @@ use crate::tuples::points::Point;
 use crate::matrix::{CanTransform, Matrix};
 use crate::shapes::Object;
 use crate::math::Real;
+use crate::tuples::colors;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Pattern {
@@ -18,6 +19,7 @@ pub enum PatternType {
     Gradient,
     Ring,
     Checkers,
+    Test,
 }
 
 impl Pattern {
@@ -41,6 +43,10 @@ impl Pattern {
         Pattern::new(PatternType::Checkers, first, second)
     }
 
+    pub fn test() -> Pattern {
+        Pattern::new(PatternType::Test, Color::white(), Color::black())
+    }
+
     pub fn at(&self, point: Point) -> Color {
         let choose = |value: Real| {
             if value % 2.0 == 0.0 {
@@ -58,7 +64,8 @@ impl Pattern {
                 self.first + distance * fraction
             },
             PatternType::Ring => choose((point.x.powi(2) + point.z.powi(2)).sqrt().floor()),
-            PatternType::Checkers => choose(point.x.floor() + point.y.floor() + point.z.floor())
+            PatternType::Checkers => choose(point.x.floor() + point.y.floor() + point.z.floor()),
+            PatternType::Test => colors::new(point.x, point.y, point.z)
         }
     }
 

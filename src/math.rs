@@ -46,7 +46,7 @@ pub fn order_reals(a: Real, b: Real) -> Ordering {
     }
 }
 
-/// These are used a lot in tests
+/// This is used a lot in tests
 pub(crate) fn two_sqrt_div_2() -> Real {
     2_f64.sqrt() / 2.0
 }

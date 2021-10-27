@@ -5,6 +5,7 @@ use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;
 
+#[derive(Clone)]
 pub struct Comps<'a, S> {
     t: Real,
     object: &'a Object<S>,
@@ -14,6 +15,7 @@ pub struct Comps<'a, S> {
     reflect_vec: Vector,
     inside: bool,
     over_point: Option<Point>,
+    under_point: Option<Point>,
     n1: Real,
     n2: Real,
 }
@@ -42,6 +44,7 @@ impl<'a> Comps3D<'a> {
             reflect_vec: Vector::zero(),
             inside: false,
             over_point: None,
+            under_point: None,
             n1: 0.0,
             n2: 0.0,
         };
@@ -54,6 +57,7 @@ impl<'a> Comps3D<'a> {
         }
 
         comps.over_point = Some(comps.point + comps.normal_vec * math::EPSILON);
+        comps.under_point = Some(comps.point - comps.normal_vec * math::EPSILON);
         comps.reflect_vec = ray.direction.reflect(comps.normal_vec);
 
         comps.compute_n1_and_n2(hit, xs);
@@ -87,8 +91,12 @@ impl<'a> Comps3D<'a> {
 }
 
 impl<'a, S> Comps<'a, S> {
-    pub fn get_overpoint(&self) -> Point {
-        self.over_point.expect("Invalid state")
+    pub fn get_over_point(&self) -> Point {
+        Comps::<'a, S>::expect_or_invalid(self.over_point)
+    }
+
+    pub fn get_under_point(&self) -> Point {
+        Comps::<'a, S>::expect_or_invalid::<Point>(self.under_point)
     }
 
     pub fn get_reflect_vec(&self) -> Vector {
@@ -117,6 +125,10 @@ impl<'a, S> Comps<'a, S> {
 
     pub fn get_n2(&self) -> Real {
         self.n2
+    }
+
+    fn expect_or_invalid<A>(opt: Option<A>) -> A {
+        opt.expect("Invalid state")
     }
 }
 

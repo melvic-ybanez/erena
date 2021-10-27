@@ -49,8 +49,15 @@ impl<S> World<S> {
         self.light = Some(point_light);
     }
 
-    pub fn update_object<F>(&mut self, i: usize, f: F) where S: Clone, F: Fn(Object<S>) -> Object<S> {
+    pub fn update_object<F>(&mut self, i: usize, f: F) -> Object<S>
+        where S: Clone, F: Fn(Object<S>) -> Object<S>
+    {
         self.objects[i] = f(self.objects[i].clone());
+        self.get_object(i)
+    }
+
+    pub fn get_object(&self, index: usize) -> Object<S> where S: Clone {
+        self.objects[index].clone()
     }
 }
 
@@ -96,53 +103,87 @@ impl World3D {
         }
     }
 
-    pub fn color_at(&self, ray: &Ray) -> Color {
-        self.color_at_with_depth(ray, DEFAULT_DEPTH)
+    pub fn color_at_default(&self, ray: &Ray) -> Color {
+        self.color_at(ray, DEFAULT_DEPTH)
     }
 
-    pub fn color_at_with_depth(&self, ray: &Ray, depth: u8) -> Color {
+    pub fn color_at(&self, ray: &Ray, depth: u8) -> Color {
         let xs = self.intersect(ray);
         if let Some(hit) = Intersection::hit(xs.clone()) {
             let comps = Comps3D::prepare(hit, ray, xs);
-            self.shade_hit_with_depth(comps, depth)
+            self.shade_hit(comps, depth)
         } else {
             Color::black()
         }
     }
 
-    fn shade_hit(&self, comps: Comps3D) -> Color {
-        self.shade_hit_with_depth(comps, DEFAULT_DEPTH)
+    fn shade_hit_default(&self, comps: Comps3D) -> Color {
+        self.shade_hit(comps, DEFAULT_DEPTH)
     }
 
-    fn shade_hit_with_depth(&self, comps: Comps3D, depth: u8) -> Color {
+    fn shade_hit(&self, comps: Comps3D, depth: u8) -> Color {
         if let Some(light) = self.light {
-            let shadowed = self.is_shadowed(comps.get_overpoint());
+            let shadowed = self.is_shadowed(comps.get_over_point());
             let surface = comps.get_object().material.lighting(
                 comps.get_object(),
                 light,
-                comps.get_overpoint(),
+                comps.get_over_point(),
                 comps.get_eye_vec(),
                 comps.get_normal_vec(),
                 shadowed,
             );
-            let reflected = self.reflected_color_with_depth(comps, depth);
-            surface + reflected
+            let reflected = self.reflected_color(comps.clone(), depth);
+            let refracted = self.refracted_color(comps, depth);
+            surface + reflected + refracted
         } else {
             Color::black()
         }
     }
 
-    pub fn reflected_color(&self, comps: Comps3D) -> Color {
-        self.reflected_color_with_depth(comps, DEFAULT_DEPTH)
+    pub fn reflected_color_default(&self, comps: Comps3D) -> Color {
+        self.reflected_color(comps, DEFAULT_DEPTH)
     }
 
-    pub fn reflected_color_with_depth(&self, comps: Comps3D, depth: u8) -> Color {
+    pub fn reflected_color(&self, comps: Comps3D, depth: u8) -> Color {
         if depth == 0 || comps.get_object().material.reflective == 0.0 {
             Color::black()
         } else {
-            let reflect_ray = Ray::new(comps.get_overpoint(), comps.get_reflect_vec());
-            let color = self.color_at_with_depth(&reflect_ray, depth - 1);
+            let reflect_ray = Ray::new(comps.get_over_point(), comps.get_reflect_vec());
+            let color = self.color_at(&reflect_ray, depth - 1);
             color * comps.get_object().material.reflective
+        }
+    }
+
+    pub fn refracted_color_default(&self, comps: Comps3D) -> Color {
+        self.refracted_color(comps, DEFAULT_DEPTH)
+    }
+
+    pub fn refracted_color(&self, comps: Comps3D, depth: u8) -> Color {
+        if depth == 0 || comps.get_object().material.transparency == 0.0 {
+            Color::black()
+        } else {
+            // According to Snell's Law, sin(theta_i) / sin(theta_t) = n2 / n1.
+            // In our case, theta_i is the angle of the incoming ray and theta_t
+            // is the angle of the refracted ray.
+            let n_ratio = comps.get_n1() / comps.get_n2();
+            let cos_i = comps.get_eye_vec().dot(comps.get_normal_vec());
+
+            // Pythagorean identity: sin^2 (t) + cos^2 (t) = 1
+            let sin2t = n_ratio * n_ratio * (1.0 - cos_i * cos_i);
+
+            let is_total_internal_reflection = sin2t > 1.0;
+            if is_total_internal_reflection {
+                Color::black()
+            } else {
+                // again, from Pythagorean identities
+                let cos_t = (1.0 - sin2t).sqrt();
+                // direction of the refracted ray
+                let direction = comps.get_normal_vec() *
+                    (n_ratio * cos_i - cos_t) - comps.get_eye_vec() * n_ratio;
+
+                let refracted_ray = Ray::new(comps.get_under_point(), direction);
+                self.color_at(&refracted_ray, depth - 1) * comps.get_object().material.transparency
+            }
         }
     }
 }

@@ -107,8 +107,8 @@ mod tests {
         let i = Intersection::new(5.0, &shape);
         let comps = Comps::prepare_default(i, &ray);
 
-        assert!(comps.get_overpoint().z < -math::EPSILON / 2.0);
-        assert!(comps.get_point().z > comps.get_overpoint().z);
+        assert!(comps.get_over_point().z < -math::EPSILON / 2.0);
+        assert!(comps.get_point().z > comps.get_over_point().z);
     }
 
     #[test]
@@ -156,5 +156,16 @@ mod tests {
             assert_eq!(comps.get_n1(), samples[i].0);
             assert_eq!(comps.get_n2(), samples[i].1);
         }
+    }
+
+    /// The under point is offset below the surface
+    #[test]
+    fn test_under_point_offset_below() {
+        let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
+        let shape = spheres::glass().translate(0.0, 0.0, 1.0);
+        let i = Intersection::new(5.0, &shape);
+        let comps = Comps::prepare(i, &ray, vec![i]);
+        assert!(comps.get_under_point().z > math::EPSILON / 2.0);
+        assert!(comps.get_point().z < comps.get_under_point().z);
     }
 }
