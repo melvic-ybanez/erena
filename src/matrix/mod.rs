@@ -5,6 +5,7 @@ pub use transformations::*;
 use crate::{math, tuples};
 use crate::math::Real;
 use crate::tuples::TupleLike;
+use std::cell::RefCell;
 
 mod transformations;
 
@@ -13,11 +14,12 @@ pub struct Matrix {
     elements: Vec<Real>,
     width: usize,
     height: usize,
+    inverse: Box<RefCell<Option<Matrix>>>,
 }
 
 impl Matrix {
     fn new(width: usize, height: usize, elements: Vec<Real>) -> Matrix {
-        Matrix { width, height, elements }
+        Matrix { width, height, elements, inverse: Box::new(RefCell::new(None)) }
     }
 
     /// Constructs a new matrix from a 2D vector. The
@@ -25,11 +27,11 @@ impl Matrix {
     /// Note: This constructor assumes the vector represents n x n matrix
     /// and not an m x n one.
     fn from_vec2(elements: Vec<Vec<Real>>) -> Matrix {
-        Matrix {
-            width: elements[0].len(),
-            height: elements.len(),
-            elements: elements.into_iter().flatten().collect::<Vec<Real>>(),
-        }
+        Matrix::new(
+            elements[0].len(),
+            elements.len(),
+            elements.into_iter().flatten().collect::<Vec<Real>>(),
+        )
     }
 
     /// Constructs an n x n matrix with all the cells initialized to 0.0.
@@ -129,7 +131,11 @@ impl Matrix {
     /// 2. Transpose M into M'.
     /// 3. For every element E in M', divide E by the determinant of M0.
     pub fn inverse(&self) -> Option<Matrix> {
-        if !self.is_invertible() {
+        if self.inverse.borrow().is_some() {
+            return self.inverse.borrow().clone()
+        }
+
+        let inverse = if !self.is_invertible() {
             None
         } else {
             let mut matrix = Matrix::with_nxn(self.width);
@@ -142,7 +148,10 @@ impl Matrix {
                 }
             }
             Some(matrix)
-        }
+        };
+
+        self.inverse.replace(inverse.clone());
+        inverse
     }
 
     pub fn inverse_or_id44(&self) -> Matrix {
