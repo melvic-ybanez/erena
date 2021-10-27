@@ -36,6 +36,10 @@ impl<'a, S: Clone + PartialEq> Intersection<'a, S> {
         ts.iter().map(|&t| Intersection::new(t, shape)).collect()
     }
 
+    pub fn from_data(data: &[(Real, &'a Object<S>)]) -> Vec<Intersection<'a, S>> {
+        data.iter().map(|(t, obj)| Intersection::new(*t, obj)).collect()
+    }
+
     pub(crate) fn compare(i1: &Intersection<'a, S>, i2: &Intersection<'a, S>) -> Ordering {
         math::order_reals(i1.t, i2.t)
     }
@@ -44,11 +48,12 @@ impl<'a, S: Clone + PartialEq> Intersection<'a, S> {
 #[cfg(test)]
 mod tests {
     use crate::rays::intersections::Intersection;
-    use crate::shapes::Shape;
+    use crate::shapes::{Shape, spheres};
     use crate::rays::{Ray, Comps};
     use crate::tuples::{points, vectors};
     use crate::matrix::CanTransform;
     use crate::math;
+    use crate::materials::Material;
 
     #[test]
     fn test_intersection_fields() {
@@ -100,7 +105,7 @@ mod tests {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
         let shape = Shape::sphere().translate(0.0, 0.0, 1.0);
         let i = Intersection::new(5.0, &shape);
-        let comps = Comps::prepare(i, &ray);
+        let comps = Comps::prepare_default(i, &ray);
 
         assert!(comps.get_overpoint().z < -math::EPSILON / 2.0);
         assert!(comps.get_point().z > comps.get_overpoint().z);
@@ -114,7 +119,42 @@ mod tests {
             vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2())
         );
         let i = Intersection::new(2_f64.sqrt(), &shape);
-        let comps = Comps::prepare(i, &ray);
+        let comps = Comps::prepare_default(i, &ray);
         assert_eq!(comps.get_reflect_vec(), vectors::new(0.0, math::two_sqrt_div_2(), math::two_sqrt_div_2()));
+    }
+
+    #[test]
+    fn test_finding_n1_and_n2() {
+        let a = spheres::glass()
+            .scale(2.0, 2.0, 2.0)
+            .material(Material::default().refractive_index(1.5));
+        let b = spheres::glass()
+            .translate(0.0, 0.0, -0.25)
+            .material(Material::default().refractive_index(2.0));
+        let c = spheres::glass()
+            .translate(0.0, 0.0, 0.25)
+            .material(Material::default().refractive_index(2.5));
+        let ray = Ray::new(points::new(0.0, 0.0, -4.0), vectors::new(0.0, 0.0, 1.0));
+        let xs = Intersection::from_data(&[
+            (2.0, &a),
+            (2.75, &b),
+            (3.25, &c),
+            (4.75, &b),
+            (5.25, &c),
+            (6.0, &a)
+        ]);
+        let samples = vec![
+            (1.0, 1.5),
+            (1.5, 2.0),
+            (2.0, 2.5),
+            (2.5, 2.5),
+            (2.5, 1.5),
+            (1.5, 1.0),
+        ];
+        for i in 0..samples.len() {
+            let comps = Comps::prepare(xs[i].clone(), &ray, xs.clone());
+            assert_eq!(comps.get_n1(), samples[i].0);
+            assert_eq!(comps.get_n2(), samples[i].1);
+        }
     }
 }

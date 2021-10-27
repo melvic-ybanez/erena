@@ -3,7 +3,7 @@ use std::f64::consts::{FRAC_1_SQRT_2, PI};
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix, rotation_z, scaling, translation};
 use crate::rays::Ray;
-use crate::shapes::Shape;
+use crate::shapes::{Shape, spheres};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 
@@ -155,4 +155,12 @@ fn test_material_update() {
     mat.ambient = 1.0;
     let sphere = Shape::sphere().material_ref(&mat);
     assert_eq!(sphere.material, mat);
+}
+
+#[test]
+fn test_glass_sphere() {
+    let s = spheres::glass();
+    assert_eq!(s.transformation, Matrix::id44());
+    assert_eq!(s.material.transparency, 1.0);
+    assert_eq!(s.material.refractive_index, 1.5);
 }

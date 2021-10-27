@@ -101,8 +101,9 @@ impl World3D {
     }
 
     pub fn color_at_with_depth(&self, ray: &Ray, depth: u8) -> Color {
-        if let Some(hit) = Intersection::hit(self.intersect(ray)) {
-            let comps = Comps3D::prepare(hit, ray);
+        let xs = self.intersect(ray);
+        if let Some(hit) = Intersection::hit(xs.clone()) {
+            let comps = Comps3D::prepare(hit, ray, xs);
             self.shade_hit_with_depth(comps, depth)
         } else {
             Color::black()

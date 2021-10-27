@@ -111,3 +111,10 @@ fn test_default_reflective() {
     let mat = Material::default();
     assert_eq!(mat.reflective, 0.0);
 }
+
+#[test]
+fn test_default_transparency_and_refractive_index() {
+    let mat = Material::default();
+    assert_eq!(mat.transparency, 0.0);
+    assert_eq!(mat.refractive_index, 1.0);
+}

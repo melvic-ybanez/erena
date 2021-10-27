@@ -114,5 +114,5 @@ mod test {
 #[cfg(test)]
 mod tests;
 
-mod spheres;
+pub mod spheres;
 mod planes;

@@ -51,7 +51,7 @@ fn test_shading_an_intersection() {
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
     let shape = &world.objects[0];
     let i = Intersection::new(4.0, shape);
-    let comps = Comps3D::prepare(i, &ray);
+    let comps = Comps3D::prepare_default(i, &ray);
     let color = world.shade_hit(comps);
     assert_eq!(color.round_items(), colors::new(0.38066, 0.47583, 0.28550));
 }
@@ -64,7 +64,7 @@ fn test_shading_from_inside() {
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
     let shape = &world.objects[1];
     let i = Intersection::new(0.5, shape);
-    let comps = Comps3D::prepare(i, &ray);
+    let comps = Comps3D::prepare_default(i, &ray);
     let color = world.shade_hit(comps);
     assert_eq!(color.round_items(), colors::new(0.90498, 0.90498, 0.90498));
 }
@@ -146,7 +146,7 @@ fn test_shade_hit_intersection_in_shadow() {
     let ray = Ray::new(points::new(0.0, 0.0, 5.0), vectors::new(0.0, 0.0, 1.0));
     let intersection = Intersection::new(4.0, &sphere2);
 
-    let comps = Comps::prepare(intersection, &ray);
+    let comps = Comps::prepare_default(intersection, &ray);
     let result = world.shade_hit(comps);
 
     assert_eq!(result, colors::new(0.1, 0.1, 0.1));
@@ -165,7 +165,7 @@ fn test_non_reflective_mat_reflection() {
     let shape = &world.objects[1];
     let i = Intersection::new(1.0, shape);
 
-    let comps = Comps::prepare(i, &ray);
+    let comps = Comps::prepare_default(i, &ray);
     let color = world.reflected_color(comps);
     assert_eq!(color, Color::black());
 }
@@ -183,7 +183,7 @@ fn test_reflective_mat_reflection() {
         vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2()),
     );
     let i = Intersection::new(2_f64.sqrt(), &shape);
-    let comps = Comps::prepare(i, &ray);
+    let comps = Comps::prepare_default(i, &ray);
     let color = world.reflected_color(comps);
     assert_eq!(color.round_items(), colors::new(0.19033, 0.23791, 0.14275));
 }
@@ -201,7 +201,7 @@ fn test_shade_with_reflective_mat() {
         vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2()),
     );
     let i = Intersection::new(2_f64.sqrt(), &shape);
-    let comps = Comps::prepare(i, &ray);
+    let comps = Comps::prepare_default(i, &ray);
     let color = world.shade_hit(comps);
     assert_eq!(color.round_items(), colors::new(0.87676, 0.92434, 0.82917));
 }
@@ -239,7 +239,7 @@ fn test_reflected_color_at_max_recursive_depth() {
         vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2())
     );
     let i = Intersection::new(2_f64.sqrt(), &shape);
-    let comps = Comps::prepare(i, &ray);
+    let comps = Comps::prepare_default(i, &ray);
     let color = world.reflected_color_with_depth(comps, 0);
     assert_eq!(color, Color::black());
 }

@@ -15,6 +15,8 @@ pub struct Material {
     pub shininess: Real,
     pub pattern: Option<Pattern>,
     pub reflective: Real,
+    pub transparency: Real,
+    pub refractive_index: Real,
 }
 
 impl Material {
@@ -27,6 +29,8 @@ impl Material {
             shininess: 200.0,
             pattern: None,
             reflective: 0.0,
+            transparency: 0.0,
+            refractive_index: 1.0,
         }
     }
 
@@ -115,6 +119,16 @@ impl Material {
 
     pub fn reflective(mut self, reflective: Real) -> Self {
         self.reflective = reflective;
+        self
+    }
+
+    pub fn transparency(mut self, transparency: Real) -> Self {
+        self.transparency = transparency;
+        self
+    }
+
+    pub fn refractive_index(mut self, refractive_index: Real) -> Self {
+        self.refractive_index = refractive_index;
         self
     }
 }

@@ -2,6 +2,7 @@ use crate::rays::{Intersection, Ray};
 use crate::shapes::{Shape, Space3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use crate::materials::Material;
 
 pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
     // note: sphere's center is at world origin
@@ -24,4 +25,10 @@ pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersecti
 
 pub fn normal_at(local_point: Point) -> Vector {
     (local_point - Point::origin()).to_vector()
+}
+
+pub fn glass() -> Shape {
+    Shape::sphere().material(
+        Material::default().transparency(1.0).refractive_index(1.5)
+    )
 }
