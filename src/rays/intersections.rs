@@ -54,6 +54,8 @@ mod tests {
     use crate::matrix::CanTransform;
     use crate::math;
     use crate::materials::Material;
+    use crate::scene::World3D;
+    use crate::tuples::points::Point;
 
     #[test]
     fn test_intersection_fields() {
