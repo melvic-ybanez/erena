@@ -5,7 +5,6 @@ use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::rays::lights::PointLight;
-use crate::math::Real;
 use crate::materials::dielectrics;
 
 pub mod camera;

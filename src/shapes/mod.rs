@@ -1,7 +1,7 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::Space3D::{Sphere, TestShape, Plane, Cube};
+use crate::shapes::Space3D::{Sphere, TestShape, Plane, Cube, Cylinder};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
@@ -18,6 +18,7 @@ pub enum Space3D {
     TestShape,
     Plane,
     Cube,
+    Cylinder,
 }
 
 pub type Shape = Object<Space3D>;
@@ -47,6 +48,10 @@ impl Shape {
         Shape::new(Cube)
     }
 
+    pub fn cylinder() -> Shape {
+        Shape::new(Cylinder)
+    }
+
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
@@ -54,7 +59,8 @@ impl Shape {
             Sphere => spheres::intersect(self, &local_ray),
             TestShape => test::intersect(self, &local_ray),
             Plane => planes::intersect(self, &local_ray),
-            Cube => cubes::intersect(self, &local_ray)
+            Cube => cubes::intersect(self, &local_ray),
+            Cylinder => cylinders::intersect(self, &local_ray),
         }
     }
 
@@ -66,7 +72,8 @@ impl Shape {
             Sphere => spheres::normal_at(local_point),
             TestShape => test::normal_at(local_point),
             Plane => planes::normal_at(),
-            Cube => cubes::normal_at(local_point)
+            Cube => cubes::normal_at(local_point),
+            Cylinder => unimplemented!()
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -124,3 +131,4 @@ mod tests;
 pub mod spheres;
 mod planes;
 mod cubes;
+mod cylinders;

@@ -6,7 +6,7 @@ use crate::math::Real;
 use crate::math;
 use crate::tuples::vectors;
 
-pub(crate) fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
+pub fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
     let (xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
     let (ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
     let (ztmin, ztmax) = check_axis(ray.origin.z, ray.direction.z);
@@ -21,7 +21,7 @@ pub(crate) fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a
     }
 }
 
-pub(crate) fn normal_at(point: Point) -> Vector {
+pub fn normal_at(point: Point) -> Vector {
     let max = Real::max(point.x.abs(), Real::max(point.y.abs(), point.z.abs()));
     if max == point.x.abs() {
         vectors::new(point.x, 0.0, 0.0)
