@@ -5,6 +5,7 @@ use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::rays::lights::PointLight;
+use crate::math::Real;
 
 pub mod camera;
 
@@ -16,7 +17,7 @@ pub struct World<S> {
 
 pub type World3D = World<Space3D>;
 
-const DEFAULT_DEPTH: u8 = 4;
+const DEFAULT_DEPTH: u8 = 5;
 
 impl<S> World<S> {
     pub fn new(objects: Vec<Object<S>>, light: Option<PointLight>) -> World<S> {
@@ -133,8 +134,15 @@ impl World3D {
                 shadowed,
             );
             let reflected = self.reflected_color(comps.clone(), depth);
-            let refracted = self.refracted_color(comps, depth);
-            surface + reflected + refracted
+            let refracted = self.refracted_color(comps.clone(), depth);
+
+            let material = &comps.get_object().material;
+            if material.reflective > 0.0 && material.transparency > 0.0 {
+                let reflectance = self.schlick(comps);
+                surface + reflected * reflectance + refracted * (1.0 - reflectance)
+            } else {
+                surface + reflected + refracted
+            }
         } else {
             Color::black()
         }
@@ -185,6 +193,29 @@ impl World3D {
                 self.color_at(&refracted_ray, depth - 1) * comps.get_object().material.transparency
             }
         }
+    }
+
+    // TODO: Write unit tests for this function
+    fn schlick(&self, comps: Comps3D) -> Real {
+        // cosine of the angle between the eye and normal vectors
+        let cos = comps.get_eye_vec().dot(comps.get_normal_vec());
+
+        // total internal reflection occurs when n1 > n2
+        let cos = if comps.get_n1() > comps.get_n2() {
+            let n = comps.get_n1() / comps.get_n2();
+            let sin2t = n * n * (1.0 - cos * cos);
+
+            if sin2t > 1.0 {
+                return 1.0
+            }
+
+            (1.0 - sin2t).sqrt()
+        } else {
+            cos
+        };
+
+        let r0 = ((comps.get_n1() - comps.get_n2()) / (comps.get_n1() + comps.get_n2())).powi(2);
+        r0 + (1.0 - r0) * (1.0 - cos).powi(5)
     }
 }
 

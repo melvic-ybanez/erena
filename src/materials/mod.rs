@@ -131,6 +131,11 @@ impl Material {
         self.refractive_index = refractive_index;
         self
     }
+
+    pub fn shininess(mut self, shininess: Real) -> Self {
+        self.shininess = shininess;
+        self
+    }
 }
 
 #[cfg(test)]
