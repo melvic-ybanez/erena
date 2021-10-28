@@ -78,7 +78,7 @@ impl Shape {
             TestShape => test::normal_at(local_point),
             Plane => planes::normal_at(),
             Cube => cubes::normal_at(local_point),
-            Cylinder { .. } => cylinders::normal_at(local_point)
+            Cylinder { min, max, .. } => cylinders::normal_at(local_point, min, max)
         };
 
         let world_normal = inverse.transpose() * local_normal;

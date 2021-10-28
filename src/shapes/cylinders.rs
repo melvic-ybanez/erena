@@ -4,7 +4,7 @@ use crate::math;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::tuples::vectors;
-use crate::math::Real;
+use crate::math::{Real, EPSILON};
 
 pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
     let a = ray.direction.x.powi(2) + ray.direction.z.powi(2);
@@ -51,8 +51,17 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
     intersect_caps(cyl, ray, xs)
 }
 
-pub fn normal_at(point: Point) -> Vector {
-    vectors::new(point.x, 0.0, point.z)
+pub fn normal_at(point: Point, min: Real, max: Real) -> Vector {
+    // square of the distance from y-axis
+    let dist = point.x.powi(2) + point.z.powi(2);
+
+    if dist < 1.0 && point.y >= max - math::EPSILON {
+        vectors::new(0.0, 1.0, 0.0)
+    } else if dist < 1.0 && point.y <= min + EPSILON {
+        vectors::new(0.0, -1.0, 0.0)
+    } else {
+        vectors::new(point.x, 0.0, point.z)
+    }
 }
 
 /// Checks if the intersection at `t` is within a radius
@@ -198,6 +207,24 @@ mod tests {
             let ray = Ray::new(point, direction.normalize());
             let xs = cyl.intersect(&ray);
             assert_eq!(xs.len(), count);
+        }
+    }
+
+    /// The normal vector on a cylinder's end caps
+    #[test]
+    fn test_cylinder_end_caps_normal() {
+        let cyl = Shape::new(Space3D::cylinder().min(1.0).max(2.0).closed(true));
+        let data = [
+            (points::new(0.0, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0)),
+            (points::new(0.5, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0)),
+            (points::new(0.0, 1.0, 0.5), vectors::new(0.0, -1.0, 0.0)),
+            (points::new(0.0, 2.0, 0.0), vectors::new(0.0, 1.0, 0.0)),
+            (points::new(0.5, 2.0, 0.0), vectors::new(0.0, 1.0, 0.0)),
+            (points::new(0.0, 2.0, 0.5), vectors::new(0.0, 1.0, 0.0))
+        ];
+
+        for (point, normal) in data {
+            assert_eq!(cyl.normal_at(point), normal);
         }
     }
 }
