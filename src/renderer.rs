@@ -20,6 +20,28 @@ pub(crate) fn render_scene() {
                 .reflective(0.2)
         );
 
+    let mut objects = vec![floor];
+    objects.append(&mut spheres());
+    objects.append(&mut cubes());
+
+    let world = World3D::new(
+        objects,
+        Some(PointLight::new(points::new(-10.0, 12.0, -10.0), Color::white())),
+    );
+
+    let mut camera = Camera::new(1000, 600, math::PI / 3.0);
+    camera.transformation = view_transformation(
+        points::new(0.0, 1.5, -5.0),
+        points::new(0.0, 1.0, 0.0),
+        vectors::new(0.0, 1.0, 0.0),
+    );
+
+    let canvas = camera.render(world, true);
+
+    fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
+}
+
+fn spheres() -> Vec<Shape> {
     let middle = Shape::sphere()
         .translate(-0.5, 1.0, 0.5)
         .material(
@@ -49,7 +71,7 @@ pub(crate) fn render_scene() {
         );
 
     let right = Shape::sphere()
-        .transform(translation(1.1, 1.0, 0.7) * scaling(0.5, 0.5, 0.5))
+        .transform(translation(1.1, 2.1, 3.0) * scaling(0.7, 0.7, 0.7))
         .material(
             Material::default()
                 .color(colors::new(1.0, 0.5, 0.5))
@@ -79,22 +101,23 @@ pub(crate) fn render_scene() {
         )
     };
 
-    let mut objects = vec![floor, middle, right, left];
-    objects.append(&mut small_spheres);
+    let mut result = vec![middle, left, right];
+    result.append(&mut small_spheres);
+    result
+}
 
-    let world = World3D::new(
-        objects,
-        Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white())),
-    );
-
-    let mut camera = Camera::new(1000, 600, math::PI / 3.0);
-    camera.transformation = view_transformation(
-        points::new(0.0, 1.5, -5.0),
-        points::new(0.0, 1.0, 0.0),
-        vectors::new(0.0, 1.0, 0.0),
-    );
-
-    let canvas = camera.render(world, true);
-
-    fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
+fn cubes() -> Vec<Shape> {
+    let cube = Shape::cube()
+        .scale(0.7, 0.7, 0.7)
+        .rotate_y(math::PI / 4.0)
+        .translate(1.1, 0.7, 3.0)
+        .material(
+            Material::default()
+                .diffuse(0.7)
+                .specular(0.3)
+                .pattern(Pattern::checkers(colors::new(1.0, 0.8, 0.1), Color::white())
+                    .scale(0.33, 0.33, 0.33)
+                    .rotate_x(-math::PI / 4.0))
+        );
+    vec![cube]
 }
