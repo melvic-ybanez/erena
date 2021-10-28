@@ -33,8 +33,8 @@ pub fn normal_at(point: Point) -> Vector {
 }
 
 fn check_axis(origin: Real, direction: Real) -> (Real, Real) {
-    let tmin_numerator = (-1.0 - origin);
-    let tmax_numerator = (1.0 - origin);
+    let tmin_numerator = -1.0 - origin;
+    let tmax_numerator = 1.0 - origin;
 
     let (tmin, tmax) = if direction.abs() >= math::EPSILON {
         (tmin_numerator / direction, tmax_numerator / direction)
@@ -53,7 +53,6 @@ fn check_axis(origin: Real, direction: Real) -> (Real, Real) {
 mod tests {
     use crate::shapes::Shape;
     use crate::rays::Ray;
-    use crate::tuples::points::Point;
     use crate::tuples::{points, vectors};
 
     #[test]

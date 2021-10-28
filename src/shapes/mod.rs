@@ -4,6 +4,7 @@ use crate::rays::{Ray, Intersection3D};
 use crate::shapes::Space3D::{Sphere, TestShape, Plane, Cube, Cylinder};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use crate::math::Real;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Object<S> {
@@ -18,7 +19,7 @@ pub enum Space3D {
     TestShape,
     Plane,
     Cube,
-    Cylinder,
+    Cylinder(Real, Real),
 }
 
 pub type Shape = Object<Space3D>;
@@ -49,7 +50,7 @@ impl Shape {
     }
 
     pub fn cylinder() -> Shape {
-        Shape::new(Cylinder)
+        Shape::new(Cylinder(-Real::INFINITY, Real::INFINITY))
     }
 
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
@@ -60,7 +61,7 @@ impl Shape {
             TestShape => test::intersect(self, &local_ray),
             Plane => planes::intersect(self, &local_ray),
             Cube => cubes::intersect(self, &local_ray),
-            Cylinder => cylinders::intersect(self, &local_ray),
+            Cylinder(_, _) => cylinders::intersect(self, &local_ray),
         }
     }
 
@@ -73,7 +74,7 @@ impl Shape {
             TestShape => test::normal_at(local_point),
             Plane => planes::normal_at(),
             Cube => cubes::normal_at(local_point),
-            Cylinder => cylinders::normal_at(local_point)
+            Cylinder(_, _) => cylinders::normal_at(local_point)
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -87,6 +88,34 @@ impl Shape {
     pub fn material(mut self, material: Material) -> Shape {
         self.material = material;
         self
+    }
+
+    pub fn cyl_min(mut self, min: Real) -> Shape {
+        self.shape = self.shape.min(min);
+        self
+    }
+
+    pub fn cyl_max(mut self, max: Real) -> Self {
+        self.shape = self.shape.max(max);
+        self
+    }
+}
+
+impl Space3D {
+    pub fn min(&self, min: Real) -> Space3D {
+        if let Space3D::Cylinder(_, max) = self {
+            Space3D::Cylinder(min, *max)
+        } else {
+            *self
+        }
+    }
+
+    pub fn max(&self, max: Real) -> Self {
+        if let Space3D::Cylinder(min, _) = self {
+            Space3D::Cylinder(*min, max)
+        } else {
+            *self
+        }
     }
 }
 

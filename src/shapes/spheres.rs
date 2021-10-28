@@ -1,5 +1,5 @@
 use crate::rays::{Intersection, Ray, Intersection3D};
-use crate::shapes::{Shape, Space3D};
+use crate::shapes::Shape;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::materials::Material;
