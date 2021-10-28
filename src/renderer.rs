@@ -133,9 +133,7 @@ fn cylinders() -> Vec<Shape> {
     ];
     let offset_scale = 0.8;
     let mut cyls = vec![
-        Shape::cylinder()
-            .cyl_min(-0.1)
-            .cyl_max(0.1)
+        Shape::new(Space3D::cylinder().min(-0.1).max(0.1))
             .material(Material::default().color(colors::new(7.0 / 255.0, 87.0 / 255.0, 152.0 / 255.0)))
             .scale(offset_scale, 1.0, offset_scale)
             .translate(2.0, 0.1, 0.5)
@@ -154,9 +152,7 @@ fn cylinders() -> Vec<Shape> {
         last_min -= 0.1;
         last_max += 0.1;
 
-        let new_cyl = Shape::cylinder()
-            .cyl_min(last_min)
-            .cyl_max(last_max)
+        let new_cyl = Shape::new(Space3D::cylinder().min(last_min).max(last_max))
             .material(Material::default().color(colors::new(r / 255.0, g / 255.0, b / 255.0)))
             .scale(scale_factor, 1.0, scale_factor)
             .translate(2.0, last_max, 0.5);

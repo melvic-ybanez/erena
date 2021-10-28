@@ -19,7 +19,11 @@ pub enum Space3D {
     TestShape,
     Plane,
     Cube,
-    Cylinder(Real, Real),
+    Cylinder {
+        min: Real,
+        max: Real,
+        closed: bool,
+    },
 }
 
 pub type Shape = Object<Space3D>;
@@ -50,7 +54,7 @@ impl Shape {
     }
 
     pub fn cylinder() -> Shape {
-        Shape::new(Cylinder(-Real::INFINITY, Real::INFINITY))
+        Shape::new(Space3D::cylinder())
     }
 
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
@@ -61,7 +65,7 @@ impl Shape {
             TestShape => test::intersect(self, &local_ray),
             Plane => planes::intersect(self, &local_ray),
             Cube => cubes::intersect(self, &local_ray),
-            Cylinder(_, _) => cylinders::intersect(self, &local_ray),
+            Cylinder { .. } => cylinders::intersect(self, &local_ray),
         }
     }
 
@@ -74,7 +78,7 @@ impl Shape {
             TestShape => test::normal_at(local_point),
             Plane => planes::normal_at(),
             Cube => cubes::normal_at(local_point),
-            Cylinder(_, _) => cylinders::normal_at(local_point)
+            Cylinder { .. } => cylinders::normal_at(local_point)
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -90,32 +94,40 @@ impl Shape {
         self
     }
 
-    pub fn cyl_min(mut self, min: Real) -> Shape {
-        self.shape = self.shape.min(min);
-        self
-    }
-
-    pub fn cyl_max(mut self, max: Real) -> Self {
-        self.shape = self.shape.max(max);
+    pub fn shape(mut self, shape: Space3D) -> Shape {
+        self.shape = shape;
         self
     }
 }
 
 impl Space3D {
-    pub fn min(&self, min: Real) -> Space3D {
-        if let Space3D::Cylinder(_, max) = self {
-            Space3D::Cylinder(min, *max)
-        } else {
-            *self
+    pub fn cylinder() -> Space3D {
+        Space3D::Cylinder {
+            min: -Real::INFINITY,
+            max: Real::INFINITY,
+            closed: false
         }
     }
 
-    pub fn max(&self, max: Real) -> Self {
-        if let Space3D::Cylinder(min, _) = self {
-            Space3D::Cylinder(*min, max)
-        } else {
-            *self
+    pub fn min(mut self, new_min: Real) -> Space3D {
+        if let Space3D::Cylinder { ref mut min, .. } = self {
+            *min = new_min;
         }
+        self
+    }
+
+    pub fn max(mut self, new_max: Real) -> Self {
+        if let Space3D::Cylinder { ref mut max, .. } = self {
+            *max = new_max;
+        }
+        self
+    }
+
+    pub fn closed(mut self, new_closed: bool) -> Self {
+        if let Space3D::Cylinder { ref mut closed, .. } = self {
+            *closed = new_closed;
+        }
+        self
     }
 }
 

@@ -35,7 +35,7 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
 
     let mut xs: Vec<Intersection3D> = vec![];
 
-    if let Space3D::Cylinder(min, max) = cyl.shape {
+    if let Space3D::Cylinder { min, max, .. } = cyl.shape {
         let y0 = ray.origin.y + t0 * ray.direction.y;
         if min < y0 && y0 < max {
             xs.push(Intersection::new(t0, &cyl));
@@ -116,7 +116,7 @@ mod tests {
     /// The default minimum and maximum for a cylinder
     #[test]
     fn test_default_min_max() {
-        if let Space3D::Cylinder(min, max) = Shape::cylinder().shape {
+        if let Space3D::Cylinder { min, max, .. } = Shape::cylinder().shape {
             assert_eq!(min, -Real::INFINITY);
             assert_eq!(max, Real::INFINITY);
         } else {
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_intersecting_constrained() {
-        let cyl = Shape::cylinder().cyl_min(1.0).cyl_max(2.0);
+        let cyl = Shape::new(Space3D::cylinder().min(1.0).max(2.0));
         let data = [
             (points::new(0.0, 1.5, 0.0), vectors::new(0.1, 1.0, 0.0), 0),
             (points::new(0.0, 3.0, -5.0), vectors::new(0.0, 0.0, 1.0), 0),
@@ -140,6 +140,13 @@ mod tests {
             let ray = Ray::new(point, direction);
             let xs = cyl.intersect(&ray);
             assert_eq!(xs.len(), count);
+        }
+    }
+
+    #[test]
+    fn test_default_closed_value() {
+        if let Cylinder { closed, .. } = Shape::cylinder().shape {
+            assert!(!closed);
         }
     }
 }
