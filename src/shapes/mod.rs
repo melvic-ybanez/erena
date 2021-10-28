@@ -1,7 +1,7 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::Space3D::{Sphere, TestShape, Plane};
+use crate::shapes::Space3D::{Sphere, TestShape, Plane, Cube};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
@@ -17,6 +17,7 @@ pub enum Space3D {
     Sphere,
     TestShape,
     Plane,
+    Cube,
 }
 
 pub type Shape = Object<Space3D>;
@@ -42,13 +43,18 @@ impl Shape {
         Shape::new(Plane)
     }
 
+    pub fn cube() -> Shape {
+        Shape::new(Cube)
+    }
+
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
         match self.shape {
             Sphere => spheres::intersect(self, &local_ray),
             TestShape => test::intersect(self, &local_ray),
-            Plane => planes::intersect(self, &local_ray)
+            Plane => planes::intersect(self, &local_ray),
+            Cube => cubes::intersect(self, &local_ray)
         }
     }
 
@@ -59,14 +65,15 @@ impl Shape {
         let local_normal = match self.shape {
             Sphere => spheres::normal_at(local_point),
             TestShape => test::normal_at(local_point),
-            Plane => planes::normal_at()
+            Plane => planes::normal_at(),
+            Cube => unimplemented!()
         };
 
         let world_normal = inverse.transpose() * local_normal;
         world_normal.to_vector().normalize()
     }
 
-    pub fn material_ref(mut self, material: &Material) -> Shape {
+    pub fn material_ref(self, material: &Material) -> Shape {
         self.material(material.clone())
     }
 
@@ -116,3 +123,4 @@ mod tests;
 
 pub mod spheres;
 mod planes;
+mod cubes;

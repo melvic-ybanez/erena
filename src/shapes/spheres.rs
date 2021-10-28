@@ -1,10 +1,10 @@
-use crate::rays::{Intersection, Ray};
+use crate::rays::{Intersection, Ray, Intersection3D};
 use crate::shapes::{Shape, Space3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::materials::Material;
 
-pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersection<'a, Space3D>> {
+pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersection3D<'a>> {
     // note: sphere's center is at world origin
     let sphere_to_ray = transformed_ray.origin - Point::origin();
 
