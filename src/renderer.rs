@@ -4,7 +4,7 @@ use crate::materials::Material;
 use crate::math;
 use crate::matrix::{scaling, translation, view_transformation, CanTransform};
 use crate::scene::World3D;
-use crate::shapes::Shape;
+use crate::shapes::{Shape, Space3D};
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::patterns::Pattern;
@@ -23,6 +23,7 @@ pub(crate) fn render_scene() {
     let mut objects = vec![floor];
     objects.append(&mut spheres());
     objects.append(&mut cubes());
+    objects.append(&mut cylinders());
 
     let world = World3D::new(
         objects,
@@ -120,4 +121,46 @@ fn cubes() -> Vec<Shape> {
                     .rotate_x(-math::PI / 4.0))
         );
     vec![cube]
+}
+
+fn cylinders() -> Vec<Shape> {
+    let colors = [
+        (40.0, 103.0, 160.0),
+        (72.0, 120.0, 170.0),
+        (99.0, 141.0, 187.0),
+        (121.0, 158.0, 196.0),
+        (157.0, 179.0, 208.0)
+    ];
+    let offset_scale = 0.8;
+    let mut cyls = vec![
+        Shape::cylinder()
+            .cyl_min(-0.1)
+            .cyl_max(0.1)
+            .material(Material::default().color(colors::new(7.0 / 255.0, 87.0 / 255.0, 152.0 / 255.0)))
+            .scale(offset_scale, 1.0, offset_scale)
+            .translate(2.0, 0.1, 0.5)
+    ];
+
+    let (mut last_min, mut last_max) = (-0.1, 0.1);
+
+    for (i, (r, g, b)) in colors.iter().enumerate() {
+        let scale_factor = offset_scale - ((i + 1) as f64 * 0.2);
+        let scale_factor = if scale_factor >= 0.2 {
+            scale_factor
+        } else {
+            offset_scale / 2_f64.powi(i as i32)
+        };
+
+        last_min -= 0.1;
+        last_max += 0.1;
+
+        let new_cyl = Shape::cylinder()
+            .cyl_min(last_min)
+            .cyl_max(last_max)
+            .material(Material::default().color(colors::new(r / 255.0, g / 255.0, b / 255.0)))
+            .scale(scale_factor, 1.0, scale_factor)
+            .translate(2.0, last_max, 0.5);
+        cyls.push(new_cyl);
+    }
+    cyls
 }
