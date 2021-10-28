@@ -4,13 +4,14 @@ use crate::math;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::tuples::vectors;
+use crate::math::Real;
 
 pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
     let a = ray.direction.x.powi(2) + ray.direction.z.powi(2);
 
     // there are no intersections when ray is parallel to the y axis
-    if a <= math::EPSILON {
-        return vec![]
+    if math::compare_reals(a, 0.0) {
+        return intersect_caps(cyl, ray, vec![])
     }
 
     let b = 2.0 * ray.origin.x * ray.direction.x +
@@ -47,11 +48,44 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
         }
     }
 
-    xs
+    intersect_caps(cyl, ray, xs)
 }
 
 pub fn normal_at(point: Point) -> Vector {
     vectors::new(point.x, 0.0, point.z)
+}
+
+/// Checks if the intersection at `t` is within a radius
+/// of 1 from the y-axis. Note that cylinders have the
+/// radius of 1.
+fn check_cap(ray: &Ray, t: Real) -> bool {
+    let x = ray.origin.x + t * ray.direction.x;
+    let z = ray.origin.z + t * ray.direction.z;
+
+    (x * x + z * z) <= 1.0
+}
+
+fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>) -> Vec<Intersection3D<'a>> {
+    if let Space3D::Cylinder { min, max, closed } = cyl.shape {
+        // not closed or no intersection. Reject.
+        if !closed || math::compare_reals(ray.direction.y, 0.0) {
+            return xs
+        }
+
+        // lower end cap intersection (y = min)
+        let t = (min - ray.origin.y) / ray.direction.y;
+        if check_cap(&ray, t) {
+            xs.push(Intersection::new(t, &cyl))
+        }
+
+        // upper end cap intersection (y = max)
+        let t = (max - ray.origin.y) / ray.direction.y;
+        if check_cap(&ray, t) {
+            xs.push(Intersection::new(t, &cyl));
+        }
+    }
+
+    xs
 }
 
 #[cfg(test)]
@@ -147,6 +181,23 @@ mod tests {
     fn test_default_closed_value() {
         if let Cylinder { closed, .. } = Shape::cylinder().shape {
             assert!(!closed);
+        }
+    }
+
+    #[test]
+    fn test_intersecting_closed_caps() {
+        let cyl = Shape::new(Space3D::cylinder().min(1.0).max(2.0).closed(true));
+        let data = [
+            (points::new(0.0, 3.0, 0.0), vectors::new(0.0, -1.0, 0.0), 2),
+            (points::new(0.0, 3.0, -2.0), vectors::new(0.0, -1.0, 2.0), 2),
+            (points::new(0.0, 4.0, -2.0), vectors::new(0.0, -1.0, 1.0), 2),
+            (points::new(0.0, 0.0, -2.0), vectors::new(0.0, 1.0, 2.0), 2),
+            (points::new(0.0, -1.0, -2.0), vectors::new(0.0, 1.0, 1.0), 2)
+        ];
+        for (point, direction, count) in data {
+            let ray = Ray::new(point, direction.normalize());
+            let xs = cyl.intersect(&ray);
+            assert_eq!(xs.len(), count);
         }
     }
 }
