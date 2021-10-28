@@ -66,7 +66,7 @@ impl Shape {
             Sphere => spheres::normal_at(local_point),
             TestShape => test::normal_at(local_point),
             Plane => planes::normal_at(),
-            Cube => unimplemented!()
+            Cube => cubes::normal_at(local_point)
         };
 
         let world_normal = inverse.transpose() * local_normal;

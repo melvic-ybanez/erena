@@ -4,6 +4,7 @@ use crate::tuples::vectors::Vector;
 use crate::tuples::points::Point;
 use crate::math::Real;
 use crate::math;
+use crate::tuples::vectors;
 
 pub(crate) fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
     let (xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
@@ -17,6 +18,17 @@ pub(crate) fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a
         vec![]
     } else {
         vec![Intersection::new(tmin, &cube), Intersection::new(tmax, &cube)]
+    }
+}
+
+pub(crate) fn normal_at(point: Point) -> Vector {
+    let max = Real::max(point.x.abs(), Real::max(point.y.abs(), point.z.abs()));
+    if max == point.x.abs() {
+        vectors::new(point.x, 0.0, 0.0)
+    } else if max == point.y.abs() {
+        vectors::new(0.0, point.y, 0.0)
+    } else {
+        vectors::new(0.0, 0.0, point.z)
     }
 }
 
@@ -80,6 +92,24 @@ mod tests {
             let ray = Ray::new(*origin, *direction);
             let xs = cube.intersect(&ray);
             assert_eq!(xs.len(), 0);
+        }
+    }
+
+    #[test]
+    fn test_cube_normal() {
+        let cube = Shape::cube();
+        let data = [
+            (points::new(1.0, 0.5, -0.8), vectors::new(1.0, 0.0, 0.0)),
+            (points::new(-1.0, -0.2, 0.9), vectors::new(-1.0, 0.0, 0.0)),
+            (points::new(-0.4, 1.0, -0.1), vectors::new(0.0, 1.0, 0.0)),
+            (points::new(0.3, -1.0, -0.7), vectors::new(0.0, -1.0, 0.0)),
+            (points::new(-0.6, 0.3, 1.0), vectors::new(0.0, 0.0, 1.0)),
+            (points::new(0.4, 0.4, -1.0), vectors::new(0.0, 0.0, -1.0)),
+            (points::new(1.0, 1.0, 1.0), vectors::new(1.0, 0.0, 0.0)),
+            (points::new(-1.0, -1.0, -1.0), vectors::new(-1.0, 0.0, 0.0))
+        ];
+        for (point, normal) in data {
+            assert_eq!(cube.normal_at(point), normal);
         }
     }
 }
