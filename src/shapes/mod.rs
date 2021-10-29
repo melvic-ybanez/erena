@@ -87,7 +87,8 @@ impl Shape {
         };
 
         let world_normal = inverse.transpose() * local_normal;
-        world_normal.to_vector().normalize()
+        let world_normal = world_normal.to_vector();     // set w to 0 first
+        world_normal.normalize()
     }
 
     pub fn material_ref(self, material: &Material) -> Shape {

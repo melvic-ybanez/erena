@@ -58,15 +58,15 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3
     let mut xs: Vec<Intersection3D> = vec![];
 
     if let Space3D::Cylinder { min, max, .. } = cyl.shape {
-        let y0 = ray.origin.y + t0 * ray.direction.y;
-        if min < y0 && y0 < max {
-            xs.push(Intersection::new(t0, &cyl));
-        }
+        let mut y_between_t = |t: Real| {
+            let y = o.y + t * d.y;
+            if min < y && y < max {
+                xs.push(Intersection::new(t, cyl));
+            }
+        };
 
-        let y1 = ray.origin.y + t1 * ray.direction.y;
-        if min < y1 && y1 < max {
-            xs.push(Intersection::new(t1, &cyl));
-        }
+        y_between_t(t0);
+        y_between_t(t1);
     }
 
     intersect_caps(cyl, ray, xs)
@@ -108,7 +108,7 @@ fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>
     if let Space3D::Cylinder { min, max, closed, .. } = cyl.shape {
         // not closed or no intersection. Reject.
         if !closed || math::compare_reals(ray.direction.y, 0.0) {
-            return xs;
+            return xs
         }
 
         check_cap(cyl, ray, min, &mut xs);

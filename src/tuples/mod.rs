@@ -155,11 +155,9 @@ pub(crate) mod vectors {
         pub fn normalize(&self) -> Vector {
             let magnitude = self.magnitude();
             if magnitude == 0.0 {
-                self.clone()
+                *self
             } else {
-                TupleLike::new(
-                    self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude
-                )
+                new(self.x / magnitude, self.y / magnitude, self.z / magnitude)
             }
         }
 
