@@ -9,7 +9,7 @@ pub(crate) const PI: Real = std::f64::consts::PI;
 pub(crate) type Idx = (usize, usize);
 
 pub(crate) fn compare_reals(a: Real, b: Real) -> bool {
-    (a - b).abs() <= EPSILON
+    (a - b).abs() < EPSILON
 }
 
 pub(crate) fn index_of(col: usize, row: usize, width: usize) -> usize {

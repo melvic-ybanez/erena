@@ -19,7 +19,7 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3
 
     let (a, b, c) = if cone {
         let a = dx2 - dy2 + dz2;
-        let b = 2.0 * o.x * d.x - 2.0 * o.y * d.y + 2.0 * o.z * d.z;
+        let b = b - 2.0 * o.y * d.y;
         let c = o.x.powi(2) - o.y.powi(2) + o.z.powi(2);
 
         if math::compare_reals(a, 0.0) && !math::compare_reals(b, 0.0) {
@@ -91,14 +91,17 @@ pub fn normal_at(point: Point, min: Real, max: Real, cone: bool) -> Vector {
     }
 }
 
-/// Checks if the intersection at `t` is within a radius
-/// of 1 from the y-axis. Note that cylinders have the
-/// radius of 1.
-fn check_cap(ray: &Ray, t: Real) -> bool {
+/// Checks if the intersection is within the radius. If it is,
+/// include the intersection
+fn check_cap<'a>(cyl: &'a Shape, ray: &Ray, limit: Real, xs: &mut Vec<Intersection3D<'a>>) {
+    let t = (limit - ray.origin.y) / ray.direction.y;
     let x = ray.origin.x + t * ray.direction.x;
     let z = ray.origin.z + t * ray.direction.z;
 
-    (x * x + z * z) <= 1.0
+    let radius = if cyl.shape.is_cone() { limit.abs() } else { 1.0 };
+    if (x * x + z * z) <= radius {
+        xs.push(Intersection::new(t, cyl));
+    }
 }
 
 fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>) -> Vec<Intersection3D<'a>> {
@@ -108,18 +111,9 @@ fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>
             return xs;
         }
 
-        // lower end cap intersection (y = min)
-        let t = (min - ray.origin.y) / ray.direction.y;
-        if check_cap(&ray, t) {
-            xs.push(Intersection::new(t, &cyl))
-        }
-
-        // upper end cap intersection (y = max)
-        let t = (max - ray.origin.y) / ray.direction.y;
-        if check_cap(&ray, t) {
-            xs.push(Intersection::new(t, &cyl));
-        }
+        check_cap(cyl, ray, min, &mut xs);
+        check_cap(cyl, ray, max, &mut xs);
+        return xs
     }
-
     xs
 }
