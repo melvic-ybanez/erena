@@ -1,7 +1,7 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::Space3D::{Sphere, TestShape, Plane, Cube, Cylinder};
+use crate::shapes::Space3D::{Sphere, TestShape, Plane, Cube, Cylinder };
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math::Real;
@@ -23,6 +23,7 @@ pub enum Space3D {
         min: Real,
         max: Real,
         closed: bool,
+        cone: bool,
     },
 }
 
@@ -57,6 +58,10 @@ impl Shape {
         Shape::new(Space3D::cylinder())
     }
 
+    pub fn cone() -> Shape {
+        Shape::new(Space3D::cone())
+    }
+
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
@@ -65,7 +70,7 @@ impl Shape {
             TestShape => test::intersect(self, &local_ray),
             Plane => planes::intersect(self, &local_ray),
             Cube => cubes::intersect(self, &local_ray),
-            Cylinder { .. } => cylinders::intersect(self, &local_ray),
+            Cylinder { cone, .. } => cylinders::intersect(self, &local_ray, cone),
         }
     }
 
@@ -78,7 +83,7 @@ impl Shape {
             TestShape => test::normal_at(local_point),
             Plane => planes::normal_at(),
             Cube => cubes::normal_at(local_point),
-            Cylinder { min, max, .. } => cylinders::normal_at(local_point, min, max)
+            Cylinder { min, max, cone, .. } => cylinders::normal_at(local_point, min, max, cone),
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -102,10 +107,19 @@ impl Shape {
 
 impl Space3D {
     pub fn cylinder() -> Space3D {
+        Space3D::cylinder_like(false)
+    }
+
+    pub fn cone() -> Space3D {
+        Space3D::cylinder_like(true)
+    }
+
+    pub fn cylinder_like(cone: bool) -> Space3D {
         Space3D::Cylinder {
             min: -Real::INFINITY,
             max: Real::INFINITY,
-            closed: false
+            closed: false,
+            cone,
         }
     }
 
@@ -128,6 +142,13 @@ impl Space3D {
             *closed = new_closed;
         }
         self
+    }
+
+    pub fn is_cone(&self) -> bool {
+        if let Space3D::Cylinder { cone, .. } = self {
+            return *cone
+        }
+        false
     }
 }
 

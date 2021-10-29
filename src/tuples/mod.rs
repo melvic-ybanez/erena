@@ -154,9 +154,13 @@ pub(crate) mod vectors {
 
         pub fn normalize(&self) -> Vector {
             let magnitude = self.magnitude();
-            TupleLike::new(
-                self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude
-            )
+            if magnitude == 0.0 {
+                self.clone()
+            } else {
+                TupleLike::new(
+                    self.x / magnitude, self.y / magnitude, self.z / magnitude, self.w / magnitude
+                )
+            }
         }
 
         pub fn cross(&self, that: Vector) -> Vector {
