@@ -11,6 +11,7 @@ use crate::patterns::Pattern;
 use crate::math::Real;
 use crate::rays::lights::PointLight;
 use crate::scene::camera::Camera;
+use crate::shapes::Space3D::Sphere;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane()
@@ -24,6 +25,7 @@ pub(crate) fn render_scene() {
     objects.append(&mut spheres());
     objects.append(&mut cubes());
     objects.append(&mut cylinders());
+    objects.append(&mut cones());
 
     let world = World3D::new(
         objects,
@@ -159,4 +161,19 @@ fn cylinders() -> Vec<Shape> {
         cyls.push(new_cyl);
     }
     cyls
+}
+
+fn cones() -> Vec<Shape> {
+    let base_color = colors::new(1.0, 168.0 / 255.0, 18.0 / 255.0);
+    let cone = Shape::new(Space3D::cone().min(-1.0).max(0.0).closed(true))
+        .material(Material::default()
+            .pattern(Pattern::stripe(Color::white(), base_color)
+                .scale(0.15, 0.15, 0.15).rotate_z(math::PI / 2.0)))
+        .scale(0.5, 1.5, 0.5)
+        .translate(-3.5, 1.6, 4.5);
+    let base = Shape::new(Space3D::cylinder().closed(true).min(-0.1).max(0.1))
+        .material(Material::default().color(base_color))
+        .scale(0.6, 1.0, 0.6)
+        .translate(-3.5, 0.1, 4.5);
+    vec![base, cone]
 }
