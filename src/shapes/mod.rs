@@ -6,6 +6,7 @@ use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
+use crate::shapes::groups::Group;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Object<G> {
@@ -22,12 +23,6 @@ pub enum Geometry {
     Plane,
     Cube,
     Cylinder(CylLike)
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum Group<G> {
-    Leaf(G),
-    Tree(Vec<Object<G>>)
 }
 
 pub type Shape = Object<Geometry>;
@@ -123,22 +118,6 @@ impl Shape {
     pub fn geometry(mut self, geometry: Geometry) -> Shape {
         self.geometry = Group::Leaf(geometry);
         self
-    }
-}
-
-impl Group<Geometry> {
-    pub fn is_cone(&self) -> bool {
-        if let Group::Leaf(Cylinder(cyl @ CylLike { .. })) = self {
-            return cyl.is_cone()
-        }
-        return false
-    }
-
-    pub fn is_empty(&self) -> bool {
-        if let Group::Tree(objects) = self {
-            return objects.is_empty()
-        }
-        panic!("Invalid method access");
     }
 }
 

@@ -1,3 +1,29 @@
+use crate::shapes::{Object, Geometry};
+use crate::shapes::Geometry::Cylinder;
+use crate::shapes::cylinders::CylLike;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Group<G> {
+    Leaf(G),
+    Tree(Vec<Object<G>>)
+}
+
+impl Group<Geometry> {
+    pub fn is_cone(&self) -> bool {
+        if let Group::Leaf(Cylinder(cyl @ CylLike { .. })) = self {
+            return cyl.is_cone()
+        }
+        return false
+    }
+
+    pub fn is_empty(&self) -> bool {
+        if let Group::Tree(objects) = self {
+            return objects.is_empty()
+        }
+        panic!("Invalid method access");
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::shapes::Shape;
