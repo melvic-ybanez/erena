@@ -1,11 +1,11 @@
 
-use crate::shapes::{Shape, Space3D, cylinders};
+use crate::shapes::{Shape, Geometry, cylinders, GeoType};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 use crate::rays::Ray;
 use crate::math;
 use crate::math::Real;
-use crate::shapes::Space3D::Cylinder;
+use crate::shapes::Geometry::Cylinder;
 use crate::tuples::vectors::Vector;
 
 #[test]
@@ -60,7 +60,7 @@ fn test_cylinder_normal() {
 /// The default minimum and maximum for a cylinder
 #[test]
 fn test_default_min_max() {
-    if let Space3D::Cylinder { min, max, .. } = Shape::cylinder().shape {
+    if let GeoType::One(Geometry::Cylinder { min, max, .. }) = Shape::cylinder().geometry {
         assert_eq!(min, -Real::INFINITY);
         assert_eq!(max, Real::INFINITY);
     } else {
@@ -70,7 +70,7 @@ fn test_default_min_max() {
 
 #[test]
 fn test_intersecting_constrained() {
-    let cyl = Shape::new(Space3D::cylinder().min(1.0).max(2.0));
+    let cyl = Shape::one(Geometry::cylinder().min(1.0).max(2.0));
     let data = [
         (points::new(0.0, 1.5, 0.0), vectors::new(0.1, 1.0, 0.0), 0),
         (points::new(0.0, 3.0, -5.0), vectors::new(0.0, 0.0, 1.0), 0),
@@ -90,14 +90,14 @@ fn test_intersecting_constrained() {
 
 #[test]
 fn test_default_closed_value() {
-    if let Cylinder { closed, .. } = Shape::cylinder().shape {
+    if let GeoType::One(Cylinder { closed, .. }) = Shape::cylinder().geometry {
         assert!(!closed);
     }
 }
 
 #[test]
 fn test_intersecting_closed_caps() {
-    let cyl = Shape::new(Space3D::cylinder().min(1.0).max(2.0).closed(true));
+    let cyl = Shape::one(Geometry::cylinder().min(1.0).max(2.0).closed(true));
     let data = [
         (points::new(0.0, 3.0, 0.0), vectors::new(0.0, -1.0, 0.0), 2),
         (points::new(0.0, 3.0, -2.0), vectors::new(0.0, -1.0, 2.0), 2),
@@ -115,7 +115,7 @@ fn test_intersecting_closed_caps() {
 /// The normal vector on a cylinder's end caps
 #[test]
 fn test_cylinder_end_caps_normal() {
-    let cyl = Shape::new(Space3D::cylinder().min(1.0).max(2.0).closed(true));
+    let cyl = Shape::one(Geometry::cylinder().min(1.0).max(2.0).closed(true));
     let data = [
         (points::new(0.0, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0)),
         (points::new(0.5, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0)),

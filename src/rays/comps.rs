@@ -1,6 +1,6 @@
 use crate::math::Real;
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::{Object, Space3D, Shape};
+use crate::shapes::{Object, Geometry, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;
@@ -20,7 +20,7 @@ pub struct Comps<'a, S> {
     n2: Real,
 }
 
-pub type Comps3D<'a> = Comps<'a, Space3D>;
+pub type Comps3D<'a> = Comps<'a, Geometry>;
 
 impl<'a> Comps3D<'a> {
     pub fn prepare_default(hit: Intersection3D<'a>, ray: &Ray) -> Comps3D<'a> {

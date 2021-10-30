@@ -1,6 +1,6 @@
 use crate::matrix::{CanTransform, scaling};
 use crate::rays::{Comps3D, Intersection, Ray, Intersection3D};
-use crate::shapes::{Object, Shape, Space3D};
+use crate::shapes::{Object, Shape, Geometry};
 use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
@@ -15,7 +15,7 @@ pub struct World<S> {
     pub light: Option<PointLight>,
 }
 
-pub type World3D = World<Space3D>;
+pub type World3D = World<Geometry>;
 
 const DEFAULT_DEPTH: u8 = 5;
 
@@ -79,7 +79,7 @@ impl World3D {
         world
     }
 
-    fn intersect(&self, ray: &Ray) -> Vec<Intersection<Space3D>> {
+    fn intersect(&self, ray: &Ray) -> Vec<Intersection<Geometry>> {
         let mut intersections: Vec<Intersection3D> = vec![];
         for obj in self.objects.iter() {
             intersections.append(&mut obj.intersect(ray));

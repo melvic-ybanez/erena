@@ -4,14 +4,14 @@ use crate::materials::Material;
 use crate::math;
 use crate::matrix::{scaling, translation, view_transformation, CanTransform};
 use crate::scene::World3D;
-use crate::shapes::{Shape, Space3D};
+use crate::shapes::{Shape, Geometry};
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::patterns::Pattern;
 use crate::math::Real;
 use crate::rays::lights::PointLight;
 use crate::scene::camera::Camera;
-use crate::shapes::Space3D::Sphere;
+use crate::shapes::Geometry::Sphere;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane()
@@ -135,7 +135,7 @@ fn cylinders() -> Vec<Shape> {
     ];
     let offset_scale = 0.8;
     let mut cyls = vec![
-        Shape::new(Space3D::cylinder().min(-0.1).max(0.1))
+        Shape::one(Geometry::cylinder().min(-0.1).max(0.1))
             .material(Material::default().color(colors::new(7.0 / 255.0, 87.0 / 255.0, 152.0 / 255.0)))
             .scale(offset_scale, 1.0, offset_scale)
             .translate(2.0, 0.1, 0.5)
@@ -154,7 +154,7 @@ fn cylinders() -> Vec<Shape> {
         last_min -= 0.1;
         last_max += 0.1;
 
-        let new_cyl = Shape::new(Space3D::cylinder().min(last_min).max(last_max))
+        let new_cyl = Shape::one(Geometry::cylinder().min(last_min).max(last_max))
             .material(Material::default().color(colors::new(r / 255.0, g / 255.0, b / 255.0)))
             .scale(scale_factor, 1.0, scale_factor)
             .translate(2.0, last_max, 0.5);
@@ -165,13 +165,13 @@ fn cylinders() -> Vec<Shape> {
 
 fn cones() -> Vec<Shape> {
     let base_color = colors::new(1.0, 168.0 / 255.0, 18.0 / 255.0);
-    let cone = Shape::new(Space3D::cone().min(-1.0).max(0.0).closed(true))
+    let cone = Shape::one(Geometry::cone().min(-1.0).max(0.0).closed(true))
         .material(Material::default()
             .pattern(Pattern::stripe(Color::white(), base_color)
                 .scale(0.15, 0.15, 0.15).rotate_z(math::PI / 2.0)))
         .scale(0.5, 1.5, 0.5)
         .translate(-3.5, 1.6, 4.5);
-    let base = Shape::new(Space3D::cylinder().closed(true).min(-0.1).max(0.1))
+    let base = Shape::one(Geometry::cylinder().closed(true).min(-0.1).max(0.1))
         .material(Material::default().color(base_color))
         .scale(0.6, 1.0, 0.6)
         .translate(-3.5, 0.1, 4.5);

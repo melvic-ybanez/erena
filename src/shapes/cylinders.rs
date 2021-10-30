@@ -1,4 +1,4 @@
-use crate::shapes::{Shape, Space3D};
+use crate::shapes::{Shape, Geometry, GeoType};
 use crate::rays::{Ray, Intersection3D, Intersection};
 use crate::math;
 use crate::tuples::points::Point;
@@ -57,7 +57,7 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3
 
     let mut xs: Vec<Intersection3D> = vec![];
 
-    if let Space3D::Cylinder { min, max, .. } = cyl.shape {
+    if let GeoType::One(Geometry::Cylinder { min, max, .. }) = cyl.geometry {
         let mut y_between_t = |t: Real| {
             let y = o.y + t * d.y;
             if min < y && y < max {
@@ -98,14 +98,14 @@ fn check_cap<'a>(cyl: &'a Shape, ray: &Ray, limit: Real, xs: &mut Vec<Intersecti
     let x = ray.origin.x + t * ray.direction.x;
     let z = ray.origin.z + t * ray.direction.z;
 
-    let radius = if cyl.shape.is_cone() { limit.abs() } else { 1.0 };
+    let radius = if cyl.geometry.is_cone() { limit.abs() } else { 1.0 };
     if (x * x + z * z) <= radius {
         xs.push(Intersection::new(t, cyl));
     }
 }
 
 fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>) -> Vec<Intersection3D<'a>> {
-    if let Space3D::Cylinder { min, max, closed, .. } = cyl.shape {
+    if let GeoType::One(Geometry::Cylinder { min, max, closed, .. }) = cyl.geometry {
         // not closed or no intersection. Reject.
         if !closed || math::compare_reals(ray.direction.y, 0.0) {
             return xs
