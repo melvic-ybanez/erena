@@ -10,7 +10,7 @@ use crate::math::Real;
 pub struct Object<G> {
     pub transformation: Matrix,
     pub material: Material,
-    pub geometry: GeoType<G>,
+    pub geometry: Group<G>,
     pub parent: Option<Group<G>>,
 }
 
@@ -29,20 +29,15 @@ pub enum Geometry {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum GeoType<S> {
-    One(S),
-    Many(Group<S>)
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Group<S> {
-    pub objects: Vec<Object<S>>
+pub enum Group<G> {
+    Leaf(G),
+    Tree(Vec<Object<G>>)
 }
 
 pub type Shape = Object<Geometry>;
 
 impl Shape {
-    pub fn new(geo: GeoType<Geometry>) -> Shape {
+    pub fn new(geo: Group<Geometry>) -> Shape {
         Object {
             transformation: Matrix::id44(),
             material: Material::default(),
@@ -52,7 +47,7 @@ impl Shape {
     }
 
     pub fn one(geo: Geometry) -> Shape {
-        Shape::new(GeoType::One(geo))
+        Shape::new(Group::Leaf(geo))
     }
 
     pub fn sphere() -> Shape {
@@ -79,16 +74,24 @@ impl Shape {
         Shape::one(Geometry::cone())
     }
 
+    pub fn group(objects: Vec<Shape>) -> Shape {
+        Shape::new(Group::Tree(objects))
+    }
+
+    pub fn empty_group() -> Shape {
+        Shape::group(vec![])
+    }
+
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
         match self.geometry {
-            GeoType::One(Sphere) => spheres::intersect(self, &local_ray),
-            GeoType::One(TestShape) => test::intersect(self, &local_ray),
-            GeoType::One(Plane) => planes::intersect(self, &local_ray),
-            GeoType::One(Cube) => cubes::intersect(self, &local_ray),
-            GeoType::One(Cylinder { cone, .. }) => cylinders::intersect(self, &local_ray, cone),
-            GeoType::Many(_) => unimplemented!()
+            Group::Leaf(Sphere) => spheres::intersect(self, &local_ray),
+            Group::Leaf(TestShape) => test::intersect(self, &local_ray),
+            Group::Leaf(Plane) => planes::intersect(self, &local_ray),
+            Group::Leaf(Cube) => cubes::intersect(self, &local_ray),
+            Group::Leaf(Cylinder { cone, .. }) => cylinders::intersect(self, &local_ray, cone),
+            Group::Tree(_) => unimplemented!()
         }
     }
 
@@ -97,13 +100,13 @@ impl Shape {
         let local_point = &inverse * point;
 
         let local_normal = match self.geometry {
-            GeoType::One(Sphere) => spheres::normal_at(local_point),
-            GeoType::One(TestShape) => test::normal_at(local_point),
-            GeoType::One(Plane) => planes::normal_at(),
-            GeoType::One(Cube) => cubes::normal_at(local_point),
-            GeoType::One(Cylinder { min, max, cone, .. }) =>
+            Group::Leaf(Sphere) => spheres::normal_at(local_point),
+            Group::Leaf(TestShape) => test::normal_at(local_point),
+            Group::Leaf(Plane) => planes::normal_at(),
+            Group::Leaf(Cube) => cubes::normal_at(local_point),
+            Group::Leaf(Cylinder { min, max, cone, .. }) =>
                 cylinders::normal_at(local_point, min, max, cone),
-            GeoType::Many(_) => unimplemented!()
+            Group::Tree(_) => unimplemented!()
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -121,7 +124,7 @@ impl Shape {
     }
 
     pub fn geometry(mut self, geometry: Geometry) -> Shape {
-        self.geometry = GeoType::One(geometry);
+        self.geometry = Group::Leaf(geometry);
         self
     }
 }
@@ -173,12 +176,19 @@ impl Geometry {
     }
 }
 
-impl GeoType<Geometry> {
+impl Group<Geometry> {
     pub fn is_cone(&self) -> bool {
-        if let GeoType::One(geometry) = self {
+        if let Group::Leaf(geometry) = self {
             return geometry.is_cone()
         }
         return false
+    }
+
+    pub fn is_empty(&self) -> bool {
+        if let Group::Tree(objects) = self {
+            return objects.is_empty()
+        }
+        panic!("Invalid method access");
     }
 }
 
@@ -195,7 +205,7 @@ impl<S> CanTransform for Object<S> {
 
 mod test {
     use crate::rays::{Ray, Intersection3D};
-    use crate::shapes::{Shape, GeoType};
+    use crate::shapes::{Shape, Group};
     use crate::shapes::Geometry::TestShape;
     use crate::tuples::points::Point;
     use crate::tuples::vectors::Vector;
@@ -203,7 +213,7 @@ mod test {
     pub static mut SAVED_RAY: Option<Ray> = None;
 
     pub fn intersect<'a>(shape: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
-        if let GeoType::One(TestShape) = shape.geometry {
+        if let Group::Leaf(TestShape) = shape.geometry {
             unsafe {
                 SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
             }

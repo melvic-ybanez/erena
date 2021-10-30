@@ -1,5 +1,5 @@
 
-use crate::shapes::{Shape, Geometry, cylinders, GeoType};
+use crate::shapes::{Shape, Geometry, cylinders, Group};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 use crate::rays::Ray;
@@ -60,7 +60,7 @@ fn test_cylinder_normal() {
 /// The default minimum and maximum for a cylinder
 #[test]
 fn test_default_min_max() {
-    if let GeoType::One(Geometry::Cylinder { min, max, .. }) = Shape::cylinder().geometry {
+    if let Group::Leaf(Geometry::Cylinder { min, max, .. }) = Shape::cylinder().geometry {
         assert_eq!(min, -Real::INFINITY);
         assert_eq!(max, Real::INFINITY);
     } else {
@@ -90,7 +90,7 @@ fn test_intersecting_constrained() {
 
 #[test]
 fn test_default_closed_value() {
-    if let GeoType::One(Cylinder { closed, .. }) = Shape::cylinder().geometry {
+    if let Group::Leaf(Cylinder { closed, .. }) = Shape::cylinder().geometry {
         assert!(!closed);
     }
 }
