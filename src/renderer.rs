@@ -4,7 +4,7 @@ use crate::materials::Material;
 use crate::math;
 use crate::matrix::{scaling, translation, view_transformation, CanTransform};
 use crate::scene::World3D;
-use crate::shapes::{Shape, Geometry, CylLike};
+use crate::shapes::{Shape, Geometry };
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::patterns::Pattern;
@@ -12,6 +12,7 @@ use crate::math::Real;
 use crate::rays::lights::PointLight;
 use crate::scene::camera::Camera;
 use crate::shapes::Geometry::Sphere;
+use crate::shapes::cylinders::CylLike;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane()

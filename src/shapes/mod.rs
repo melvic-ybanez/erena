@@ -5,6 +5,7 @@ use crate::shapes::Geometry::{Sphere, TestShape, Plane, Cube, Cylinder };
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math::Real;
+use crate::shapes::cylinders::CylLike;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Object<G> {
@@ -21,14 +22,6 @@ pub enum Geometry {
     Plane,
     Cube,
     Cylinder(CylLike)
-}
-
-#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
-pub struct CylLike {
-    min: Real,
-    max: Real,
-    closed: bool,
-    cone: bool,     // consider defining cone as its own type?
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -133,52 +126,6 @@ impl Shape {
     }
 }
 
-impl CylLike {
-    pub fn new(cone: bool) -> CylLike {
-        CylLike {
-            min: -Real::INFINITY,
-            max: Real::INFINITY,
-            closed: false,
-            cone,
-        }
-    }
-
-    pub fn cylinder() -> CylLike {
-        CylLike::new(false)
-    }
-
-    pub fn cone() -> CylLike {
-        CylLike::new(true)
-    }
-
-    pub fn min(mut self, min: Real) -> CylLike {
-        self.min = min;
-        self
-    }
-
-    pub fn max(mut self, max: Real) -> Self {
-        self.max = max;
-        self
-    }
-
-    pub fn closed(mut self, closed: bool) -> Self {
-        self.closed = closed;
-        self
-    }
-
-    pub fn is_cone(&self) -> bool {
-        self.cone
-    }
-
-    pub fn to_geo(&self) -> Geometry {
-        Geometry::Cylinder(self.clone())
-    }
-
-    pub fn to_shape(&self) -> Shape {
-        Shape::one(self.to_geo())
-    }
-}
-
 impl Group<Geometry> {
     pub fn is_cone(&self) -> bool {
         if let Group::Leaf(Cylinder(cyl @ CylLike { .. })) = self {
@@ -236,5 +183,5 @@ mod tests;
 pub mod spheres;
 mod planes;
 mod cubes;
-mod cylinders;
+pub mod cylinders;
 mod groups;

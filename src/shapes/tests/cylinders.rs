@@ -1,4 +1,4 @@
-use crate::shapes::{Shape, Geometry, cylinders, Group, CylLike};
+use crate::shapes::{Shape, Geometry, Group, CylLike, cylinders};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 use crate::rays::Ray;

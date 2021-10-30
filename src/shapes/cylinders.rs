@@ -1,10 +1,64 @@
-use crate::shapes::{Shape, Geometry, Group, CylLike};
+use crate::shapes::{Shape, Geometry, Group };
 use crate::rays::{Ray, Intersection3D, Intersection};
 use crate::math;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::tuples::vectors;
 use crate::math::{Real, EPSILON};
+
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+pub struct CylLike {
+    pub min: Real,
+    pub max: Real,
+    pub closed: bool,
+    pub cone: bool,     // consider defining cone as its own type?
+}
+
+impl CylLike {
+    pub fn new(cone: bool) -> CylLike {
+        CylLike {
+            min: -Real::INFINITY,
+            max: Real::INFINITY,
+            closed: false,
+            cone,
+        }
+    }
+
+    pub fn cylinder() -> CylLike {
+        CylLike::new(false)
+    }
+
+    pub fn cone() -> CylLike {
+        CylLike::new(true)
+    }
+
+    pub fn min(mut self, min: Real) -> CylLike {
+        self.min = min;
+        self
+    }
+
+    pub fn max(mut self, max: Real) -> Self {
+        self.max = max;
+        self
+    }
+
+    pub fn closed(mut self, closed: bool) -> Self {
+        self.closed = closed;
+        self
+    }
+
+    pub fn is_cone(&self) -> bool {
+        self.cone
+    }
+
+    pub fn to_geo(&self) -> Geometry {
+        Geometry::Cylinder(self.clone())
+    }
+
+    pub fn to_shape(&self) -> Shape {
+        Shape::one(self.to_geo())
+    }
+}
 
 pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3D<'a>> {
     let Ray { origin: o, direction: d } = ray;
