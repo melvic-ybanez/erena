@@ -20,12 +20,15 @@ pub enum Geometry {
     TestShape,
     Plane,
     Cube,
-    Cylinder {
-        min: Real,
-        max: Real,
-        closed: bool,
-        cone: bool,
-    },
+    Cylinder(CylLike)
+}
+
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
+pub struct CylLike {
+    min: Real,
+    max: Real,
+    closed: bool,
+    cone: bool,     // consider defining cone as its own type?
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -67,11 +70,11 @@ impl Shape {
     }
 
     pub fn cylinder() -> Shape {
-        Shape::one(Geometry::cylinder())
+        CylLike::cylinder().to_shape()
     }
 
     pub fn cone() -> Shape {
-        Shape::one(Geometry::cone())
+        CylLike::cone().to_shape()
     }
 
     pub fn group(objects: Vec<Shape>) -> Shape {
@@ -90,7 +93,8 @@ impl Shape {
             Group::Leaf(TestShape) => test::intersect(self, &local_ray),
             Group::Leaf(Plane) => planes::intersect(self, &local_ray),
             Group::Leaf(Cube) => cubes::intersect(self, &local_ray),
-            Group::Leaf(Cylinder { cone, .. }) => cylinders::intersect(self, &local_ray, cone),
+            Group::Leaf(Cylinder(CylLike { cone, .. })) =>
+                cylinders::intersect(self, &local_ray, cone),
             Group::Tree(_) => unimplemented!()
         }
     }
@@ -104,7 +108,7 @@ impl Shape {
             Group::Leaf(TestShape) => test::normal_at(local_point),
             Group::Leaf(Plane) => planes::normal_at(),
             Group::Leaf(Cube) => cubes::normal_at(local_point),
-            Group::Leaf(Cylinder { min, max, cone, .. }) =>
+            Group::Leaf(Cylinder(CylLike { min, max, cone, .. })) =>
                 cylinders::normal_at(local_point, min, max, cone),
             Group::Tree(_) => unimplemented!()
         };
@@ -129,17 +133,9 @@ impl Shape {
     }
 }
 
-impl Geometry {
-    pub fn cylinder() -> Geometry {
-        Geometry::cylinder_like(false)
-    }
-
-    pub fn cone() -> Geometry {
-        Geometry::cylinder_like(true)
-    }
-
-    pub fn cylinder_like(cone: bool) -> Geometry {
-        Geometry::Cylinder {
+impl CylLike {
+    pub fn new(cone: bool) -> CylLike {
+        CylLike {
             min: -Real::INFINITY,
             max: Real::INFINITY,
             closed: false,
@@ -147,39 +143,46 @@ impl Geometry {
         }
     }
 
-    pub fn min(mut self, new_min: Real) -> Geometry {
-        if let Geometry::Cylinder { ref mut min, .. } = self {
-            *min = new_min;
-        }
+    pub fn cylinder() -> CylLike {
+        CylLike::new(false)
+    }
+
+    pub fn cone() -> CylLike {
+        CylLike::new(true)
+    }
+
+    pub fn min(mut self, min: Real) -> CylLike {
+        self.min = min;
         self
     }
 
-    pub fn max(mut self, new_max: Real) -> Self {
-        if let Geometry::Cylinder { ref mut max, .. } = self {
-            *max = new_max;
-        }
+    pub fn max(mut self, max: Real) -> Self {
+        self.max = max;
         self
     }
 
-    pub fn closed(mut self, new_closed: bool) -> Self {
-        if let Geometry::Cylinder { ref mut closed, .. } = self {
-            *closed = new_closed;
-        }
+    pub fn closed(mut self, closed: bool) -> Self {
+        self.closed = closed;
         self
     }
 
     pub fn is_cone(&self) -> bool {
-        if let Geometry::Cylinder { cone, .. } = self {
-            return *cone
-        }
-        false
+        self.cone
+    }
+
+    pub fn to_geo(&self) -> Geometry {
+        Geometry::Cylinder(self.clone())
+    }
+
+    pub fn to_shape(&self) -> Shape {
+        Shape::one(self.to_geo())
     }
 }
 
 impl Group<Geometry> {
     pub fn is_cone(&self) -> bool {
-        if let Group::Leaf(geometry) = self {
-            return geometry.is_cone()
+        if let Group::Leaf(Cylinder(cyl @ CylLike { .. })) = self {
+            return cyl.is_cone()
         }
         return false
     }

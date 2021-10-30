@@ -1,5 +1,4 @@
-
-use crate::shapes::{Shape, Geometry, cylinders, Group};
+use crate::shapes::{Shape, Geometry, cylinders, Group, CylLike};
 use crate::tuples::{points, vectors};
 use crate::tuples::points::Point;
 use crate::rays::Ray;
@@ -60,7 +59,7 @@ fn test_cylinder_normal() {
 /// The default minimum and maximum for a cylinder
 #[test]
 fn test_default_min_max() {
-    if let Group::Leaf(Geometry::Cylinder { min, max, .. }) = Shape::cylinder().geometry {
+    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, .. })) = Shape::cylinder().geometry {
         assert_eq!(min, -Real::INFINITY);
         assert_eq!(max, Real::INFINITY);
     } else {
@@ -70,7 +69,7 @@ fn test_default_min_max() {
 
 #[test]
 fn test_intersecting_constrained() {
-    let cyl = Shape::one(Geometry::cylinder().min(1.0).max(2.0));
+    let cyl = CylLike::cylinder().min(1.0).max(2.0).to_shape();
     let data = [
         (points::new(0.0, 1.5, 0.0), vectors::new(0.1, 1.0, 0.0), 0),
         (points::new(0.0, 3.0, -5.0), vectors::new(0.0, 0.0, 1.0), 0),
@@ -90,14 +89,14 @@ fn test_intersecting_constrained() {
 
 #[test]
 fn test_default_closed_value() {
-    if let Group::Leaf(Cylinder { closed, .. }) = Shape::cylinder().geometry {
+    if let Group::Leaf(Cylinder(CylLike { closed, .. })) = Shape::cylinder().geometry {
         assert!(!closed);
     }
 }
 
 #[test]
 fn test_intersecting_closed_caps() {
-    let cyl = Shape::one(Geometry::cylinder().min(1.0).max(2.0).closed(true));
+    let cyl = CylLike::cylinder().min(1.0).max(2.0).closed(true).to_shape();
     let data = [
         (points::new(0.0, 3.0, 0.0), vectors::new(0.0, -1.0, 0.0), 2),
         (points::new(0.0, 3.0, -2.0), vectors::new(0.0, -1.0, 2.0), 2),
@@ -115,7 +114,7 @@ fn test_intersecting_closed_caps() {
 /// The normal vector on a cylinder's end caps
 #[test]
 fn test_cylinder_end_caps_normal() {
-    let cyl = Shape::one(Geometry::cylinder().min(1.0).max(2.0).closed(true));
+    let cyl = CylLike::cylinder().min(1.0).max(2.0).closed(true).to_shape();
     let data = [
         (points::new(0.0, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0)),
         (points::new(0.5, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0)),
