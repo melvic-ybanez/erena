@@ -3,7 +3,7 @@ use std::cmp::Ordering::Equal;
 
 use crate::math;
 use crate::math::Real;
-use crate::shapes::{Object, Geometry};
+use crate::shapes::{Object, Geo};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Intersection<'a, S> {
@@ -11,7 +11,7 @@ pub struct Intersection<'a, S> {
     pub object: &'a Object<S>,
 }
 
-pub type Intersection3D<'a> = Intersection<'a, Geometry>;
+pub type Intersection3D<'a> = Intersection<'a, Geo>;
 
 impl<'a, S: Clone + PartialEq> Intersection<'a, S> {
     pub fn new(t: Real, object: &'a Object<S>) -> Intersection<S> {
@@ -105,7 +105,7 @@ mod tests {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
         let shape = Shape::sphere().translate(0.0, 0.0, 1.0);
         let i = Intersection::new(5.0, &shape);
-        let comps = Comps::prepare_default(i, &ray);
+        let comps = Comps::prepare_default(&i, &ray);
 
         assert!(comps.get_over_point().z < -math::EPSILON / 2.0);
         assert!(comps.get_point().z > comps.get_over_point().z);
@@ -119,7 +119,7 @@ mod tests {
             vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2())
         );
         let i = Intersection::new(2_f64.sqrt(), &shape);
-        let comps = Comps::prepare_default(i, &ray);
+        let comps = Comps::prepare_default(&i, &ray);
         assert_eq!(comps.get_reflect_vec(), vectors::new(0.0, math::two_sqrt_div_2(), math::two_sqrt_div_2()));
     }
 
@@ -152,7 +152,7 @@ mod tests {
             (1.5, 1.0),
         ];
         for i in 0..samples.len() {
-            let comps = Comps::prepare(xs[i].clone(), &ray, xs.clone());
+            let comps = Comps::prepare(&xs[i], &ray, &xs.clone());
             assert_eq!(comps.get_n1(), samples[i].0);
             assert_eq!(comps.get_n2(), samples[i].1);
         }
@@ -164,7 +164,7 @@ mod tests {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
         let shape = spheres::glass().translate(0.0, 0.0, 1.0);
         let i = Intersection::new(5.0, &shape);
-        let comps = Comps::prepare(i, &ray, vec![i]);
+        let comps = Comps::prepare(&i, &ray, &vec![i.clone()]);
         assert!(comps.get_under_point().z > math::EPSILON / 2.0);
         assert!(comps.get_point().z < comps.get_under_point().z);
     }

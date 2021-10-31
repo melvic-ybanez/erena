@@ -1,4 +1,4 @@
-use crate::shapes::{Shape, Geometry, Group};
+use crate::shapes::{Shape, Geo};
 use crate::tuples::points::Point;
 use crate::tuples::{points, vectors};
 use crate::rays::Ray;
@@ -11,7 +11,7 @@ fn test_normal_at() {
     let n2 = plane.normal_at(points::new(10.0, 0.0, -10.0));
     let n3 = plane.normal_at(points::new(-5.0, 0.0, 150.0));
 
-    assert_eq!(plane.node, Group::Leaf(Geometry::Plane));
+    assert_eq!(plane.geo, Geo::Plane);
     assert_eq!(n1, vectors::new(0.0, 1.0, 0.0));
     assert_eq!(n2, vectors::new(0.0, 1.0, 0.0));
     assert_eq!(n3, vectors::new(0.0, 1.0, 0.0));

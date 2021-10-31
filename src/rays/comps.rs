@@ -1,6 +1,6 @@
 use crate::math::Real;
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::{Object, Geometry, Shape};
+use crate::shapes::{Object, Geo, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;
@@ -20,14 +20,14 @@ pub struct Comps<'a, S> {
     n2: Real,
 }
 
-pub type Comps3D<'a> = Comps<'a, Geometry>;
+pub type Comps3D<'a> = Comps<'a, Geo>;
 
 impl<'a> Comps3D<'a> {
-    pub fn prepare_default(hit: Intersection3D<'a>, ray: &Ray) -> Comps3D<'a> {
-        Comps3D::prepare(hit, ray, vec![hit])
+    pub fn prepare_default(hit: &Intersection3D<'a>, ray: &Ray) -> Comps3D<'a> {
+        Comps3D::prepare(hit, ray, &vec![hit.clone()])
     }
 
-    pub fn prepare(hit: Intersection3D<'a>, ray: &Ray, xs: Vec<Intersection3D<'a>>) -> Comps3D<'a> {
+    pub fn prepare(hit: &Intersection3D<'a>, ray: &Ray, xs: &Vec<Intersection3D<'a>>) -> Comps3D<'a> {
         // same as the values of the corresponding intersection properties
         let t = hit.t;
         let object = hit.object;
@@ -64,11 +64,11 @@ impl<'a> Comps3D<'a> {
         comps
     }
 
-    fn compute_n1_and_n2(&mut self, hit: Intersection3D<'a>, xs: Vec<Intersection3D<'a>>) {
+    fn compute_n1_and_n2(&mut self, hit: &Intersection3D<'a>, xs: &Vec<Intersection3D<'a>>) {
         let mut containers: Vec<Shape> = vec![];
 
         for i in xs.iter() {
-            if *i == hit {
+            if i == hit {
                 self.n1 = containers.last()
                     .map(|obj| obj.material.refractive_index)
                     .unwrap_or(1.0);
@@ -80,7 +80,7 @@ impl<'a> Comps3D<'a> {
                 containers.push(i.object.clone());
             }
 
-            if *i == hit {
+            if i == hit {
                 self.n2 = containers.last()
                     .map(|obj| obj.material.refractive_index)
                     .unwrap_or(1.0);
@@ -146,7 +146,7 @@ mod tests {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
         let shape = Shape::sphere();
         let i = Intersection::new(4.0, &shape);
-        let comps = Comps::prepare_default(i, &ray);
+        let comps = Comps::prepare_default(&i, &ray);
 
         assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object);
@@ -160,7 +160,7 @@ mod tests {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
         let shape = Shape::sphere();
         let i = Intersection::new(4.0, &shape);
-        let comps = Comps3D::prepare_default(i, &ray);
+        let comps = Comps3D::prepare_default(&i, &ray);
         assert!(!comps.inside);
     }
 
@@ -169,7 +169,7 @@ mod tests {
         let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
         let shape = Shape::sphere();
         let i = Intersection::new(1.0, &shape);
-        let comps = Comps3D::prepare_default(i, &ray);
+        let comps = Comps3D::prepare_default(&i, &ray);
 
         assert_eq!(comps.point, points::new(0.0, 0.0, 1.0));
         assert_eq!(comps.eye_vec, vectors::new(0.0, 0.0, -1.0));

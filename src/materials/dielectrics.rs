@@ -40,7 +40,7 @@ mod tests {
             (-math::two_sqrt_div_2(), &shape),
             (math::two_sqrt_div_2(), &shape)
         ]);
-        let comps = Comps::prepare(xs[1], &ray, xs);
+        let comps = Comps::prepare(&xs[1], &ray, &xs);
         let reflectance = schlick(comps);
         assert_eq!(reflectance, 1.0);
     }
@@ -50,7 +50,7 @@ mod tests {
         let shape = spheres::glass();
         let ray = Ray::new(Point::origin(), vectors::new(0.0, 1.0, 0.0));
         let xs = Intersection::from_data(&[(-1.0, &shape), (1.0, &shape)]);
-        let comps = Comps::prepare(xs[1], &ray, xs);
+        let comps = Comps::prepare(&xs[1], &ray, &xs);
         let reflectance = schlick(comps);
         assert_eq!(math::round(reflectance, 2), 0.04);
     }
@@ -61,7 +61,7 @@ mod tests {
         let shape = spheres::glass();
         let ray = Ray::new(points::new(0.0, 0.99, -2.0), vectors::new(0.0, 0.0, 1.0));
         let xs = vec![Intersection::new(1.8589, &shape)];
-        let comps = Comps::prepare(xs[0], &ray, xs);
+        let comps = Comps::prepare(&xs[0], &ray, &xs);
         let reflectance = schlick(comps);
         assert_eq!(math::round(reflectance, 5), 0.48873);
     }

@@ -1,69 +1,68 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
 use crate::rays::{Ray, Intersection3D};
-use crate::shapes::Geometry::{Sphere, TestShape, Plane, Cube, Cylinder };
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
-use crate::shapes::groups::Group;
 use crate::shapes::arena::ObjectId;
+use crate::shapes::groups::Group;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Object<G> {
     pub id: Option<ObjectId>,
     pub transformation: Matrix,
     pub material: Material,
-    pub node: Group<G>,
+    pub geo: G,
     pub parent: Option<ObjectId>,
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub enum Geometry {
+#[derive(Debug, PartialEq, Clone)]
+pub enum Geo {
     Sphere,
     TestShape,
     Plane,
     Cube,
-    Cylinder(CylLike)
+    Cylinder(CylLike),
+    Group(Group)
 }
 
-pub type Shape = Object<Geometry>;
+pub type Shape = Object<Geo>;
 
 impl<G> Object<G> {
     pub fn set_parent(&mut self, parent: ObjectId) {
         self.parent = Some(parent);
     }
+
+    pub fn set_id(&mut self, id: ObjectId) {
+        self.id = Some(id);
+    }
 }
 
 impl Shape {
-    pub fn new(geo: Group<Geometry>) -> Shape {
+    pub fn new(geo: Geo) -> Shape {
         Object {
             id: None,
             transformation: Matrix::id44(),
             material: Material::default(),
-            node: geo,
+            geo,
             parent: None,
         }
     }
 
-    pub fn one(geo: Geometry) -> Shape {
-        Shape::new(Group::Leaf(geo))
-    }
-
     pub fn sphere() -> Shape {
-        Shape::one(Sphere)
+        Shape::new(Geo::Sphere)
     }
 
     pub fn test() -> Shape {
-        Shape::one(TestShape)
+        Shape::new(Geo::TestShape)
     }
 
     pub fn plane() -> Shape {
-        Shape::one(Plane)
+        Shape::new(Geo::Plane)
     }
 
     pub fn cube() -> Shape {
-        Shape::one(Cube)
+        Shape::new(Geo::Cube)
     }
 
     pub fn cylinder() -> Shape {
@@ -75,7 +74,7 @@ impl Shape {
     }
 
     pub fn group(objects: Vec<ObjectId>) -> Shape {
-        Shape::new(Group::Tree(objects))
+        Shape::new(Geo::Group(Group::new(objects)))
     }
 
     pub fn empty_group() -> Shape {
@@ -85,14 +84,14 @@ impl Shape {
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
-        match self.node {
-            Group::Leaf(Sphere) => spheres::intersect(self, &local_ray),
-            Group::Leaf(TestShape) => test::intersect(self, &local_ray),
-            Group::Leaf(Plane) => planes::intersect(self, &local_ray),
-            Group::Leaf(Cube) => cubes::intersect(self, &local_ray),
-            Group::Leaf(Cylinder(CylLike { cone, .. })) =>
+        match self.geo {
+            Geo::Sphere => spheres::intersect(self, &local_ray),
+            Geo::TestShape => test::intersect(self, &local_ray),
+            Geo::Plane => planes::intersect(self, &local_ray),
+            Geo::Cube => cubes::intersect(self, &local_ray),
+            Geo::Cylinder(CylLike { cone, .. }) =>
                 cylinders::intersect(self, &local_ray, cone),
-            Group::Tree(_) => unimplemented!()
+            Geo::Group(_) => unimplemented!()
         }
     }
 
@@ -100,14 +99,14 @@ impl Shape {
         let inverse = self.transformation.inverse_or_id44();
         let local_point = &inverse * point;
 
-        let local_normal = match self.node {
-            Group::Leaf(Sphere) => spheres::normal_at(local_point),
-            Group::Leaf(TestShape) => test::normal_at(local_point),
-            Group::Leaf(Plane) => planes::normal_at(),
-            Group::Leaf(Cube) => cubes::normal_at(local_point),
-            Group::Leaf(Cylinder(CylLike { min, max, cone, .. })) =>
+        let local_normal = match self.geo {
+            Geo::Sphere => spheres::normal_at(local_point),
+            Geo::TestShape => test::normal_at(local_point),
+            Geo::Plane => planes::normal_at(),
+            Geo::Cube => cubes::normal_at(local_point),
+            Geo::Cylinder(CylLike { min, max, cone, .. }) =>
                 cylinders::normal_at(local_point, min, max, cone),
-            Group::Tree(_) => unimplemented!()
+            Geo::Group(_) => unimplemented!()
         };
 
         let world_normal = inverse.transpose() * local_normal;
@@ -124,9 +123,18 @@ impl Shape {
         self
     }
 
-    pub fn geometry(mut self, geometry: Geometry) -> Shape {
-        self.node = Group::Leaf(geometry);
+    pub fn geometry(mut self, geometry: Geo) -> Shape {
+        self.geo = geometry;
         self
+    }
+}
+
+impl Geo {
+    pub fn is_cone(&self) -> bool {
+        if let Geo::Cylinder(cyl @ CylLike { .. }) = self {
+            return cyl.is_cone();
+        }
+        return false;
     }
 }
 
@@ -143,15 +151,14 @@ impl<S> CanTransform for Object<S> {
 
 mod test {
     use crate::rays::{Ray, Intersection3D};
-    use crate::shapes::{Shape, Group};
-    use crate::shapes::Geometry::TestShape;
+    use crate::shapes::{Shape, Geo};
     use crate::tuples::points::Point;
     use crate::tuples::vectors::Vector;
 
     pub static mut SAVED_RAY: Option<Ray> = None;
 
     pub fn intersect<'a>(shape: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
-        if let Group::Leaf(TestShape) = shape.node {
+        if let Geo::TestShape = shape.geo {
             unsafe {
                 SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
             }

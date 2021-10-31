@@ -1,10 +1,9 @@
-use crate::shapes::{Shape, Group};
+use crate::shapes::{Shape, Geo};
 use crate::matrix::{Matrix, CanTransform, translation};
 use crate::materials::Material;
 use crate::rays::Ray;
 use crate::tuples::{points, vectors};
 use crate::{shapes, math};
-use crate::shapes::Geometry::TestShape;
 use std::f64::consts::FRAC_1_SQRT_2;
 
 #[test]
@@ -41,7 +40,7 @@ fn test_intersection_with_scale() {
     let shape = Shape::test().scale(2.0, 2.0, 2.0);
     shape.intersect(&ray);
 
-    assert_eq!(Group::Leaf(TestShape), shape.node);
+    assert_eq!(Geo::TestShape, shape.geo);
     unsafe {
         if let Some(ray) = shapes::test::SAVED_RAY {
             assert_eq!(ray.origin, points::new(0.0, 0.0, -2.5));
@@ -59,7 +58,7 @@ fn test_intersection_with_translation() {
     let shape = Shape::test().translate(5.0, 0.0, 0.0);
     shape.intersect(&ray);
 
-    assert_eq!(Group::Leaf(TestShape), shape.node);
+    assert_eq!(Geo::TestShape, shape.geo);
     unsafe {
         if let Some(ray) = shapes::test::SAVED_RAY {
             assert_eq!(ray.origin, points::new(-5.0, 0.0, -5.0));

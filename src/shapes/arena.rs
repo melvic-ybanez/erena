@@ -1,5 +1,4 @@
-use crate::shapes::{Object, Geometry};
-use crate::shapes::groups::Group;
+use crate::shapes::{Object, Geo, Shape};
 
 #[derive(Debug)]
 pub struct Arena<G> {
@@ -11,24 +10,37 @@ pub struct ObjectId {
     pub value: usize
 }
 
-impl<G: Clone> Arena<G> {
-    pub fn new() -> Arena<G> {
+impl ObjectId {
+    pub fn new(value: usize) -> ObjectId {
+        ObjectId { value }
+    }
+}
+
+pub type GeoArena = Arena<Geo>;
+
+impl GeoArena {
+    pub fn new() -> GeoArena {
         Arena { objects: vec![] }
     }
 
-    pub fn register(&mut self, node: &Object<G>) -> ObjectId {
+    pub fn register(&mut self, node: &mut Shape) -> ObjectId {
         let index = self.objects.len();
+        let id = ObjectId::new(index);
 
+        node.set_id(id);
         self.objects.push((*node).clone());
 
-        ObjectId { value: index }
+        id
     }
 
-    pub fn parent_child(&mut self, parent: &mut Object<G>, child: &mut Object<G>) {
-        parent.node.add_child(parent, child, self)
+    pub fn connect(&mut self, parent: &mut Shape, child: &mut Shape) {
+        if let Geo::Group(ref mut group) = parent.geo {
+            group.objects.push(self.read(child));
+            child.set_parent(self.read(parent));
+        }
     }
 
-    pub fn read(&mut self, node: &Object<G>) -> ObjectId {
+    pub fn read(&mut self, node: &mut Shape) -> ObjectId {
         match node.id {
             None => self.register(node),
             Some(id) => id
