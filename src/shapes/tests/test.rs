@@ -41,7 +41,7 @@ fn test_intersection_with_scale() {
     let shape = Shape::test().scale(2.0, 2.0, 2.0);
     shape.intersect(&ray);
 
-    assert_eq!(Group::Leaf(TestShape), shape.geometry);
+    assert_eq!(Group::Leaf(TestShape), shape.node);
     unsafe {
         if let Some(ray) = shapes::test::SAVED_RAY {
             assert_eq!(ray.origin, points::new(0.0, 0.0, -2.5));
@@ -59,7 +59,7 @@ fn test_intersection_with_translation() {
     let shape = Shape::test().translate(5.0, 0.0, 0.0);
     shape.intersect(&ray);
 
-    assert_eq!(Group::Leaf(TestShape), shape.geometry);
+    assert_eq!(Group::Leaf(TestShape), shape.node);
     unsafe {
         if let Some(ray) = shapes::test::SAVED_RAY {
             assert_eq!(ray.origin, points::new(-5.0, 0.0, -5.0));

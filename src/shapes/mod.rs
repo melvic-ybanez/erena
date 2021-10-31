@@ -7,13 +7,15 @@ use crate::tuples::vectors::Vector;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
 use crate::shapes::groups::Group;
+use crate::shapes::arena::ObjectId;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Object<G> {
+    pub id: Option<ObjectId>,
     pub transformation: Matrix,
     pub material: Material,
-    pub geometry: Group<G>,
-    pub parent: Option<Group<G>>,
+    pub node: Group<G>,
+    pub parent: Option<ObjectId>,
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -27,13 +29,20 @@ pub enum Geometry {
 
 pub type Shape = Object<Geometry>;
 
+impl<G> Object<G> {
+    pub fn set_parent(&mut self, parent: ObjectId) {
+        self.parent = Some(parent);
+    }
+}
+
 impl Shape {
     pub fn new(geo: Group<Geometry>) -> Shape {
         Object {
+            id: None,
             transformation: Matrix::id44(),
             material: Material::default(),
-            geometry: geo,
-            parent: None
+            node: geo,
+            parent: None,
         }
     }
 
@@ -65,7 +74,7 @@ impl Shape {
         CylLike::cone().to_shape()
     }
 
-    pub fn group(objects: Vec<Shape>) -> Shape {
+    pub fn group(objects: Vec<ObjectId>) -> Shape {
         Shape::new(Group::Tree(objects))
     }
 
@@ -76,7 +85,7 @@ impl Shape {
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
-        match self.geometry {
+        match self.node {
             Group::Leaf(Sphere) => spheres::intersect(self, &local_ray),
             Group::Leaf(TestShape) => test::intersect(self, &local_ray),
             Group::Leaf(Plane) => planes::intersect(self, &local_ray),
@@ -91,7 +100,7 @@ impl Shape {
         let inverse = self.transformation.inverse_or_id44();
         let local_point = &inverse * point;
 
-        let local_normal = match self.geometry {
+        let local_normal = match self.node {
             Group::Leaf(Sphere) => spheres::normal_at(local_point),
             Group::Leaf(TestShape) => test::normal_at(local_point),
             Group::Leaf(Plane) => planes::normal_at(),
@@ -116,7 +125,7 @@ impl Shape {
     }
 
     pub fn geometry(mut self, geometry: Geometry) -> Shape {
-        self.geometry = Group::Leaf(geometry);
+        self.node = Group::Leaf(geometry);
         self
     }
 }
@@ -142,7 +151,7 @@ mod test {
     pub static mut SAVED_RAY: Option<Ray> = None;
 
     pub fn intersect<'a>(shape: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
-        if let Group::Leaf(TestShape) = shape.geometry {
+        if let Group::Leaf(TestShape) = shape.node {
             unsafe {
                 SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
             }
@@ -164,3 +173,4 @@ mod planes;
 mod cubes;
 pub mod cylinders;
 mod groups;
+mod arena;

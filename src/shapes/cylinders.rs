@@ -111,7 +111,7 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3
 
     let mut xs: Vec<Intersection3D> = vec![];
 
-    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, .. })) = cyl.geometry {
+    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, .. })) = cyl.node {
         let mut y_between_t = |t: Real| {
             let y = o.y + t * d.y;
             if min < y && y < max {
@@ -152,14 +152,14 @@ fn check_cap<'a>(cyl: &'a Shape, ray: &Ray, limit: Real, xs: &mut Vec<Intersecti
     let x = ray.origin.x + t * ray.direction.x;
     let z = ray.origin.z + t * ray.direction.z;
 
-    let radius = if cyl.geometry.is_cone() { limit.abs() } else { 1.0 };
+    let radius = if cyl.node.is_cone() { limit.abs() } else { 1.0 };
     if (x * x + z * z) <= radius {
         xs.push(Intersection::new(t, cyl));
     }
 }
 
 fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>) -> Vec<Intersection3D<'a>> {
-    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, closed, .. })) = cyl.geometry {
+    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, closed, .. })) = cyl.node {
         // not closed or no intersection. Reject.
         if !closed || math::compare_reals(ray.direction.y, 0.0) {
             return xs

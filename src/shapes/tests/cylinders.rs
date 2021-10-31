@@ -59,7 +59,7 @@ fn test_cylinder_normal() {
 /// The default minimum and maximum for a cylinder
 #[test]
 fn test_default_min_max() {
-    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, .. })) = Shape::cylinder().geometry {
+    if let Group::Leaf(Geometry::Cylinder(CylLike { min, max, .. })) = Shape::cylinder().node {
         assert_eq!(min, -Real::INFINITY);
         assert_eq!(max, Real::INFINITY);
     } else {
@@ -89,7 +89,7 @@ fn test_intersecting_constrained() {
 
 #[test]
 fn test_default_closed_value() {
-    if let Group::Leaf(Cylinder(CylLike { closed, .. })) = Shape::cylinder().geometry {
+    if let Group::Leaf(Cylinder(CylLike { closed, .. })) = Shape::cylinder().node {
         assert!(!closed);
     }
 }
