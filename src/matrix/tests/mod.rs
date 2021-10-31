@@ -1,4 +1,4 @@
-use crate::matrix::Matrix;
+use crate::matrix::{Matrix, no_inverse};
 use crate::tuples::Tuple;
 
 mod transformations;
@@ -270,7 +270,7 @@ fn test_inverse() {
                 -0.52256, -0.81391, -0.30075, 0.30639
             ]))
         }
-        None => assert!(false)
+        None => no_inverse()
     }
 
     let m = Matrix::new44i(&[
@@ -286,7 +286,7 @@ fn test_inverse() {
             0.35897, 0.35897, 0.43590, 0.92308,
             -0.69231, -0.69231, -0.76923, -1.92308
         ])),
-        None => assert!(false)
+        None => no_inverse()
     }
 
     let m = Matrix::new44i(&[
@@ -302,7 +302,7 @@ fn test_inverse() {
             -0.02901, -0.14630, -0.10926, 0.12963,
             0.17778, 0.06667, -0.26667, 0.33333,
         ])),
-        None => assert!(false)
+        None => no_inverse()
     }
 }
 
@@ -323,6 +323,6 @@ fn test_multiply_product_by_inverse() {
     let product = &m * &m1;
     match m1.inverse() {
         Some(inverse) => assert_eq!(&product * &inverse, m),
-        None => assert!(false)
+        None => no_inverse()
     }
 }

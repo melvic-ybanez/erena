@@ -46,7 +46,7 @@ fn test_intersection_with_scale() {
             assert_eq!(ray.origin, points::new(0.0, 0.0, -2.5));
             assert_eq!(ray.direction, vectors::new(0.0, 0.0, 0.5));
         } else {
-            assert!(false);
+            panic!("No saved ray");
         }
     }
 }
@@ -64,7 +64,7 @@ fn test_intersection_with_translation() {
             assert_eq!(ray.origin, points::new(-5.0, 0.0, -5.0));
             assert_eq!(ray.direction, vectors::new(0.0, 0.0, 1.0));
         } else {
-            assert!(false);
+            panic!("No saved ray");
         }
     }
 }

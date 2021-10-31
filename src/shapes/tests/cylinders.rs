@@ -62,7 +62,7 @@ fn test_default_min_max() {
         assert_eq!(min, -Real::INFINITY);
         assert_eq!(max, Real::INFINITY);
     } else {
-        assert!(false);
+        panic!("Not a cylinder");
     }
 }
 

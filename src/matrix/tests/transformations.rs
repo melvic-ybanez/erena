@@ -17,7 +17,7 @@ fn test_translation_inverse() {
     let point = points::new(-3.0, 4.0, 5.0);
     match maybe_inv {
         Some(transform) => assert_eq!(transform * point, points::new(-8.0, 7.0, 3.0)),
-        None => assert!(false)
+        None => panic!("No inverse")
     }
 }
 
@@ -51,7 +51,7 @@ fn test_inverse_scaling() {
             let vec = vectors::new(-4.0, 6.0, 8.0);
             assert_eq!(inv * vec, vectors::new(-2.0, 2.0, 2.0));
         }
-        None => assert!(false)
+        None => panic!("No inverse")
     }
 }
 
@@ -82,7 +82,7 @@ fn test_inverse_x_rotation() {
     match half_quarter.inverse() {
         Some(inv) =>
             assert_eq!(inv * point, points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0)),
-        None => assert!(false)
+        None => panic!("No inverse")
     }
 }
 

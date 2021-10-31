@@ -16,7 +16,7 @@ fn test_creating_stripe() {
         assert_eq!(pattern.first, Color::white());
         assert_eq!(pattern.second, Color::black());
     } else {
-        assert!(false);
+        panic!("Not a stripe");
     }
 }
 

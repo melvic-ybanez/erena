@@ -275,5 +275,9 @@ impl<T: Copy> Mul<&TupleLike<T>> for Matrix {
     }
 }
 
+pub fn no_inverse() {
+    panic!("No inverse");
+}
+
 #[cfg(test)]
 mod tests;
