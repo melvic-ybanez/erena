@@ -4,7 +4,7 @@ use crate::rays::{Ray, Intersection3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::shapes::cylinders::CylLike;
-use crate::shapes::arena::ObjectId;
+use crate::shapes::arena::{ObjectId, GeoArena};
 use crate::shapes::groups::Group;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -82,6 +82,10 @@ impl Shape {
     }
 
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
+        self.intersect_with_arena(ray, &GeoArena::new())
+    }
+
+    pub fn intersect_with_arena(&self, ray: &Ray, arena: &GeoArena) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
         match self.geo {
@@ -91,7 +95,7 @@ impl Shape {
             Geo::Cube => cubes::intersect(self, &local_ray),
             Geo::Cylinder(CylLike { cone, .. }) =>
                 cylinders::intersect(self, &local_ray, cone),
-            Geo::Group(_) => unimplemented!()
+            Geo::Group(_) => groups::intersect(self, &local_ray, arena)
         }
     }
 

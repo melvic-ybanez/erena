@@ -1,5 +1,6 @@
-use crate::shapes::arena::ObjectId;
-use crate::shapes::Shape;
+use crate::shapes::arena::{ObjectId, GeoArena};
+use crate::shapes::{Shape, Geo};
+use crate::rays::{Ray, Intersection3D, Intersection};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
@@ -31,42 +32,19 @@ impl Group {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::matrix::Matrix;
-    use crate::shapes::{Geo, Shape};
-    use crate::shapes::arena::Arena;
+pub fn intersect<'a>(shape: &'a Shape, ray: &Ray, arena: &GeoArena) -> Vec<Intersection3D<'a>> {
+    if let Geo::Group(Group { ref objects }) = shape.geo {
+        let mut xs: Vec<_> = vec![];
+        let objects: Vec<_> = objects.iter().map(|id| arena.read_object(*id)).collect();
 
-    #[test]
-    fn test_create_group() {
-        let group = Shape::empty_group();
-        assert_eq!(group.transformation, Matrix::id44());
-        if let Geo::Group(group) = group.geo {
-            assert!(group.is_empty());
-        } else {
-            panic!("Not a group");
+        for object in objects.iter() {
+            xs.append(&mut object.intersect_with_arena(ray, arena));
         }
+        xs.sort_by(Intersection::compare);
     }
+    vec![]
+}
 
-    #[test]
-    fn test_shape_parent() {
-        let shape = Shape::test();
-        assert!(shape.parent.is_none());
-    }
-
-    #[test]
-    fn test_add_child() {
-        let mut arena = Arena::new();
-        let mut group = Shape::empty_group();
-        let mut shape = Shape::test();
-
-        arena.connect(&mut group, &mut shape);
-
-        if let Geo::Group(group) = group.geo {
-            assert!(group.non_empty());
-            assert!(group.contains(&shape));
-        } else {
-            panic!("Not a group");
-        }
-    }
+pub fn not_a_group() {
+    panic!("Not a group");
 }

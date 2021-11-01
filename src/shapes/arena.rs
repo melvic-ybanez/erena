@@ -35,16 +35,20 @@ impl GeoArena {
 
     pub fn connect(&mut self, parent: &mut Shape, child: &mut Shape) {
         if let Geo::Group(ref mut group) = parent.geo {
-            group.objects.push(self.read(child));
-            child.set_parent(self.read(parent));
+            group.objects.push(self.read_id(child));
+            child.set_parent(self.read_id(parent));
         }
     }
 
-    pub fn read(&mut self, node: &mut Shape) -> ObjectId {
+    pub fn read_id(&mut self, node: &mut Shape) -> ObjectId {
         match node.id {
             None => self.register(node),
             Some(id) => id
         }
+    }
+
+    pub fn read_object(&self, id: ObjectId) -> Object<Geo> {
+        self.objects[id.value].clone()
     }
 
     pub fn is_registered(&self, id: usize) -> bool {
