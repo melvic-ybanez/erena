@@ -36,7 +36,7 @@ impl<S> World<S> {
         self.objects.push((*object).clone());
     }
 
-    pub fn add_objects(&mut self, objects: &Vec<&Object<S>>) where S: Clone {
+    pub fn add_objects(&mut self, objects: &[&Object<S>]) where S: Clone {
         for obj in objects {
             self.add_object(obj);
         }

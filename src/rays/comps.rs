@@ -27,7 +27,7 @@ impl<'a> Comps3D<'a> {
         Comps3D::prepare(hit, ray, &vec![hit.clone()])
     }
 
-    pub fn prepare(hit: &Intersection3D<'a>, ray: &Ray, xs: &Vec<Intersection3D<'a>>) -> Comps3D<'a> {
+    pub fn prepare(hit: &Intersection3D<'a>, ray: &Ray, xs: &[Intersection3D<'a>]) -> Comps3D<'a> {
         // same as the values of the corresponding intersection properties
         let t = hit.t;
         let object = hit.object;
@@ -64,7 +64,7 @@ impl<'a> Comps3D<'a> {
         comps
     }
 
-    fn compute_n1_and_n2(&mut self, hit: &Intersection3D<'a>, xs: &Vec<Intersection3D<'a>>) {
+    fn compute_n1_and_n2(&mut self, hit: &Intersection3D<'a>, xs: &[Intersection3D<'a>]) {
         let mut containers: Vec<Shape> = vec![];
 
         for i in xs.iter() {
