@@ -4,16 +4,16 @@ use crate::rays::{Ray, Intersection3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::shapes::cylinders::CylLike;
-use crate::shapes::arena::{ObjectId, GeoArena};
 use crate::shapes::groups::Group;
+use std::rc::{Weak, Rc};
+use std::cell::RefCell;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct Object<G> {
-    pub id: Option<ObjectId>,
     pub transformation: Matrix,
     pub material: Material,
     pub geo: G,
-    pub parent: Option<ObjectId>,
+    pub parent: RefCell<Weak<Object<G>>>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -29,23 +29,18 @@ pub enum Geo {
 pub type Shape = Object<Geo>;
 
 impl<G> Object<G> {
-    pub fn set_parent(&mut self, parent: ObjectId) {
-        self.parent = Some(parent);
-    }
-
-    pub fn set_id(&mut self, id: ObjectId) {
-        self.id = Some(id);
+    pub fn set_parent(&self, parent: Weak<Object<G>>) {
+        *self.parent.borrow_mut() = parent;
     }
 }
 
 impl Shape {
     pub fn new(geo: Geo) -> Shape {
         Object {
-            id: None,
             transformation: Matrix::id44(),
             material: Material::default(),
             geo,
-            parent: None,
+            parent: RefCell::new(Weak::new()),
         }
     }
 
@@ -73,7 +68,9 @@ impl Shape {
         CylLike::cone().to_shape()
     }
 
-    pub fn group(objects: Vec<ObjectId>) -> Shape {
+    pub fn group(objects: Vec<Shape>) -> Shape {
+        let objects: Vec<_> = objects.into_iter()
+            .map(|obj| Rc::new(obj)).collect();
         Shape::new(Geo::Group(Group::new(objects)))
     }
 
@@ -82,10 +79,6 @@ impl Shape {
     }
 
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {
-        self.intersect_with_arena(ray, &GeoArena::new())
-    }
-
-    pub fn intersect_with_arena(&self, ray: &Ray, arena: &GeoArena) -> Vec<Intersection3D> {
         let local_ray = ray.transform(self.transformation.inverse_or_id44());
 
         match self.geo {
@@ -95,7 +88,7 @@ impl Shape {
             Geo::Cube => cubes::intersect(self, &local_ray),
             Geo::Cylinder(CylLike { cone, .. }) =>
                 cylinders::intersect(self, &local_ray, cone),
-            Geo::Group(_) => groups::intersect(self, &local_ray, arena)
+            Geo::Group(_) => groups::intersect(self, &local_ray)
         }
     }
 
@@ -130,6 +123,14 @@ impl Shape {
     pub fn geometry(mut self, geometry: Geo) -> Shape {
         self.geo = geometry;
         self
+    }
+}
+
+impl<G: PartialEq> PartialEq for Object<G> {
+    fn eq(&self, other: &Self) -> bool {
+        self.transformation == other.transformation &&
+            self.material == other.material &&
+            self.geo == other.geo
     }
 }
 
@@ -184,4 +185,3 @@ mod planes;
 mod cubes;
 pub mod cylinders;
 mod groups;
-mod arena;

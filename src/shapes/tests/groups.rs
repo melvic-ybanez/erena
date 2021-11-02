@@ -1,10 +1,10 @@
 use crate::shapes::{Shape, Geo, groups};
 use crate::matrix::{Matrix, CanTransform};
 use crate::shapes::groups::not_a_group;
-use crate::shapes::arena::Arena;
 use crate::rays::Ray;
 use crate::tuples::points::Point;
 use crate::tuples::{vectors, points};
+use std::rc::Rc;
 
 #[test]
 fn test_create_group() {
@@ -20,20 +20,17 @@ fn test_create_group() {
 #[test]
 fn test_shape_parent() {
     let shape = Shape::test();
-    assert!(shape.parent.is_none());
+    assert_eq!(shape.parent.borrow().weak_count(), 0);
 }
 
 #[test]
 fn test_add_child() {
-    let mut arena = Arena::new();
     let mut group = Shape::empty_group();
-    let mut shape = Shape::test();
-
-    arena.connect(&mut group, &mut shape);
+    let mut shape = Rc::new(Shape::test());
 
     if let Geo::Group(group) = group.geo {
         assert!(group.non_empty());
-        assert!(group.contains(&shape));
+        assert!(group.contains(shape));
     } else {
         not_a_group();
     }
@@ -44,7 +41,7 @@ fn test_add_child() {
 fn test_intersect_empty() {
     let group = Shape::empty_group();
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
-    let xs = groups::intersect(&group, &ray, &mut Arena::new());
+    let xs = groups::intersect(&group, &ray);
     assert!(xs.is_empty());
 }
 
@@ -52,18 +49,13 @@ fn test_intersect_empty() {
 /// The ray intersects two of the group's children.
 #[test]
 fn test_intersect_non_empty() {
-    let mut arena = Arena::new();
     let mut group = Shape::empty_group();
     let mut s1 = Shape::sphere();
     let mut s2 = Shape::sphere().translate(0.0, 0.0, -3.0);
     let mut s3 = Shape::sphere().translate(5.0, 0.0, 0.0);
 
-    arena.connect(&mut group, &mut s1);
-    arena.connect(&mut group, &mut s2);
-    arena.connect(&mut group, &mut s3);
-
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-    let xs = groups::intersect(&group, &ray, &mut arena);
+    let xs = groups::intersect(&group, &ray);
 
     assert_eq!(xs.len(), 4);
     assert_eq!(xs[0].object, &s2);
