@@ -80,10 +80,10 @@ impl World3D {
     }
 
     fn intersect(&self, ray: &Ray) -> Vec<Intersection<Geo>> {
-        let mut intersections: Vec<Intersection3D> = vec![];
-        for obj in self.objects.iter() {
-            intersections.append(&mut obj.intersect(ray));
-        }
+        let mut intersections: Vec<Intersection3D> = self.objects
+            .iter()
+            .flat_map(|obj| obj.intersect(ray))
+            .collect();
         intersections.sort_by(Intersection::compare);
         intersections
     }
@@ -104,7 +104,7 @@ impl World3D {
         }
     }
 
-    pub fn color_at_default(&self, ray: &Ray) -> Color {
+    pub fn default_color_at(&self, ray: &Ray) -> Color {
         self.color_at(ray, DEFAULT_DEPTH)
     }
 

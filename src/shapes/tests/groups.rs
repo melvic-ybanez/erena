@@ -72,3 +72,19 @@ fn test_intersect_non_empty() {
         not_a_group();
     }
 }
+
+/// Tests intersecting a transformed group
+#[test]
+fn test_intersect_transformed() {
+    let group = Rc::new(Shape::empty_group().scale(2.0, 2.0, 2.0));
+    let shape = Rc::new(Shape::sphere().translate(5.0, 0.0, 0.0));
+
+    if let Geo::Group(g) = &group.geo {
+        g.add_child(Rc::downgrade(&group), shape);
+        let ray = Ray::new(points::new(10.0, 0.0, -10.0), vectors::new(0.0, 0.0, 1.0));
+        let xs = group.intersect(&ray);
+        assert_eq!(xs.len(), 2);
+    } else {
+        not_a_group();
+    }
+}

@@ -75,7 +75,7 @@ fn test_shading_from_inside() {
 fn test_missed_ray_color() {
     let world = World::default();
     let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 1.0, 0.0));
-    let color = world.color_at_default(&ray);
+    let color = world.default_color_at(&ray);
     assert_eq!(color, Color::black());
 }
 
@@ -95,7 +95,7 @@ fn test_behind_ray_color() {
         (ray, inner.material.color)
     };
 
-    let color = world.color_at_default(&ray);
+    let color = world.default_color_at(&ray);
     assert_eq!(color, inner_color);
 }
 
@@ -225,7 +225,7 @@ fn test_mutually_reflective_surfaces_color() {
     world.add_object(&upper);
 
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 1.0, 0.0));
-    world.color_at_default(&ray); // should terminate successfully
+    world.default_color_at(&ray); // should terminate successfully
     assert!(true)
 }
 

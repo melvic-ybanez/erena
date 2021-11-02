@@ -88,7 +88,7 @@ impl Camera {
             for y in 0..self.height {
                 for x in 0..self.width {
                     let ray = self.ray_for_pixel(x, y);
-                    image[(x, y)] = world.color_at_default(&ray);
+                    image[(x, y)] = world.default_color_at(&ray);
                 }
             }
 
