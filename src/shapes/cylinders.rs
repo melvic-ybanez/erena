@@ -5,6 +5,7 @@ use crate::shapes::{Geo, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors;
 use crate::tuples::vectors::Vector;
+use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct CylLike {
@@ -60,7 +61,7 @@ impl CylLike {
     }
 }
 
-pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3D<'a>> {
+pub fn intersect(cyl: &Shape, ray: &Ray, cone: bool) -> Vec<Intersection3D> {
     let Ray { origin: o, direction: d } = ray;
 
     let dx2 = d.x.powi(2);
@@ -78,7 +79,7 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3
 
         if math::compare_reals(a, 0.0) && !math::compare_reals(b, 0.0) {
             let t = -c / (2.0 * b);
-            return vec![Intersection::new(t, cyl)];
+            return vec![Intersection::new(t, Rc::new(cyl.clone()))];
         } else if math::compare_reals(a, 0.0) {
             return vec![];
         }
@@ -115,7 +116,7 @@ pub fn intersect<'a>(cyl: &'a Shape, ray: &Ray, cone: bool) -> Vec<Intersection3
         let mut y_between_t = |t: Real| {
             let y = o.y + t * d.y;
             if min < y && y < max {
-                xs.push(Intersection::new(t, cyl));
+                xs.push(Intersection::new(t, Rc::new(cyl.clone())));
             }
         };
 
@@ -147,18 +148,18 @@ pub fn normal_at(point: Point, min: Real, max: Real, cone: bool) -> Vector {
 
 /// Checks if the intersection is within the radius. If it is,
 /// include the intersection
-fn check_cap<'a>(cyl: &'a Shape, ray: &Ray, limit: Real, xs: &mut Vec<Intersection3D<'a>>) {
+fn check_cap<'a>(cyl: &'a Shape, ray: &Ray, limit: Real, xs: &mut Vec<Intersection3D>) {
     let t = (limit - ray.origin.y) / ray.direction.y;
     let x = ray.origin.x + t * ray.direction.x;
     let z = ray.origin.z + t * ray.direction.z;
 
     let radius = if cyl.geo.is_cone() { limit.abs() } else { 1.0 };
     if (x * x + z * z) <= radius {
-        xs.push(Intersection::new(t, cyl));
+        xs.push(Intersection::new(t, Rc::new(cyl.clone())));
     }
 }
 
-fn intersect_caps<'a>(cyl: &'a Shape, ray: &Ray, mut xs: Vec<Intersection3D<'a>>) -> Vec<Intersection3D<'a>> {
+fn intersect_caps(cyl: &Shape, ray: &Ray, mut xs: Vec<Intersection3D>) -> Vec<Intersection3D> {
     if let Geo::Cylinder(CylLike { min, max, closed, .. }) = cyl.geo {
         // not closed or no intersection. Reject.
         if !closed || math::compare_reals(ray.direction.y, 0.0) {

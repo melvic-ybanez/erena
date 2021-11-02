@@ -4,6 +4,8 @@ use crate::shapes::{Object, Geo, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;
+use std::borrow::Borrow;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Comps<'a, S> {
@@ -23,14 +25,14 @@ pub struct Comps<'a, S> {
 pub type Comps3D<'a> = Comps<'a, Geo>;
 
 impl<'a> Comps3D<'a> {
-    pub fn prepare_default(hit: &Intersection3D<'a>, ray: &Ray) -> Comps3D<'a> {
+    pub fn prepare_default(hit: &'a Intersection3D, ray: &Ray) -> Comps3D<'a> {
         Comps3D::prepare(hit, ray, &vec![hit.clone()])
     }
 
-    pub fn prepare(hit: &Intersection3D<'a>, ray: &Ray, xs: &[Intersection3D<'a>]) -> Comps3D<'a> {
+    pub fn prepare(hit: &'a Intersection3D, ray: &Ray, xs: &[Intersection3D]) -> Comps3D<'a> {
         // same as the values of the corresponding intersection properties
         let t = hit.t;
-        let object = hit.object;
+        let object = hit.object.borrow();
 
         let point = ray.position(t);
 
@@ -64,8 +66,8 @@ impl<'a> Comps3D<'a> {
         comps
     }
 
-    fn compute_n1_and_n2(&mut self, hit: &Intersection3D<'a>, xs: &[Intersection3D<'a>]) {
-        let mut containers: Vec<Shape> = vec![];
+    fn compute_n1_and_n2(&mut self, hit: &Intersection3D, xs: &[Intersection3D]) {
+        let mut containers: Vec<&Shape> = vec![];
 
         for i in xs.iter() {
             if i == hit {
@@ -74,10 +76,10 @@ impl<'a> Comps3D<'a> {
                     .unwrap_or(1.0);
             }
 
-            if let Some(position) = containers.iter().position(|x| x == i.object) {
+            if let Some(position) = containers.iter().position(|x| x == &i.object.borrow()) {
                 containers.remove(position);
             } else {
-                containers.push(i.object.clone());
+                containers.push(&i.object);
             }
 
             if i == hit {
@@ -139,17 +141,19 @@ mod tests {
     use crate::shapes::Shape;
     use crate::tuples::{points, vectors};
     use crate::tuples::points::Point;
+    use std::rc::Rc;
+    use std::borrow::Borrow;
 
     /// Tests precomputing the state of an intersection
     #[test]
     fn test_intersection_state() {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-        let shape = Shape::sphere();
-        let i = Intersection::new(4.0, &shape);
+        let shape = Rc::new(Shape::sphere());
+        let i = Intersection::from_ref(4.0, &shape);
         let comps = Comps::prepare_default(&i, &ray);
 
         assert_eq!(comps.t, i.t);
-        assert_eq!(comps.object, i.object);
+        assert_eq!(comps.object, i.object.borrow());
         assert_eq!(comps.point, points::new(0.0, 0.0, -1.0));
         assert_eq!(comps.eye_vec, vectors::new(0.0, 0.0, -1.0));
         assert_eq!(comps.normal_vec, vectors::new(0.0, 0.0, -1.0));
@@ -158,8 +162,8 @@ mod tests {
     #[test]
     fn test_outside_intersection() {
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-        let shape = Shape::sphere();
-        let i = Intersection::new(4.0, &shape);
+        let shape = Rc::new(Shape::sphere());
+        let i = Intersection::from_ref(4.0, &shape);
         let comps = Comps3D::prepare_default(&i, &ray);
         assert!(!comps.inside);
     }
@@ -167,8 +171,8 @@ mod tests {
     #[test]
     fn test_inside_intersection() {
         let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
-        let shape = Shape::sphere();
-        let i = Intersection::new(1.0, &shape);
+        let shape = Rc::new(Shape::sphere());
+        let i = Intersection::from_ref(1.0, &shape);
         let comps = Comps3D::prepare_default(&i, &ray);
 
         assert_eq!(comps.point, points::new(0.0, 0.0, 1.0));

@@ -31,10 +31,11 @@ mod tests {
     use crate::tuples::{points, vectors};
     use crate::math;
     use crate::tuples::points::Point;
+    use std::rc::Rc;
 
     #[test]
     fn test_schlick_under_total_internal_reflection() {
-        let shape = spheres::glass();
+        let shape = Rc::new(spheres::glass());
         let ray = Ray::new(points::new(0.0, 0.0, math::two_sqrt_div_2()), vectors::new(0.0, 1.0, 0.0));
         let xs = Intersection::from_data(&[
             (-math::two_sqrt_div_2(), &shape),
@@ -47,7 +48,7 @@ mod tests {
 
     #[test]
     fn test_schlick_with_perpendicular_angle() {
-        let shape = spheres::glass();
+        let shape = Rc::new(spheres::glass());
         let ray = Ray::new(Point::origin(), vectors::new(0.0, 1.0, 0.0));
         let xs = Intersection::from_data(&[(-1.0, &shape), (1.0, &shape)]);
         let comps = Comps::prepare(&xs[1], &ray, &xs);
@@ -58,9 +59,9 @@ mod tests {
     /// Tests the schlick approximation with small angle and n2 > n1
     #[test]
     fn test_schlick_n2_over_n1() {
-        let shape = spheres::glass();
+        let shape = Rc::new(spheres::glass());
         let ray = Ray::new(points::new(0.0, 0.99, -2.0), vectors::new(0.0, 0.0, 1.0));
-        let xs = vec![Intersection::new(1.8589, &shape)];
+        let xs = vec![Intersection::from_ref(1.8589, &shape)];
         let comps = Comps::prepare(&xs[0], &ray, &xs);
         let reflectance = schlick(comps);
         assert_eq!(math::round(reflectance, 5), 0.48873);

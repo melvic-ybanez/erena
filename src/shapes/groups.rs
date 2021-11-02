@@ -1,8 +1,8 @@
-use crate::shapes::{Shape, Geo};
-use crate::rays::{Ray, Intersection3D, Intersection};
-use std::rc::{Rc, Weak};
 use std::cell::RefCell;
-use std::borrow::{Borrow, BorrowMut};
+use std::rc::{Rc, Weak};
+
+use crate::rays::{Intersection, Intersection3D, Ray};
+use crate::shapes::{Geo, Shape};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
@@ -36,11 +36,11 @@ impl Group {
     }
 }
 
-pub fn intersect<'a>(shape: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
+pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
     if let Geo::Group(Group { ref children }) = shape.geo {
         let mut xs: Vec<_> = children.borrow()
             .iter()
-            .flat_map(|obj| obj.intersect(ray))
+            .flat_map(|child| child.intersect(ray))
             .collect();
         xs.sort_by(Intersection::compare);
         xs

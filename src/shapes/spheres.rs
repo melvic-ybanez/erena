@@ -3,8 +3,9 @@ use crate::shapes::Shape;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::materials::Material;
+use std::rc::Rc;
 
-pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersection3D<'a>> {
+pub fn intersect(sphere: &Shape, transformed_ray: &Ray) -> Vec<Intersection3D> {
     // note: sphere's center is at world origin
     let sphere_to_ray = transformed_ray.origin - Point::origin();
 
@@ -17,8 +18,8 @@ pub fn intersect<'a>(sphere: &'a Shape, transformed_ray: &Ray) -> Vec<Intersecti
         vec![]
     } else {
         vec![
-            Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), sphere),     // t1
-            Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), sphere),     // t2
+            Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), Rc::new(sphere.clone())),     // t1
+            Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), Rc::new(sphere.clone())),     // t2
         ]
     }
 }

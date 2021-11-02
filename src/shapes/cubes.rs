@@ -5,8 +5,9 @@ use crate::tuples::points::Point;
 use crate::math::Real;
 use crate::math;
 use crate::tuples::vectors;
+use std::rc::Rc;
 
-pub fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
+pub fn intersect(cube: &Shape, ray: &Ray) -> Vec<Intersection3D> {
     let (xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
     let (ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
     let (ztmin, ztmax) = check_axis(ray.origin.z, ray.direction.z);
@@ -17,7 +18,10 @@ pub fn intersect<'a>(cube: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
     if tmin > tmax {
         vec![]
     } else {
-        vec![Intersection::new(tmin, &cube), Intersection::new(tmax, &cube)]
+        vec![
+            Intersection::new(tmin, Rc::new(cube.clone())),
+            Intersection::new(tmax, Rc::new(cube.clone()))
+        ]
     }
 }
 

@@ -2,6 +2,7 @@ use crate::shapes::{Shape, Geo};
 use crate::tuples::points::Point;
 use crate::tuples::{points, vectors};
 use crate::rays::Ray;
+use std::rc::Rc;
 
 /// The normal of a plane is the same everywhere
 #[test]
@@ -38,22 +39,22 @@ fn test_intersect_coplanar() {
 /// A ray intersecting a plane from above
 #[test]
 fn test_intersect_from_above() {
-    let plane = Shape::plane();
+    let plane = Rc::new(Shape::plane());
     let ray = Ray::new(points::new(0.0, 1.0, 0.0), vectors::new(0.0, -1.0, 0.0));
     let xs = plane.intersect(&ray);
 
     assert_eq!(xs.len(), 1);
     assert_eq!(xs[0].t, 1.0);
-    assert_eq!(xs[0].object, &plane);
+    assert_eq!(xs[0].object, plane);
 }
 
 #[test]
 fn test_intersect_from_below() {
-    let plane = Shape::plane();
+    let plane = Rc::new(Shape::plane());
     let ray = Ray::new(points::new(0.0, -1.0, 0.0), vectors::new(0.0, 1.0, 0.0));
     let xs = plane.intersect(&ray);
 
     assert_eq!(xs.len(), 1);
     assert_eq!(xs[0].t, 1.0);
-    assert_eq!(xs[0].object, &plane);
+    assert_eq!(xs[0].object, plane);
 }

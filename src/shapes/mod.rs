@@ -162,7 +162,7 @@ mod test {
 
     pub static mut SAVED_RAY: Option<Ray> = None;
 
-    pub fn intersect<'a>(shape: &'a Shape, ray: &Ray) -> Vec<Intersection3D<'a>> {
+    pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
         if let Geo::TestShape = shape.geo {
             unsafe {
                 SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
