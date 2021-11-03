@@ -70,7 +70,7 @@ impl Pattern {
     }
 
     pub fn at_object<S>(&self, object: &Object<S>, world_point: Point) -> Color {
-        let object_point = object.transformation.inverse_or_id44() * world_point;
+        let object_point = object.world_to_object(world_point);
         let pattern_point = self.transformation.inverse_or_id44() * object_point;
         self.at(pattern_point)
     }

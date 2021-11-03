@@ -33,10 +33,10 @@ impl<G> Object<G> {
         *self.parent.borrow_mut() = parent;
     }
 
-    pub fn world_to_object(&self, point: Point) -> Point {
+    pub fn world_to_object(&self, world_point: Point) -> Point {
         let point = match self.get_parent() {
-            None => point,
-            Some(parent) => parent.world_to_object(point)
+            None => world_point,
+            Some(parent) => parent.world_to_object(world_point)
         };
         self.transformation.inverse_or_id44() * point
     }

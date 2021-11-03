@@ -53,7 +53,7 @@ pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
 
 /// Probably never gonna be needed.
 pub fn normal_at() -> Vector {
-    Vector::zero()
+    panic!("Groups have no normal vector")
 }
 
 pub fn not_a_group() {
