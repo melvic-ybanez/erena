@@ -5,6 +5,7 @@ use crate::rays::Ray;
 use crate::tuples::points::Point;
 use crate::tuples::{vectors, points};
 use std::rc::Rc;
+use crate::math;
 
 #[test]
 fn test_create_group() {
@@ -86,5 +87,22 @@ fn test_intersect_transformed() {
         assert_eq!(xs.len(), 2);
     } else {
         not_a_group();
+    }
+}
+
+/// Tests converting a point from world to object space
+#[test]
+fn test_world_to_object_space_conversion() {
+    let outer = Rc::new(Shape::empty_group().rotate_y(math::PI / 2.0));
+    let inner = Rc::new(Shape::empty_group().scale(2.0, 2.0, 2.0));
+    let shape = Rc::new(Shape::sphere().translate(5.0, 0.0, 0.0));
+
+    if let (Geo::Group(g1), Geo::Group(g2)) = (&outer.geo, &inner.geo) {
+        g1.add_child(Rc::downgrade(&outer), Rc::clone(&inner));
+        g2.add_child(Rc::downgrade(&inner), Rc::clone(&shape));
+        let point = shape.world_to_object(points::new(-2.0, 0.0, -10.0));
+        assert_eq!(point, points::new(0.0, 0.0, -1.0));
+    } else {
+        not_a_group()
     }
 }

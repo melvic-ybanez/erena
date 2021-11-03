@@ -32,6 +32,18 @@ impl<G> Object<G> {
     pub fn set_parent(&self, parent: Weak<Object<G>>) {
         *self.parent.borrow_mut() = parent;
     }
+
+    pub fn world_to_object(&self, point: Point) -> Point {
+        let point = match self.get_parent() {
+            None => point,
+            Some(parent) => parent.world_to_object(point)
+        };
+        self.transformation.inverse_or_id44() * point
+    }
+
+    pub fn get_parent(&self) -> Option<Rc<Object<G>>> {
+        self.parent.borrow().upgrade()
+    }
 }
 
 impl Shape {
