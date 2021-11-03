@@ -3,6 +3,8 @@ use std::rc::{Rc, Weak};
 
 use crate::rays::{Intersection, Intersection3D, Ray};
 use crate::shapes::{Geo, Shape};
+use crate::tuples::vectors::Vector;
+use crate::tuples::points::Point;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
@@ -47,6 +49,11 @@ pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
     } else {
         vec![]
     }
+}
+
+/// Probably never gonna be needed.
+pub fn normal_at() -> Vector {
+    Vector::zero()
 }
 
 pub fn not_a_group() {

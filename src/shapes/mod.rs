@@ -114,9 +114,8 @@ impl Shape {
         }
     }
 
-    pub fn normal_at(&self, point: Point) -> Vector {
-        let inverse = self.transformation.inverse_or_id44();
-        let local_point = &inverse * point;
+    pub fn normal_at(&self, world_point: Point) -> Vector {
+        let local_point = self.world_to_object(world_point);
 
         let local_normal = match self.geo {
             Geo::Sphere => spheres::normal_at(local_point),
@@ -125,12 +124,10 @@ impl Shape {
             Geo::Cube => cubes::normal_at(local_point),
             Geo::Cylinder(CylLike { min, max, cone, .. }) =>
                 cylinders::normal_at(local_point, min, max, cone),
-            Geo::Group(_) => unimplemented!()
+            Geo::Group(_) => groups::normal_at()
         };
 
-        let world_normal = inverse.transpose() * local_normal;
-        let world_normal = world_normal.to_vector();     // set w to 0 first
-        world_normal.normalize()
+        self.normal_to_world(local_normal)
     }
 
     pub fn material_ref(self, material: &Material) -> Shape {
