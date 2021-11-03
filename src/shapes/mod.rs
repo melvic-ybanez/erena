@@ -41,6 +41,16 @@ impl<G> Object<G> {
         self.transformation.inverse_or_id44() * point
     }
 
+    pub fn normal_to_world(&self, normal: Vector) -> Vector {
+        let normal = (self.transformation.inverse_or_id44().transpose() * normal)
+            .to_vector()
+            .normalize();
+        match self.get_parent() {
+            None => normal,
+            Some(parent) => parent.normal_to_world(normal)
+        }
+    }
+
     pub fn get_parent(&self) -> Option<Rc<Object<G>>> {
         self.parent.borrow().upgrade()
     }
