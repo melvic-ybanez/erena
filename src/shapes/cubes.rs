@@ -8,9 +8,10 @@ use crate::tuples::vectors;
 use std::rc::Rc;
 
 pub fn intersect(cube: &Shape, ray: &Ray) -> Vec<Intersection3D> {
-    let (xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
-    let (ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
-    let (ztmin, ztmax) = check_axis(ray.origin.z, ray.direction.z);
+    let Ray { origin, direction } = ray;
+    let (xtmin, xtmax) = check_axis(origin.x, direction.x);
+    let (ytmin, ytmax) = check_axis(origin.y, direction.y);
+    let (ztmin, ztmax) = check_axis(origin.z, direction.z);
 
     let tmin = Real::max(xtmin, Real::max(ytmin, ztmin));
     let tmax = Real::min(xtmax, Real::min(ytmax, ztmax));

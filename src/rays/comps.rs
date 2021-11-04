@@ -5,7 +5,6 @@ use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::math;
 use std::borrow::Borrow;
-use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Comps<'a, S> {

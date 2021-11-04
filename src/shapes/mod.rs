@@ -7,6 +7,7 @@ use crate::shapes::cylinders::CylLike;
 use crate::shapes::groups::Group;
 use std::rc::{Weak, Rc};
 use std::cell::RefCell;
+use crate::shapes::bounds::Bounds;
 
 #[derive(Debug, Clone)]
 pub struct Object<G> {
@@ -130,6 +131,10 @@ impl Shape {
         self.normal_to_world(local_normal)
     }
 
+    pub fn bounds(&self) -> Bounds {
+        Bounds::of(self)
+    }
+
     pub fn material_ref(self, material: &Material) -> Shape {
         self.material(material.clone())
     }
@@ -204,3 +209,4 @@ mod planes;
 mod cubes;
 pub mod cylinders;
 mod groups;
+mod bounds;

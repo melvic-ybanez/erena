@@ -52,6 +52,10 @@ impl<T> TupleLike<T> {
         tuples::new(self.x, self.y, self.z, self.w)
     }
 
+    pub fn to_point(&self) -> Point {
+        points::new(self.x, self.y, self.z)
+    }
+
     /// This is primarily used for testing
     pub(crate) fn round_items(&self) -> TupleLike<T> {
         TupleLike::new(
