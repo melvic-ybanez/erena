@@ -6,22 +6,24 @@ use crate::math::Real;
 use crate::math;
 use crate::tuples::vectors;
 use std::rc::Rc;
+use crate::shapes::bounds::Bounds;
 
 pub fn intersect(cube: &Shape, ray: &Ray) -> Vec<Intersection3D> {
     let Ray { origin, direction } = ray;
-    let (xtmin, xtmax) = check_axis(origin.x, direction.x);
-    let (ytmin, ytmax) = check_axis(origin.y, direction.y);
-    let (ztmin, ztmax) = check_axis(origin.z, direction.z);
+    let Bounds { min, max } = cube.bounds();
+    let (x_t_min, x_t_max) = check_axis(origin.x, direction.x, min.x, max.x);
+    let (y_t_min, y_t_max) = check_axis(origin.y, direction.y, min.y, max.y);
+    let (z_t_min, z_t_max) = check_axis(origin.z, direction.z, min.z, max.z);
 
-    let tmin = Real::max(xtmin, Real::max(ytmin, ztmin));
-    let tmax = Real::min(xtmax, Real::min(ytmax, ztmax));
+    let t_min = Real::max(x_t_min, Real::max(y_t_min, z_t_min));
+    let t_max = Real::min(x_t_max, Real::min(y_t_max, z_t_max));
 
-    if tmin > tmax {
+    if t_min > t_max {
         vec![]
     } else {
         vec![
-            Intersection::new(tmin, Rc::new(cube.clone())),
-            Intersection::new(tmax, Rc::new(cube.clone()))
+            Intersection::new(t_min, Rc::new(cube.clone())),
+            Intersection::new(t_max, Rc::new(cube.clone()))
         ]
     }
 }
@@ -37,20 +39,20 @@ pub fn normal_at(point: Point) -> Vector {
     }
 }
 
-fn check_axis(origin: Real, direction: Real) -> (Real, Real) {
-    let tmin_numerator = -1.0 - origin;
-    let tmax_numerator = 1.0 - origin;
+fn check_axis(origin: Real, direction: Real, min: Real, max: Real) -> (Real, Real) {
+    let t_min_num = min - origin;
+    let t_max_num = max - origin;
 
-    let (tmin, tmax) = if direction.abs() >= math::EPSILON {
-        (tmin_numerator / direction, tmax_numerator / direction)
+    let (t_min, t_max) = if direction.abs() >= math::EPSILON {
+        (t_min_num / direction, t_max_num / direction)
     } else {
-        (tmin_numerator * Real::INFINITY, tmax_numerator * Real::INFINITY)
+        (t_min_num * Real::INFINITY, t_max_num * Real::INFINITY)
     };
 
-    if tmin > tmax {
-        (tmax, tmin)
+    if t_min > t_max {
+        (t_max, t_min)
     } else {
-        (tmin, tmax)
+        (t_min, t_max)
     }
 }
 

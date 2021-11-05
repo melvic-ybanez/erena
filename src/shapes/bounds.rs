@@ -4,6 +4,7 @@ use crate::tuples::points;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
 
+#[derive(Copy, Clone)]
 pub struct Bounds {
     pub min: Point,
     pub max: Point
@@ -21,10 +22,10 @@ impl Bounds {
 
     pub fn of(shape: &Shape) -> Bounds {
         match &shape.geo {
-            Geo::Sphere => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
+            Geo::Sphere => Bounds::of(&Shape::cube()),
             Geo::TestShape => Bounds::from_min(Point::origin()),
             Geo::Plane => Bounds::from_min(points::new(-Real::INFINITY, -1.0, -Real::INFINITY)),
-            Geo::Cube => Bounds::of(&Shape::cube()),
+            Geo::Cube => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
             Geo::Cylinder(_) => {
                 let min = if let Geo::Cylinder(CylLike { min, .. }) = shape.geo {
                     min
@@ -33,7 +34,7 @@ impl Bounds {
                 };
                 Bounds::from_min(points::new(-1.0, min, -1.0))
             },
-            Geo::Group(group) => group.bounds(shape)
+            Geo::Group(group) => group.bounds()
         }
     }
 }

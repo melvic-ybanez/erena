@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 
+/// Represents real number
 pub(crate) type Real = f64;
 
 pub(crate) const EPSILON: Real = 0.000001;

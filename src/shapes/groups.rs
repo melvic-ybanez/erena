@@ -2,12 +2,13 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 use crate::rays::{Intersection, Intersection3D, Ray};
-use crate::shapes::{Geo, Shape};
+use crate::shapes::{Geo, Shape, cubes};
 use crate::tuples::vectors::Vector;
 use crate::tuples::points::Point;
 use crate::shapes::bounds::Bounds;
 use crate::tuples::points;
 use crate::math::Real;
+use crate::math;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
@@ -40,43 +41,65 @@ impl Group {
         child.set_parent(parent);
     }
 
-    pub(crate) fn bounds(&self, object: &Shape) -> Bounds {
-        let Bounds { min, max } = object.bounds();
+    pub(crate) fn bounds(&self) -> Bounds {
+        if self.children.borrow().is_empty() {
+            return Bounds::new(Point::origin(), Point::origin());
+        }
+        let children = self.children.borrow();
+        let corners = children.iter()
+            .flat_map(|child| {
+                let Bounds { min, max } = child.bounds();
 
-        // transform corners. Note that we are using the left-hand rule
-        // so "back" here means negative z-axis (or towards the user)
-        let corners = [
-            (min.x, min.y, min.z),  // lower left back
-            (max.x, min.y, min.z),  // lower right back
-            (min.x, min.y, max.z),  // lower left front
-            (max.x, min.y, max.z),  // lower right front
-            (min.x, max.y, min.z),  // upper left back
-            (max.x, max.y, min.z),  // upper right back
-            (min.x, max.y, max.z),  // upper left front
-            (max.x, max.y, max.z)   // upper right front
-        ];
+                // transform corners. Note that we are using the left-hand rule
+                // so "back" here means negative z-axis (or towards the user)
+                let corners = [
+                    (min.x, min.y, min.z),  // lower left back
+                    (max.x, min.y, min.z),  // lower right back
+                    (min.x, min.y, max.z),  // lower left front
+                    (max.x, min.y, max.z),  // lower right front
+                    (min.x, max.y, min.z),  // upper left back
+                    (max.x, max.y, min.z),  // upper right back
+                    (min.x, max.y, max.z),  // upper left front
+                    (max.x, max.y, max.z)   // upper right front
+                ];
 
-        corners.iter()
-            .map(|(x, y, z)| {
-                object.transformation.clone() * points::new(*x, *y, *z)
-            })
-            .fold(Bounds::new(Point::origin(), Point::origin()), |res, corner| {
-                let min = points::new(
-                    Real::min(res.min.x, corner.x),
-                    Real::min(res.min.y, corner.y),
-                    Real::min(res.min.z, corner.z)
-                );
-                let max = points::new(
-                    Real::max(res.max.x, corner.x),
-                    Real::max(res.max.y, corner.y),
-                    Real::max(res.max.z, corner.z)
-                );
-                Bounds::new(min, max)
-            })
+                corners.iter()
+                    .map(|(x, y, z)| {
+                        child.transformation.clone() * points::new(*x, *y, *z)
+                    })
+                    .collect::<Vec<_>>()
+            });
+
+        let get = |point: Option<Point>| point.unwrap_or_else(Point::origin);
+
+        let ord = |a: &Point, b: &Point, f: fn(Point) -> Real | {
+            math::order_reals(f(*a), f(*b))
+        };
+        let ord_x = |a: &Point, b: &Point| ord(a, b, |p| p.x);
+        let ord_y = |a: &Point, b: &Point| ord(a, b, |p| p.y);
+        let ord_z = |a: &Point, b: &Point| ord(a, b, |p| p.z);
+
+        let min_x = get(corners.clone().min_by(ord_x)).x;
+        let min_y = get(corners.clone().min_by(ord_y)).y;
+        let min_z = get(corners.clone().min_by(ord_z)).z;
+        let max_x = get(corners.clone().max_by(ord_x)).x;
+        let max_y = get(corners.clone().max_by(ord_y)).y;
+        let max_z = get(corners.clone().max_by(ord_z)).z;
+
+        Bounds::new(
+            points::new(min_x, min_y, min_z),
+            points::new(max_x, max_y, max_z)
+        )
     }
 }
 
 pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
+    // If the ray does not intersect with the bounding box,
+    // do not bother checking the children
+    if cubes::intersect(shape, ray).is_empty() {
+        return vec![];
+    }
+
     if let Geo::Group(Group { ref children }) = shape.geo {
         let mut xs: Vec<_> = children.borrow()
             .iter()
