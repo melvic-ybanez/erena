@@ -4,7 +4,7 @@ use crate::tuples::points;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Bounds {
     pub min: Point,
     pub max: Point

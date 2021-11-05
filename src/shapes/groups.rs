@@ -12,12 +12,13 @@ use crate::math;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
-    pub children: RefCell<Vec<Rc<Shape>>>
+    pub children: RefCell<Vec<Rc<Shape>>>,
+    bounds: RefCell<Option<Bounds>>
 }
 
 impl Group {
     pub fn new(objects: Vec<Rc<Shape>>) -> Group {
-        Group { children: RefCell::new(objects) }
+        Group { children: RefCell::new(objects), bounds: RefCell::new(None) }
     }
 
     pub fn empty() -> Group {
@@ -42,9 +43,14 @@ impl Group {
     }
 
     pub(crate) fn bounds(&self) -> Bounds {
+        if self.bounds.borrow().is_some() {
+            return self.bounds.borrow().expect("Invalid state")
+        }
+
         if self.children.borrow().is_empty() {
             return Bounds::new(Point::origin(), Point::origin());
         }
+
         let children = self.children.borrow();
         let corners = children.iter()
             .flat_map(|child| {
@@ -86,10 +92,12 @@ impl Group {
         let max_y = get(corners.clone().max_by(ord_y)).y;
         let max_z = get(corners.clone().max_by(ord_z)).z;
 
-        Bounds::new(
+        let bounds = Bounds::new(
             points::new(min_x, min_y, min_z),
             points::new(max_x, max_y, max_z)
-        )
+        );
+        self.bounds.replace(Some(bounds));
+        bounds
     }
 }
 
@@ -100,7 +108,7 @@ pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
         return vec![];
     }
 
-    if let Geo::Group(Group { ref children }) = shape.geo {
+    if let Geo::Group(Group { ref children, .. }) = shape.geo {
         let mut xs: Vec<_> = children.borrow()
             .iter()
             .flat_map(|child| child.intersect(ray))

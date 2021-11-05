@@ -4,7 +4,7 @@ use crate::materials::Material;
 use crate::math;
 use crate::matrix::{scaling, translation, view_transformation, CanTransform};
 use crate::scene::World3D;
-use crate::shapes::Shape;
+use crate::shapes::{Shape, Geo};
 use crate::tuples::{colors, points, vectors};
 use crate::tuples::colors::Color;
 use crate::patterns::Pattern;
@@ -12,6 +12,8 @@ use crate::math::Real;
 use crate::rays::lights::PointLight;
 use crate::scene::camera::Camera;
 use crate::shapes::cylinders::CylLike;
+use std::rc::Rc;
+use std::borrow::Borrow;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane()
@@ -21,8 +23,7 @@ pub(crate) fn render_scene() {
                 .reflective(0.2)
         );
 
-    let mut objects = vec![floor];
-    objects.append(&mut spheres());
+    let mut objects = vec![floor, (*spheres()).clone()];
     objects.append(&mut cubes());
     objects.append(&mut cylinders());
     objects.append(&mut cones());
@@ -44,7 +45,7 @@ pub(crate) fn render_scene() {
     fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
 }
 
-fn spheres() -> Vec<Shape> {
+fn spheres() -> Rc<Shape> {
     let middle = Shape::sphere()
         .translate(-0.5, 1.0, 0.5)
         .material(
@@ -104,9 +105,19 @@ fn spheres() -> Vec<Shape> {
         )
     };
 
-    let mut result = vec![middle, left, right];
-    result.append(&mut small_spheres);
-    result
+    let group = Rc::new(Shape::empty_group());
+
+    if let Geo::Group(g) = &group.geo {
+        g.add_child(Rc::downgrade(&group), Rc::new(left));
+        g.add_child(Rc::downgrade(&group), Rc::new(middle));
+        g.add_child(Rc::downgrade(&group), Rc::new(right));
+
+        small_spheres.into_iter().for_each(|sphere| {
+            g.add_child(Rc::downgrade(&group), Rc::new(sphere))
+        });
+    }
+
+    group
 }
 
 fn cubes() -> Vec<Shape> {
