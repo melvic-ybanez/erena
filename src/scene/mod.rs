@@ -6,6 +6,8 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::rays::lights::PointLight;
 use crate::materials::dielectrics;
+use std::rc::Rc;
+use std::borrow::Borrow;
 
 pub mod camera;
 
@@ -36,10 +38,14 @@ impl<S> World<S> {
         self.objects.push((*object).clone());
     }
 
-    pub fn add_objects(&mut self, objects: &[&Object<S>]) where S: Clone {
+    pub fn add_objects(&mut self, objects: Vec<&Object<S>>) where S: Clone {
         for obj in objects {
             self.add_object(obj);
         }
+    }
+
+    pub fn add_groups(&mut self, rcs: Vec<&Rc<Object<S>>>) where S: Clone {
+        self.add_objects(rcs.into_iter().map(|rc| rc.borrow()).collect());
     }
 
     fn contains(&self, shape: &Object<S>) -> bool where S: PartialEq {

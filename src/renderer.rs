@@ -23,15 +23,14 @@ pub(crate) fn render_scene() {
                 .reflective(0.2)
         );
 
-    let mut objects = vec![floor, (*spheres()).clone()];
-    objects.append(&mut cubes());
-    objects.append(&mut cylinders());
+    let mut objects = vec![floor, middle_sphere()];
     objects.append(&mut cones());
 
-    let world = World3D::new(
+    let mut world = World3D::new(
         objects,
         Some(PointLight::new(points::new(-10.0, 12.0, -10.0), Color::white())),
     );
+    world.add_groups(vec![&right(), &bottom(), &cylinders()]);
 
     let mut camera = Camera::new(1000, 600, math::PI / 3.0);
     camera.transformation = view_transformation(
@@ -45,8 +44,8 @@ pub(crate) fn render_scene() {
     fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
 }
 
-fn spheres() -> Rc<Shape> {
-    let middle = Shape::sphere()
+fn middle_sphere() -> Shape {
+    Shape::sphere()
         .translate(-0.5, 1.0, 0.5)
         .material(
             Material::default()
@@ -60,8 +59,42 @@ fn spheres() -> Rc<Shape> {
                 .diffuse(0.7)
                 .specular(0.3)
                 .reflective(0.5)
+        )
+}
+
+fn right() -> Rc<Shape> {
+    let right_sphere = Shape::sphere()
+        .transform(translation(1.1, 2.1, 3.0) * scaling(0.7, 0.7, 0.7))
+        .material(
+            Material::default()
+                .color(colors::new(1.0, 0.5, 0.5))
+                .diffuse(0.7)
+                .specular(0.3)
+                .reflective(0.5)
         );
 
+    let cube = Shape::cube()
+        .scale(0.7, 0.7, 0.7)
+        .rotate_y(math::PI / 4.0)
+        .translate(1.1, 0.7, 3.0)
+        .material(
+            Material::default()
+                .diffuse(0.7)
+                .specular(0.3)
+                .pattern(Pattern::checkers(colors::new(1.0, 0.8, 0.1), Color::white())
+                    .scale(0.33, 0.33, 0.33)
+                    .rotate_x(-math::PI / 4.0))
+        );
+
+    let group = Rc::new(Shape::empty_group());
+    if let Geo::Group(g) = &group.geo {
+        g.add_child(Rc::downgrade(&group), Rc::new(right_sphere));
+        g.add_child(Rc::downgrade(&group), Rc::new(cube));
+    }
+    group
+}
+
+fn bottom() -> Rc<Shape> {
     let left = Shape::sphere()
         .transform(translation(-1.5, 0.33, -0.75) * scaling(0.33, 0.33, 0.33))
         .material(
@@ -74,22 +107,12 @@ fn spheres() -> Rc<Shape> {
                 .reflective(0.5)
         );
 
-    let right = Shape::sphere()
-        .transform(translation(1.1, 2.1, 3.0) * scaling(0.7, 0.7, 0.7))
-        .material(
-            Material::default()
-                .color(colors::new(1.0, 0.5, 0.5))
-                .diffuse(0.7)
-                .specular(0.3)
-                .reflective(0.5)
-        );
-
     let mut small_spheres: Vec<Shape> = vec![];
     for i in 0..5 {
         let component_scale = 0.5 + 0.1 * (i as Real);
         let pattern = Pattern::gradient(
             colors::new(1.0, 0.8, 0.1),
-            colors::new(220.0 / 255.0, 20.0 / 255.0, 60.0 / 255.0)
+            colors::new(220.0 / 255.0, 20.0 / 255.0, 60.0 / 255.0),
         );
         small_spheres.push(
             left.clone().transform(translation(i as Real, 0.0, 0.0) *
@@ -109,9 +132,6 @@ fn spheres() -> Rc<Shape> {
 
     if let Geo::Group(g) = &group.geo {
         g.add_child(Rc::downgrade(&group), Rc::new(left));
-        g.add_child(Rc::downgrade(&group), Rc::new(middle));
-        g.add_child(Rc::downgrade(&group), Rc::new(right));
-
         small_spheres.into_iter().for_each(|sphere| {
             g.add_child(Rc::downgrade(&group), Rc::new(sphere))
         });
@@ -120,23 +140,7 @@ fn spheres() -> Rc<Shape> {
     group
 }
 
-fn cubes() -> Vec<Shape> {
-    let cube = Shape::cube()
-        .scale(0.7, 0.7, 0.7)
-        .rotate_y(math::PI / 4.0)
-        .translate(1.1, 0.7, 3.0)
-        .material(
-            Material::default()
-                .diffuse(0.7)
-                .specular(0.3)
-                .pattern(Pattern::checkers(colors::new(1.0, 0.8, 0.1), Color::white())
-                    .scale(0.33, 0.33, 0.33)
-                    .rotate_x(-math::PI / 4.0))
-        );
-    vec![cube]
-}
-
-fn cylinders() -> Vec<Shape> {
+fn cylinders() -> Rc<Shape> {
     let colors = [
         (40.0, 103.0, 160.0),
         (72.0, 120.0, 170.0),
@@ -171,7 +175,12 @@ fn cylinders() -> Vec<Shape> {
             .translate(2.0, last_max, 0.5);
         cyls.push(new_cyl);
     }
-    cyls
+
+    let group = Rc::new(Shape::empty_group());
+    if let Geo::Group(g) = &group.geo {
+        g.add_children(Rc::downgrade(&group), cyls.into_iter().map(|cyl| Rc::new(cyl)).collect());
+    }
+    group
 }
 
 fn cones() -> Vec<Shape> {

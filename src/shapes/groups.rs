@@ -42,6 +42,10 @@ impl Group {
         child.set_parent(parent);
     }
 
+    pub fn add_children(&self, parent: Weak<Shape>, children: Vec<Rc<Shape>>) {
+        children.into_iter().for_each(|child| self.add_child(Weak::clone(&parent), child));
+    }
+
     pub(crate) fn bounds(&self) -> Bounds {
         if self.bounds.borrow().is_some() {
             return self.bounds.borrow().expect("Invalid state")

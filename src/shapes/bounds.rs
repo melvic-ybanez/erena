@@ -7,7 +7,7 @@ use crate::shapes::cylinders::CylLike;
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Bounds {
     pub min: Point,
-    pub max: Point
+    pub max: Point,
 }
 
 impl Bounds {
@@ -26,14 +26,10 @@ impl Bounds {
             Geo::TestShape => Bounds::from_min(Point::origin()),
             Geo::Plane => Bounds::from_min(points::new(-Real::INFINITY, -1.0, -Real::INFINITY)),
             Geo::Cube => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
-            Geo::Cylinder(_) => {
-                let min = if let Geo::Cylinder(CylLike { min, .. }) = shape.geo {
-                    min
-                } else {
-                    -Real::INFINITY
-                };
-                Bounds::from_min(points::new(-1.0, min, -1.0))
-            },
+            Geo::Cylinder(CylLike { min, max, .. }) => Bounds::new(
+                points::new(-1.0, *min, -1.0),
+                points::new(1.0, *max, 1.0),
+            ),
             Geo::Group(group) => group.bounds()
         }
     }
