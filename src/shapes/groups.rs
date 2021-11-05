@@ -47,61 +47,62 @@ impl Group {
     }
 
     pub(crate) fn bounds(&self) -> Bounds {
-        if self.bounds.borrow().is_some() {
-            return self.bounds.borrow().expect("Invalid state")
+        let mut cached = self.bounds.borrow_mut();
+        if let Some(bounds) = *cached {
+            bounds
+        } else {
+            if self.children.borrow().is_empty() {
+                return Bounds::new(Point::origin(), Point::origin());
+            }
+
+            let children = self.children.borrow();
+            let corners = children.iter()
+                .flat_map(|child| {
+                    let Bounds { min, max } = child.bounds();
+
+                    // transform corners. Note that we are using the left-hand rule
+                    // so "back" here means negative z-axis (or towards the user)
+                    let corners = [
+                        (min.x, min.y, min.z),  // lower left back
+                        (max.x, min.y, min.z),  // lower right back
+                        (min.x, min.y, max.z),  // lower left front
+                        (max.x, min.y, max.z),  // lower right front
+                        (min.x, max.y, min.z),  // upper left back
+                        (max.x, max.y, min.z),  // upper right back
+                        (min.x, max.y, max.z),  // upper left front
+                        (max.x, max.y, max.z)   // upper right front
+                    ];
+
+                    corners.iter()
+                        .map(|(x, y, z)| {
+                            child.transformation.clone() * points::new(*x, *y, *z)
+                        })
+                        .collect::<Vec<_>>()
+                });
+
+            let get = |point: Option<Point>| point.unwrap_or_else(Point::origin);
+
+            let ord = |a: &Point, b: &Point, f: fn(Point) -> Real| {
+                math::order_reals(f(*a), f(*b))
+            };
+            let ord_x = |a: &Point, b: &Point| ord(a, b, |p| p.x);
+            let ord_y = |a: &Point, b: &Point| ord(a, b, |p| p.y);
+            let ord_z = |a: &Point, b: &Point| ord(a, b, |p| p.z);
+
+            let min_x = get(corners.clone().min_by(ord_x)).x;
+            let min_y = get(corners.clone().min_by(ord_y)).y;
+            let min_z = get(corners.clone().min_by(ord_z)).z;
+            let max_x = get(corners.clone().max_by(ord_x)).x;
+            let max_y = get(corners.clone().max_by(ord_y)).y;
+            let max_z = get(corners.clone().max_by(ord_z)).z;
+
+            let bounds = Bounds::new(
+                points::new(min_x, min_y, min_z),
+                points::new(max_x, max_y, max_z)
+            );
+            cached.replace(bounds);
+            bounds
         }
-
-        if self.children.borrow().is_empty() {
-            return Bounds::new(Point::origin(), Point::origin());
-        }
-
-        let children = self.children.borrow();
-        let corners = children.iter()
-            .flat_map(|child| {
-                let Bounds { min, max } = child.bounds();
-
-                // transform corners. Note that we are using the left-hand rule
-                // so "back" here means negative z-axis (or towards the user)
-                let corners = [
-                    (min.x, min.y, min.z),  // lower left back
-                    (max.x, min.y, min.z),  // lower right back
-                    (min.x, min.y, max.z),  // lower left front
-                    (max.x, min.y, max.z),  // lower right front
-                    (min.x, max.y, min.z),  // upper left back
-                    (max.x, max.y, min.z),  // upper right back
-                    (min.x, max.y, max.z),  // upper left front
-                    (max.x, max.y, max.z)   // upper right front
-                ];
-
-                corners.iter()
-                    .map(|(x, y, z)| {
-                        child.transformation.clone() * points::new(*x, *y, *z)
-                    })
-                    .collect::<Vec<_>>()
-            });
-
-        let get = |point: Option<Point>| point.unwrap_or_else(Point::origin);
-
-        let ord = |a: &Point, b: &Point, f: fn(Point) -> Real | {
-            math::order_reals(f(*a), f(*b))
-        };
-        let ord_x = |a: &Point, b: &Point| ord(a, b, |p| p.x);
-        let ord_y = |a: &Point, b: &Point| ord(a, b, |p| p.y);
-        let ord_z = |a: &Point, b: &Point| ord(a, b, |p| p.z);
-
-        let min_x = get(corners.clone().min_by(ord_x)).x;
-        let min_y = get(corners.clone().min_by(ord_y)).y;
-        let min_z = get(corners.clone().min_by(ord_z)).z;
-        let max_x = get(corners.clone().max_by(ord_x)).x;
-        let max_y = get(corners.clone().max_by(ord_y)).y;
-        let max_z = get(corners.clone().max_by(ord_z)).z;
-
-        let bounds = Bounds::new(
-            points::new(min_x, min_y, min_z),
-            points::new(max_x, max_y, max_z)
-        );
-        self.bounds.replace(Some(bounds));
-        bounds
     }
 }
 

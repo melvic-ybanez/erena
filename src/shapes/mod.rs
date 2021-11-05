@@ -8,6 +8,7 @@ use crate::shapes::groups::Group;
 use std::rc::{Weak, Rc};
 use std::cell::RefCell;
 use crate::shapes::bounds::Bounds;
+use crate::shapes::triangles::Triangle;
 
 #[derive(Debug, Clone)]
 pub struct Object<G> {
@@ -24,7 +25,8 @@ pub enum Geo {
     Plane,
     Cube,
     Cylinder(CylLike),
-    Group(Group)
+    Group(Group),
+    Triangle(Triangle)
 }
 
 pub type Shape = Object<Geo>;
@@ -97,6 +99,10 @@ impl Shape {
         Shape::new(Geo::Group(Group::new(objects)))
     }
 
+    pub fn triangle(p1: Point, p2: Point, p3: Point) -> Shape {
+        Shape::new(Geo::Triangle(Triangle::new(p1, p2, p3)))
+    }
+
     pub fn empty_group() -> Shape {
         Shape::group(vec![])
     }
@@ -111,7 +117,8 @@ impl Shape {
             Geo::Cube => cubes::intersect(self, &local_ray),
             Geo::Cylinder(CylLike { cone, .. }) =>
                 cylinders::intersect(self, &local_ray, cone),
-            Geo::Group(_) => groups::intersect(self, &local_ray)
+            Geo::Group(_) => groups::intersect(self, &local_ray),
+            Geo::Triangle(_) => unimplemented!()
         }
     }
 
@@ -125,7 +132,8 @@ impl Shape {
             Geo::Cube => cubes::normal_at(local_point),
             Geo::Cylinder(CylLike { min, max, cone, .. }) =>
                 cylinders::normal_at(local_point, min, max, cone),
-            Geo::Group(_) => groups::normal_at()
+            Geo::Group(_) => groups::normal_at(),
+            Geo::Triangle(_) => unimplemented!()
         };
 
         self.normal_to_world(local_normal)
@@ -210,3 +218,4 @@ mod cubes;
 pub mod cylinders;
 mod groups;
 mod bounds;
+mod triangles;

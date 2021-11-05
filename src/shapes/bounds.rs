@@ -30,7 +30,8 @@ impl Bounds {
                 points::new(-1.0, *min, -1.0),
                 points::new(1.0, *max, 1.0),
             ),
-            Geo::Group(group) => group.bounds()
+            Geo::Group(group) => group.bounds(),
+            Geo::Triangle(_) => unimplemented!()
         }
     }
 }
