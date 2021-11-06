@@ -133,7 +133,7 @@ impl Shape {
             Geo::Cylinder(CylLike { min, max, cone, .. }) =>
                 cylinders::normal_at(local_point, min, max, cone),
             Geo::Group(_) => groups::normal_at(),
-            Geo::Triangle(_) => unimplemented!()
+            Geo::Triangle(ref tri) => tri.get_normal()
         };
 
         self.normal_to_world(local_normal)

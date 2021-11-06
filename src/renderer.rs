@@ -13,7 +13,6 @@ use crate::rays::lights::PointLight;
 use crate::scene::camera::Camera;
 use crate::shapes::cylinders::CylLike;
 use std::rc::Rc;
-use std::borrow::Borrow;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane()

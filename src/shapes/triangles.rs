@@ -1,6 +1,5 @@
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use std::cell::RefCell;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Triangle {
@@ -30,8 +29,4 @@ impl Triangle {
     pub fn get_normal(&self) -> Vector {
         self.normal
     }
-}
-
-pub(crate) fn not_a_triangle() {
-    panic!("Not a triangle");
 }
