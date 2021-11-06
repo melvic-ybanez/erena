@@ -26,7 +26,7 @@ pub enum Geo {
     Cube,
     Cylinder(CylLike),
     Group(Group),
-    Triangle(Triangle)
+    Triangle(Triangle),
 }
 
 pub type Shape = Object<Geo>;
@@ -112,13 +112,13 @@ impl Shape {
 
         match self.geo {
             Geo::Sphere => spheres::intersect(self, &local_ray),
-            Geo::TestShape => test::intersect(self, &local_ray),
+            Geo::TestShape => test::intersect(&local_ray),
             Geo::Plane => planes::intersect(self, &local_ray),
             Geo::Cube => cubes::intersect(self, &local_ray),
             Geo::Cylinder(CylLike { cone, .. }) =>
                 cylinders::intersect(self, &local_ray, cone),
-            Geo::Group(_) => groups::intersect(self, &local_ray),
-            Geo::Triangle(_) => unimplemented!()
+            Geo::Group(ref group) => group.intersect(self, &local_ray),
+            Geo::Triangle(ref tri) => tri.intersect(self, &local_ray)
         }
     }
 
@@ -194,11 +194,9 @@ mod test {
 
     pub static mut SAVED_RAY: Option<Ray> = None;
 
-    pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
-        if let Geo::TestShape = shape.geo {
-            unsafe {
-                SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
-            }
+    pub fn intersect(ray: &Ray) -> Vec<Intersection3D> {
+        unsafe {
+            SAVED_RAY = Some(Ray::new(ray.origin, ray.direction));
         }
 
         vec![]

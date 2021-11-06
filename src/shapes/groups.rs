@@ -13,7 +13,7 @@ use crate::math;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
     pub children: RefCell<Vec<Rc<Shape>>>,
-    bounds: RefCell<Option<Bounds>>
+    bounds: RefCell<Option<Bounds>>,
 }
 
 impl Group {
@@ -98,30 +98,26 @@ impl Group {
 
             let bounds = Bounds::new(
                 points::new(min_x, min_y, min_z),
-                points::new(max_x, max_y, max_z)
+                points::new(max_x, max_y, max_z),
             );
             cached.replace(bounds);
             bounds
         }
     }
-}
 
-pub fn intersect(shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
-    // If the ray does not intersect with the bounding box,
-    // do not bother checking the children
-    if cubes::intersect(shape, ray).is_empty() {
-        return vec![];
-    }
+    pub fn intersect(&self, shape: &Shape, ray: &Ray) -> Vec<Intersection3D> {
+        // If the ray does not intersect with the bounding box,
+        // do not bother checking the children
+        if cubes::intersect(shape, ray).is_empty() {
+            return vec![];
+        }
 
-    if let Geo::Group(Group { ref children, .. }) = shape.geo {
-        let mut xs: Vec<_> = children.borrow()
+        let mut xs: Vec<_> = self.children.borrow()
             .iter()
             .flat_map(|child| child.intersect(ray))
             .collect();
         xs.sort_by(Intersection::compare);
         xs
-    } else {
-        vec![]
     }
 }
 

@@ -44,18 +44,21 @@ fn test_add_child() {
 fn test_intersect_empty() {
     let group = Shape::empty_group();
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
-    let xs = groups::intersect(&group, &ray);
-    assert!(xs.is_empty());
+
+    if let Geo::Group(ref g) = group.geo {
+        let xs = g.intersect(&group, &ray);
+        assert!(xs.is_empty());
+    }
 }
 
 /// Tests intersection of a ray with a non-empty group.
 /// The ray intersects two of the group's children.
 #[test]
 fn test_intersect_non_empty() {
-    let mut group = Rc::new(Shape::empty_group());
-    let mut s1 = Rc::new(Shape::sphere());
-    let mut s2 = Rc::new(Shape::sphere().translate(0.0, 0.0, -3.0));
-    let mut s3 = Rc::new(Shape::sphere().translate(5.0, 0.0, 0.0));
+    let group = Rc::new(Shape::empty_group());
+    let s1 = Rc::new(Shape::sphere());
+    let s2 = Rc::new(Shape::sphere().translate(0.0, 0.0, -3.0));
+    let s3 = Rc::new(Shape::sphere().translate(5.0, 0.0, 0.0));
 
     if let Geo::Group(g) = &group.geo {
         g.add_child(Rc::downgrade(&group), Rc::clone(&s1));
@@ -63,7 +66,7 @@ fn test_intersect_non_empty() {
         g.add_child(Rc::downgrade(&group), Rc::clone(&s3));
 
         let ray = Ray::new(points::new(0.0, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0));
-        let xs = groups::intersect(&group, &ray);
+        let xs = g.intersect(&group, &ray);
 
         assert_eq!(xs.len(), 4);
         assert_eq!(xs[0].object, s2);
