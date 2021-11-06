@@ -15,11 +15,18 @@ pub struct Matrix {
     width: usize,
     height: usize,
     inverse: Box<RefCell<Option<Matrix>>>,
+    determinant: RefCell<Option<Real>>,
 }
 
 impl Matrix {
     fn new(width: usize, height: usize, elements: Vec<Real>) -> Matrix {
-        Matrix { width, height, elements, inverse: Box::new(RefCell::new(None)) }
+        Matrix {
+            width,
+            height,
+            elements,
+            inverse: Box::new(RefCell::new(None)),
+            determinant: RefCell::new(None),
+        }
     }
 
     /// Constructs a new matrix from a 2D vector. The
@@ -81,14 +88,22 @@ impl Matrix {
     }
 
     fn determinant(&self) -> Real {
-        if self.width == 2 && self.height == 2 {
-            // The determinant of a 2 x 2 matrix follows the formula `ad - bc`
-            self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]
+        let mut cached = self.determinant.borrow_mut();
+        if let Some(determinant) = *cached {
+            determinant
         } else {
-            let mut determinant = 0 as Real;
-            for c in 0..self.width {
-                determinant += self[(0, c)] * self.cofactor(0, c);
-            }
+            let determinant = if self.width == 2 && self.height == 2 {
+                // The determinant of a 2 x 2 matrix follows the formula `ad - bc`
+                self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]
+            } else {
+                let mut determinant = 0 as Real;
+                for c in 0..self.width {
+                    determinant += self[(0, c)] * self.cofactor(0, c);
+                }
+                determinant
+            };
+
+            *cached = Some(determinant);
             determinant
         }
     }
@@ -109,7 +124,7 @@ impl Matrix {
         Matrix::new(self.width - 1, self.height - 1, elems)
     }
 
-    fn minor(&self, row: usize, col: usize) ->  Real {
+    fn minor(&self, row: usize, col: usize) -> Real {
         self.submatrix(row, col).determinant()
     }
 
