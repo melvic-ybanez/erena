@@ -61,9 +61,17 @@ impl Triangle {
         let u = f * p1_to_origin.dot(dir_cross_e2);
 
         if u < 0.0 || u > 1.0 {
+            return vec![]   // the ray misses
+        }
+
+        let origin_cross_e1 = p1_to_origin.to_vector().cross(self.edge1);
+        let v = f * ray.direction.dot(origin_cross_e1);
+
+        if v < 0.0 || (u + v) > 1.0 {
             return vec![]
         }
 
-        vec![Intersection::new(1.0, Rc::new(shape.clone()))]
+        let t = f * self.edge2.dot(origin_cross_e1);
+        vec![Intersection::new(t, Rc::new(shape.clone()))]
     }
 }

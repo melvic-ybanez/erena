@@ -1,5 +1,4 @@
 use crate::shapes::{Geo, Shape};
-use crate::shapes::triangles::Triangle;
 use crate::tuples::{points, vectors};
 use crate::rays::Ray;
 
@@ -56,4 +55,27 @@ fn test_ray_misses_p1_p3_edge() {
     let ray = Ray::new(points::new(1.0, 1.0, -2.0), vectors::new(0.0, 0.0, 1.0));
     let xs = triangle.intersect(&ray);
     assert!(xs.is_empty());
+}
+
+#[test]
+fn test_ray_misses_p1_p2_edge() {
+    let triangle = set_up();
+    let ray = Ray::new(points::new(-1.0, 1.0, -2.0), vectors::new(0.0, 0.0, 1.0));
+    assert!(triangle.intersect(&ray).is_empty());
+}
+
+#[test]
+fn test_ray_misses_p2_p3_edge() {
+    let triangle = set_up();
+    let ray = Ray::new(points::new(0.0, -1.0, -2.0), vectors::new(0.0, 0.0, 1.0));
+    assert!(triangle.intersect(&ray).is_empty());
+}
+
+#[test]
+fn test_ray_strikes_triangle() {
+    let triangle = set_up();
+    let ray = Ray::new(points::new(0.0, 0.5, -2.0), vectors::new(0.0, 0.0, 1.0));
+    let xs = triangle.intersect(&ray);
+    assert_eq!(xs.len(), 1);
+    assert_eq!(xs[0].t, 2.0);
 }

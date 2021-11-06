@@ -188,7 +188,6 @@ impl<S> CanTransform for Object<S> {
 
 mod test {
     use crate::rays::{Ray, Intersection3D};
-    use crate::shapes::{Shape, Geo};
     use crate::tuples::points::Point;
     use crate::tuples::vectors::Vector;
 

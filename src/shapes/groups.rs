@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 use crate::rays::{Intersection, Intersection3D, Ray};
-use crate::shapes::{Geo, Shape, cubes};
+use crate::shapes::{Shape, cubes};
 use crate::tuples::vectors::Vector;
 use crate::tuples::points::Point;
 use crate::shapes::bounds::Bounds;

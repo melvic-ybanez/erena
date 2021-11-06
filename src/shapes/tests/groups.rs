@@ -1,4 +1,4 @@
-use crate::shapes::{Shape, Geo, groups};
+use crate::shapes::{Shape, Geo};
 use crate::matrix::{Matrix, CanTransform, scaling, translation, rotation_y};
 use crate::shapes::groups::not_a_group;
 use crate::rays::Ray;
