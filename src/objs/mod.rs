@@ -10,9 +10,9 @@ use crate::shapes::groups::Group;
 use std::str::SplitWhitespace;
 use crate::shapes::triangles::Triangle;
 
-pub struct Parser<'a> {
+pub struct Parser {
     vertices: Vec<Point>,
-    faces: Vec<&'a [usize; 3]>
+    faces: Vec<[usize; 3]>,
 }
 
 pub enum LineParseResult {
@@ -21,8 +21,8 @@ pub enum LineParseResult {
     None,
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(mut vertices: Vec<Point>, faces: Vec<&'a [usize; 3]>) -> Parser<'a> {
+impl Parser {
+    pub fn new(mut vertices: Vec<Point>, faces: Vec<[usize; 3]>) -> Parser {
         // this is a quick way to make the indices 1-based
         let mut xs = vec![Point::origin()];
         xs.append(&mut vertices);
@@ -47,31 +47,31 @@ impl<'a> Parser<'a> {
     }
 }
 
-pub fn parse_obj<'a, R: Read>(read: R) -> Parser<'a> {
+pub fn parse_obj<R: Read>(read: R) -> Parser {
     let lines = BufReader::new(read).lines();
-    let mut result: Vec<Point> = vec![];
+    let mut vertices: Vec<Point> = vec![];
+    let mut faces: Vec<[usize; 3]> = vec![];
 
     for line in lines {
         if let Ok(line) = line {
-            if let LineParseResult::Vertex(point) = parse_line(line) {
-                result.push(point);
+            match parse_line(line) {
+                LineParseResult::Vertex(point) => vertices.push(point),
+                LineParseResult::Face(v1, v2, v3) => faces.push([v1, v2, v3]),
+                _ => ()
             }
         }
     }
 
-    Parser::new(result, vec![])
+    Parser::new(vertices, faces)
 }
 
 fn parse_line(line: String) -> LineParseResult {
     let mut line = line.split_whitespace();
 
-    let first = line.next();
-    if let Some("v") = first {
-        parse_vertex(line)
-    } else if let Some("f") = first {
-        parse_face(line)
-    } else {
-        LineParseResult::None
+    match line.next() {
+        Some("v") => parse_vertex(line),
+        Some("f") => parse_face(line),
+        _ => LineParseResult::None
     }
 }
 
@@ -91,7 +91,21 @@ fn parse_vertex(mut line: SplitWhitespace) -> LineParseResult {
 }
 
 fn parse_face(mut line: SplitWhitespace) -> LineParseResult {
-    unimplemented!()
+    type FaceData = (usize, usize, usize);
+
+    fn parse<F>(r: Option<&str>, f: F) -> Option<FaceData>
+        where F: FnOnce(usize) -> Option<FaceData> {
+        r.and_then(|r| {
+            r.parse::<usize>().ok().and_then(f)
+        })
+    }
+
+    let result = parse(line.next(), |v1| parse(line.next(), |v2| parse(line.next(), |v3|
+        Some((v1, v2, v3)))));
+    match result {
+        None => LineParseResult::None,
+        Some((v1, v2, v3)) => LineParseResult::Face(v1, v2, v3)
+    }
 }
 
 #[cfg(test)]
