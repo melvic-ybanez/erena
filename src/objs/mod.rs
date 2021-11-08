@@ -22,10 +22,18 @@ impl Parser {
     pub fn len(&self) -> usize {
         self.vertices.len() - 1
     }
+
+    pub fn get_vertices(&self) -> Vec<Point> {
+        self.vertices.clone()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.vertices.len() == 1
+    }
 }
 
-pub fn parse_obj<R: Read>(file: R) -> Vec<Point> {
-    let lines = BufReader::new(file).lines();
+pub fn parse_obj<R: Read>(read: R) -> Parser {
+    let lines = BufReader::new(read).lines();
     let mut result: Vec<Point> = vec![];
 
     for line in lines {
@@ -35,7 +43,8 @@ pub fn parse_obj<R: Read>(file: R) -> Vec<Point> {
             }
         }
     }
-    result
+
+    Parser::new(result)
 }
 
 fn parse_line(line: String) -> Option<Point> {
