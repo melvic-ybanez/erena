@@ -213,6 +213,6 @@ pub mod spheres;
 mod planes;
 mod cubes;
 pub mod cylinders;
-mod groups;
+pub mod groups;
 mod bounds;
-mod triangles;
+pub mod triangles;
