@@ -8,9 +8,6 @@ fn test_ignoring_unrecognized_files() {
         She set out one day.
         in a relative way,
         and came back the previous night." as &[u8];
-    let result = objs::parse(gibberish);
-    match result {
-        Ok(success) => panic!("Should be an error. Got {:?}", success),
-        Err(errors) => assert_eq!(errors.len(), 28)
-    }
+    let result = objs::parse_obj(gibberish);
+    assert!(result.is_empty());
 }

@@ -4,31 +4,57 @@ use std::io;
 use crate::math::Real;
 use std::num::ParseFloatError;
 use std::error::Error;
+use crate::tuples::points::Point;
+use crate::tuples::points;
 
-pub fn parse<R: Read>(file: R) -> Result<Vec<Real>, Vec<Box<dyn Error>>> {
+pub struct Parser {
+    vertices: Vec<Point>
+}
+
+impl Parser {
+    pub fn new(mut vertices: Vec<Point>) -> Parser {
+        let mut xs = vec![Point::origin()];
+        xs.append(&mut vertices);
+
+        Parser { vertices: xs }
+    }
+
+    pub fn len(&self) -> usize {
+        self.vertices.len() - 1
+    }
+}
+
+pub fn parse_obj<R: Read>(file: R) -> Vec<Point> {
     let lines = BufReader::new(file).lines();
-    let mut success: Vec<Real> = vec![];
-    let mut errors: Vec<Box<dyn Error>> = vec![];
+    let mut result: Vec<Point> = vec![];
 
     for line in lines {
-        match line {
-            Ok(line) => {
-                line.split_whitespace().for_each(|word| {
-                    match word.parse::<Real>() {
-                        Ok(real) => success.push(real),
-                        Err(err) => errors.push(Box::new(err))
-                    }
-                })
-            },
-            Err(error) => errors.push(Box::new(error))
+        if let Ok(line) = line {
+            if let Some(point) = parse_line(line) {
+                result.push(point);
+            }
         }
     }
+    result
+}
 
-    if !success.is_empty() {
-        Ok(success)
-    } else {
-        Err(errors)
+fn parse_line(line: String) -> Option<Point> {
+    let mut line = line.split_whitespace();
+
+    fn parse<F>(r: Option<&str>, f: F) -> Option<Point> where F: FnOnce(Real) -> Option<Point> {
+        r.and_then(|r| {
+            r.parse::<Real>().ok().and_then(f)
+        })
     }
+
+    line.next().and_then(|v| {
+        if v != "v" {
+            None
+        } else {
+            parse(line.next(), |x| parse(line.next(), |y| parse(line.next(), |z|
+                Some(points::new(x, y, z)))))
+        }
+    })
 }
 
 #[cfg(test)]
