@@ -96,7 +96,7 @@ impl Shape {
     pub fn group(objects: Vec<Shape>) -> Shape {
         let objects: Vec<_> = objects.into_iter()
             .map(|obj| Rc::new(obj)).collect();
-        Shape::new(Geo::Group(Group::new(objects)))
+        Shape::from_group(Group::new(objects))
     }
 
     pub fn triangle(p1: Point, p2: Point, p3: Point) -> Shape {
@@ -105,6 +105,10 @@ impl Shape {
 
     pub fn empty_group() -> Shape {
         Shape::group(vec![])
+    }
+
+    pub fn from_group(group: Group) -> Shape {
+        Shape::new(Geo::Group(group))
     }
 
     pub fn intersect(&self, ray: &Ray) -> Vec<Intersection3D> {

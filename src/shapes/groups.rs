@@ -119,6 +119,10 @@ impl Group {
         xs.sort_by(Intersection::compare);
         xs
     }
+
+    pub fn child_at(&self, i: usize) -> Shape {
+        (*self.children.borrow()[i]).clone()
+    }
 }
 
 /// Probably never gonna be needed.

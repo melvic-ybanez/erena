@@ -9,10 +9,12 @@ use crate::tuples::{points, TupleLike};
 use crate::shapes::groups::Group;
 use std::str::SplitWhitespace;
 use crate::shapes::triangles::Triangle;
+use std::rc::Rc;
+use crate::shapes::{Shape, Geo};
 
 pub struct Parser {
     vertices: Vec<Point>,
-    faces: Vec<[usize; 3]>,
+    faces: Vec<FaceData>,
 }
 
 pub enum LineParseResult {
@@ -21,8 +23,10 @@ pub enum LineParseResult {
     None,
 }
 
+type FaceData = (usize, usize, usize);
+
 impl Parser {
-    pub fn new(mut vertices: Vec<Point>, faces: Vec<[usize; 3]>) -> Parser {
+    pub fn new(mut vertices: Vec<Point>, faces: Vec<FaceData>) -> Parser {
         // this is a quick way to make the indices 1-based
         let mut xs = vec![Point::origin()];
         xs.append(&mut vertices);
@@ -42,21 +46,32 @@ impl Parser {
         self.vertices.len() == 1
     }
 
-    pub fn default_group(&self) -> Group {
-        unimplemented!()
+    pub fn default_group(&self) -> Rc<Shape> {
+        let group = Rc::new(Shape::empty_group());
+        for (v1, v2, v3) in self.faces.iter() {
+            let triangle = Rc::new(Shape::triangle(
+                self.get_vertices()[*v1],
+                self.get_vertices()[*v2],
+                self.get_vertices()[*v3]
+            ));
+            if let Geo::Group(g) = &group.geo {
+                g.add_child(Rc::downgrade(&group), Rc::clone(&triangle));
+            }
+        }
+        group
     }
 }
 
 pub fn parse_obj<R: Read>(read: R) -> Parser {
     let lines = BufReader::new(read).lines();
     let mut vertices: Vec<Point> = vec![];
-    let mut faces: Vec<[usize; 3]> = vec![];
+    let mut faces: Vec<FaceData> = vec![];
 
     for line in lines {
         if let Ok(line) = line {
             match parse_line(line) {
                 LineParseResult::Vertex(point) => vertices.push(point),
-                LineParseResult::Face(v1, v2, v3) => faces.push([v1, v2, v3]),
+                LineParseResult::Face(v1, v2, v3) => faces.push((v1, v2, v3)),
                 _ => ()
             }
         }
@@ -91,8 +106,6 @@ fn parse_vertex(mut line: SplitWhitespace) -> LineParseResult {
 }
 
 fn parse_face(mut line: SplitWhitespace) -> LineParseResult {
-    type FaceData = (usize, usize, usize);
-
     fn parse<F>(r: Option<&str>, f: F) -> Option<FaceData>
         where F: FnOnce(usize) -> Option<FaceData> {
         r.and_then(|r| {
