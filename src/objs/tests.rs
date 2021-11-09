@@ -2,6 +2,8 @@ use crate::objs;
 use std::io::Error;
 use crate::tuples::points;
 use crate::shapes::Geo;
+use std::fs::File;
+use std::io;
 
 #[test]
 fn test_ignoring_unrecognized_files() {
@@ -40,11 +42,11 @@ fn test_parsing_faces() {
 
         f 1 2 3
         f 1 3 4" as &[u8];
-    let parser = objs::parse_obj(file);
+    let mut parser = objs::parse_obj(file);
     let group = parser.default_group();
     if let Geo::Group(g) = &group.geo {
-        let t1 = g.child_at(0);
-        let t2 = g.child_at(1);
+        let t1 = g.get_child(0);
+        let t2 = g.get_child(1);
 
         if let (Geo::Triangle(t1), Geo::Triangle(t2)) = (t1.geo, t2.geo) {
             let vertices = parser.get_vertices();
@@ -69,12 +71,12 @@ fn test_triangulating_polygons() {
         v 1 1 0
         v 0 2 0
         f 1 2 3 4 5" as &[u8];
-    let parser = objs::parse_obj(file);
+    let mut parser = objs::parse_obj(file);
     let group = parser.default_group();
     if let Geo::Group(g) = &group.geo {
-        let t1 = g.child_at(0);
-        let t2 = g.child_at(1);
-        let t3 = g.child_at(2);
+        let t1 = g.get_child(0);
+        let t2 = g.get_child(1);
+        let t3 = g.get_child(2);
 
         if let (Geo::Triangle(t1), Geo::Triangle(t2), Geo::Triangle(t3)) = (t1.geo, t2.geo, t3.geo) {
             let vertices = parser.get_vertices();
@@ -92,4 +94,22 @@ fn test_triangulating_polygons() {
             assert_eq!(t3.get_p3(), vertices[5]);
         }
     }
+}
+
+#[test]
+fn test_triangles_in_groups() -> io::Result<()> {
+    let file = File::open("triangles.obj")?;
+    let parser = objs::parse_obj(file);
+
+    let t1 = parser.get_triangle_unsafe("FirstGroup", 0);
+    let t2 = parser.get_triangle_unsafe("SecondGroup", 1);
+
+    assert_eq!(t1.get_p1(), parser.vertices[1]);
+    assert_eq!(t1.get_p2(), parser.vertices[1]);
+    assert_eq!(t1.get_p3(), parser.vertices[3]);
+
+    assert_eq!(t2.get_p1(), parser.vertices[1]);
+    assert_eq!(t2.get_p2(), parser.vertices[3]);
+    assert_eq!(t2.get_p3(), parser.vertices[4]);
+    Ok(())
 }

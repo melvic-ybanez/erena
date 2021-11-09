@@ -120,7 +120,7 @@ impl Group {
         xs
     }
 
-    pub fn child_at(&self, i: usize) -> Shape {
+    pub fn get_child(&self, i: usize) -> Shape {
         (*self.children.borrow()[i]).clone()
     }
 }

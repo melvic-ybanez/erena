@@ -10,28 +10,33 @@ use crate::shapes::groups::Group;
 use std::str::SplitWhitespace;
 use crate::shapes::triangles::Triangle;
 use std::rc::Rc;
-use crate::shapes::{Shape, Geo};
+use crate::shapes::{Shape, Geo, Object};
+use std::collections::HashMap;
+use std::cell::RefCell;
+use std::borrow::Borrow;
 
-pub struct Parser {
+pub struct Parser<'a> {
     vertices: Vec<Point>,
     faces: Vec<FaceData>,
+    groups: HashMap<&'a str, Rc<Shape>>,
 }
 
-pub enum Command {
+pub enum Statement<'a> {
     Vertex(Point),
     Face(FaceData),
+    Group(&'a str),
     None,
 }
 
 type FaceData = Vec<usize>;
 
-impl Parser {
-    pub fn new(mut vertices: Vec<Point>, faces: Vec<FaceData>) -> Parser {
+impl<'a> Parser<'a> {
+    pub fn new(mut vertices: Vec<Point>, faces: Vec<FaceData>) -> Parser<'a> {
         // this is a quick way to make the indices 1-based
         let mut xs = vec![Point::origin()];
         xs.append(&mut vertices);
 
-        Parser { vertices: xs, faces }
+        Parser { vertices: xs, faces, groups: HashMap::new() }
     }
 
     pub fn len(&self) -> usize {
@@ -46,18 +51,29 @@ impl Parser {
         self.vertices.len() == 1
     }
 
-    pub fn default_group(&self) -> Rc<Shape> {
-        let group = Rc::new(Shape::empty_group());
+    pub fn default_group(&mut self) -> Rc<Shape> {
+        let key = "default";
         for face in self.faces.iter() {
-            let triangles = self.fan_triangulation(face);
-            for triangle in triangles {
-                let triangle = Rc::new(Shape::new(Geo::Triangle(triangle)));
-                if let Geo::Group(g) = &group.geo {
-                    g.add_child(Rc::downgrade(&group), Rc::clone(&triangle));
-                }
+            self.register_face(key, face);
+        }
+        self.groups.get(key).map(|r| *r).unwrap_or(Rc::new(Shape::empty_group()))
+    }
+
+    fn register_face(&mut self, name: &'a str, face: &FaceData) -> Option<Rc<Shape>> {
+        let group = match self.groups.get_mut(name) {
+            None => Rc::new(Shape::empty_group()),
+            Some(group) => group.clone()
+        };
+
+        let triangles = self.fan_triangulation(face);
+        for triangle in triangles {
+            let triangle = Rc::new(Shape::new(Geo::Triangle(triangle)));
+            if let Geo::Group(g) = &group.geo {
+                g.add_child(Rc::downgrade(&group), Rc::clone(&triangle));
             }
         }
-        group
+
+        self.groups.insert(name, group)
     }
 
     /// Converts polygons into triangles
@@ -67,43 +83,66 @@ impl Parser {
             let triangle = Triangle::new(
                 self.vertices[face[0]],
                 self.vertices[face[i]],
-                self.vertices[face[i + 1]]
+                self.vertices[face[i + 1]],
             );
             triangles.push(triangle)
         }
         triangles
     }
+
+    pub fn get_group(&self, name: &str) -> Group {
+        unimplemented!()
+    }
+
+    pub fn get_triangle(&'a self, name: &str, i: usize) -> Option<Triangle> {
+        let triangle_shape = self.get_group(name).get_child(i);
+        if let Geo::Triangle(triangle) = triangle_shape.geo {
+            Some(triangle)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_triangle_unsafe(&'a self, name: &'a str, i: usize) -> Triangle {
+        self.get_triangle(name, i).unwrap()
+    }
 }
 
-pub fn parse_obj<R: Read>(read: R) -> Parser {
+pub fn parse_obj<'a, R: Read>(read: R) -> Parser<'a> {
     let lines = BufReader::new(read).lines();
-    let mut vertices: Vec<Point> = vec![];
-    let mut faces: Vec<FaceData> = vec![];
+    let mut current_group: Option<&str> = None;
+    let mut parser = Parser::new(vec![], vec![]);
 
     for line in lines {
         if let Ok(line) = line {
-            match parse_line(line) {
-                Command::Vertex(point) => vertices.push(point),
-                Command::Face(face) => faces.push(face),
+            match parse_statement(line) {
+                Statement::Vertex(point) => parser.vertices.push(point),
+                Statement::Face(face) => {
+                    if let Some(group) = current_group {
+                        parser.register_face(group, &face);
+                    }
+                    parser.faces.push(face)
+                },
+                Statement::Group(name) => current_group = Some(name),
                 _ => ()
             }
         }
     }
-
-    Parser::new(vertices, faces)
+    parser
 }
 
-fn parse_line(line: String) -> Command {
+fn parse_statement<'a>(line: String) -> Statement<'a> {
     let mut line = line.split_whitespace();
 
     match line.next() {
         Some("v") => parse_vertex(line),
         Some("f") => parse_face(line),
-        _ => Command::None
+        Some("g") => parse_group(line),
+        _ => Statement::None
     }
 }
 
-fn parse_vertex(mut line: SplitWhitespace) -> Command {
+fn parse_vertex(line: SplitWhitespace) -> Statement {
     let mut components: Vec<Real> = vec![];
 
     for word in line {
@@ -113,13 +152,13 @@ fn parse_vertex(mut line: SplitWhitespace) -> Command {
     }
 
     if components.is_empty() {
-        Command::None
+        Statement::None
     } else {
-        Command::Vertex(points::new(components[0], components[1], components[2]))
+        Statement::Vertex(points::new(components[0], components[1], components[2]))
     }
 }
 
-fn parse_face(mut line: SplitWhitespace) -> Command {
+fn parse_face(line: SplitWhitespace) -> Statement {
     let mut vertex_indices: Vec<usize> = vec![];
 
     for word in line {
@@ -129,9 +168,16 @@ fn parse_face(mut line: SplitWhitespace) -> Command {
     }
 
     if vertex_indices.is_empty() {
-        Command::None
+        Statement::None
     } else {
-        Command::Face(vertex_indices)
+        Statement::Face(vertex_indices)
+    }
+}
+
+fn parse_group(mut line: SplitWhitespace) -> Statement {
+    match line.next() {
+        None => Statement::None,
+        Some(name) => Statement::Group(name)
     }
 }
 
