@@ -48,6 +48,7 @@ fn test_parsing_faces() {
 
         if let (Geo::Triangle(t1), Geo::Triangle(t2)) = (t1.geo, t2.geo) {
             let vertices = parser.get_vertices();
+
             assert_eq!(t1.get_p1(), vertices[1]);
             assert_eq!(t1.get_p2(), vertices[2]);
             assert_eq!(t1.get_p3(), vertices[3]);
@@ -55,6 +56,40 @@ fn test_parsing_faces() {
             assert_eq!(t2.get_p1(), vertices[1]);
             assert_eq!(t2.get_p2(), vertices[3]);
             assert_eq!(t2.get_p3(), vertices[4]);
+        }
+    }
+}
+
+#[test]
+fn test_triangulating_polygons() {
+    let file = b"
+        v -1 1 0
+        v -1 0 0
+        v 1 0 0
+        v 1 1 0
+        v 0 2 0
+        f 1 2 3 4 5" as &[u8];
+    let parser = objs::parse_obj(file);
+    let group = parser.default_group();
+    if let Geo::Group(g) = &group.geo {
+        let t1 = g.child_at(0);
+        let t2 = g.child_at(1);
+        let t3 = g.child_at(2);
+
+        if let (Geo::Triangle(t1), Geo::Triangle(t2), Geo::Triangle(t3)) = (t1.geo, t2.geo, t3.geo) {
+            let vertices = parser.get_vertices();
+
+            assert_eq!(t1.get_p1(), vertices[1]);
+            assert_eq!(t1.get_p2(), vertices[2]);
+            assert_eq!(t1.get_p3(), vertices[3]);
+
+            assert_eq!(t2.get_p1(), vertices[1]);
+            assert_eq!(t2.get_p2(), vertices[3]);
+            assert_eq!(t2.get_p3(), vertices[4]);
+
+            assert_eq!(t3.get_p1(), vertices[1]);
+            assert_eq!(t3.get_p2(), vertices[4]);
+            assert_eq!(t3.get_p3(), vertices[5]);
         }
     }
 }
