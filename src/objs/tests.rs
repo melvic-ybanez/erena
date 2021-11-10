@@ -98,14 +98,14 @@ fn test_triangulating_polygons() {
 
 #[test]
 fn test_triangles_in_groups() -> io::Result<()> {
-    let file = File::open("triangles.obj")?;
+    let file = File::open("resources/triangles.obj")?;
     let parser = objs::parse_obj(file);
 
     let t1 = parser.get_triangle_unsafe("FirstGroup", 0);
-    let t2 = parser.get_triangle_unsafe("SecondGroup", 1);
+    let t2 = parser.get_triangle_unsafe("SecondGroup", 0);
 
     assert_eq!(t1.get_p1(), parser.vertices[1]);
-    assert_eq!(t1.get_p2(), parser.vertices[1]);
+    assert_eq!(t1.get_p2(), parser.vertices[2]);
     assert_eq!(t1.get_p3(), parser.vertices[3]);
 
     assert_eq!(t2.get_p1(), parser.vertices[1]);

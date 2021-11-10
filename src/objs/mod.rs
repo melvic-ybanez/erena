@@ -15,23 +15,23 @@ use std::collections::HashMap;
 use std::cell::RefCell;
 use std::borrow::Borrow;
 
-pub struct Parser<'a> {
+pub struct Parser {
     vertices: Vec<Point>,
     faces: Vec<FaceData>,
-    groups: HashMap<&'a str, Rc<Shape>>,
+    groups: HashMap<String, Rc<Shape>>,
 }
 
-pub enum Statement<'a> {
+pub enum Statement {
     Vertex(Point),
     Face(FaceData),
-    Group(&'a str),
+    Group(String),
     None,
 }
 
 type FaceData = Vec<usize>;
 
-impl<'a> Parser<'a> {
-    pub fn new(mut vertices: Vec<Point>, faces: Vec<FaceData>) -> Parser<'a> {
+impl Parser {
+    pub fn new(mut vertices: Vec<Point>, faces: Vec<FaceData>) -> Parser {
         // this is a quick way to make the indices 1-based
         let mut xs = vec![Point::origin()];
         xs.append(&mut vertices);
@@ -53,13 +53,17 @@ impl<'a> Parser<'a> {
 
     pub fn default_group(&mut self) -> Rc<Shape> {
         let key = "default";
-        for face in self.faces.iter() {
-            self.register_face(key, face);
-        }
-        self.groups.get(key).map(|r| *r).unwrap_or(Rc::new(Shape::empty_group()))
+        self.group_faces(key, self.faces.clone());
+        self.groups.get(key).map(|r| (*r).clone()).unwrap_or(Rc::new(Shape::empty_group()))
     }
 
-    fn register_face(&mut self, name: &'a str, face: &FaceData) -> Option<Rc<Shape>> {
+    fn group_faces(&mut self, name: &str, faces: Vec<FaceData>) {
+        faces.iter().for_each(|face| {
+            self.add_face_to_group(name, face);
+        })
+    }
+
+    fn add_face_to_group(&mut self, name: &str, face: &FaceData) -> Option<Rc<Shape>> {
         let group = match self.groups.get_mut(name) {
             None => Rc::new(Shape::empty_group()),
             Some(group) => group.clone()
@@ -73,7 +77,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        self.groups.insert(name, group)
+        self.groups.insert(name.to_string(), group)
     }
 
     /// Converts polygons into triangles
@@ -90,27 +94,36 @@ impl<'a> Parser<'a> {
         triangles
     }
 
-    pub fn get_group(&self, name: &str) -> Group {
-        unimplemented!()
+    pub fn get_group(&self, name: &str) -> Option<Group> {
+        self.groups.get(name).and_then(|group| {
+            if let Geo::Group(g) = &group.geo {
+                Some(g.clone())
+            } else {
+                None
+            }
+        })
     }
 
-    pub fn get_triangle(&'a self, name: &str, i: usize) -> Option<Triangle> {
-        let triangle_shape = self.get_group(name).get_child(i);
-        if let Geo::Triangle(triangle) = triangle_shape.geo {
-            Some(triangle)
-        } else {
-            None
-        }
+    pub fn get_triangle(&self, name: &str, i: usize) -> Option<Triangle> {
+        self.get_group(name)
+            .and_then(|group| {
+                let child = group.get_child(i);
+                if let Geo::Triangle(triangle) = child.geo {
+                    Some(triangle.clone())
+                } else {
+                    None
+                }
+            })
     }
 
-    pub fn get_triangle_unsafe(&'a self, name: &'a str, i: usize) -> Triangle {
+    pub fn get_triangle_unsafe(&self, name: &str, i: usize) -> Triangle {
         self.get_triangle(name, i).unwrap()
     }
 }
 
-pub fn parse_obj<'a, R: Read>(read: R) -> Parser<'a> {
+pub fn parse_obj<R: Read>(read: R) -> Parser {
     let lines = BufReader::new(read).lines();
-    let mut current_group: Option<&str> = None;
+    let mut current_group: Option<String> = None;
     let mut parser = Parser::new(vec![], vec![]);
 
     for line in lines {
@@ -118,11 +131,11 @@ pub fn parse_obj<'a, R: Read>(read: R) -> Parser<'a> {
             match parse_statement(line) {
                 Statement::Vertex(point) => parser.vertices.push(point),
                 Statement::Face(face) => {
-                    if let Some(group) = current_group {
-                        parser.register_face(group, &face);
+                    if let Some(ref group) = current_group {
+                        parser.add_face_to_group(group, &face);
                     }
                     parser.faces.push(face)
-                },
+                }
                 Statement::Group(name) => current_group = Some(name),
                 _ => ()
             }
@@ -131,7 +144,7 @@ pub fn parse_obj<'a, R: Read>(read: R) -> Parser<'a> {
     parser
 }
 
-fn parse_statement<'a>(line: String) -> Statement<'a> {
+fn parse_statement(line: String) -> Statement {
     let mut line = line.split_whitespace();
 
     match line.next() {
@@ -177,7 +190,7 @@ fn parse_face(line: SplitWhitespace) -> Statement {
 fn parse_group(mut line: SplitWhitespace) -> Statement {
     match line.next() {
         None => Statement::None,
-        Some(name) => Statement::Group(name)
+        Some(name) => Statement::Group(name.to_string())
     }
 }
 
