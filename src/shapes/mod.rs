@@ -100,7 +100,11 @@ impl Shape {
     }
 
     pub fn triangle(p1: Point, p2: Point, p3: Point) -> Shape {
-        Shape::new(Geo::Triangle(Triangle::new(p1, p2, p3)))
+        Shape::new(Geo::Triangle(Triangle::regular(p1, p2, p3)))
+    }
+
+    pub fn smooth_triangle(p1: Point, p2: Point, p3: Point, n1: Vector, n2: Vector, n3: Vector) -> Shape {
+        Shape::new(Geo::Triangle(Triangle::smooth(p1, p2, p3, n1, n2, n3)))
     }
 
     pub fn empty_group() -> Shape {

@@ -84,7 +84,7 @@ impl Parser {
     fn fan_triangulation(&self, face: &FaceData) -> Vec<Triangle> {
         let mut triangles: Vec<Triangle> = vec![];
         for i in 1..face.len() - 1 {
-            let triangle = Triangle::new(
+            let triangle = Triangle::regular(
                 self.vertices[face[0]],
                 self.vertices[face[i]],
                 self.vertices[face[i + 1]],
@@ -94,8 +94,12 @@ impl Parser {
         triangles
     }
 
-    pub fn get_group(&self, name: &str) -> Option<Group> {
-        self.groups.get(name).and_then(|group| {
+    pub fn get_group(&self, name: &str) -> Option<&Rc<Shape>> {
+        self.groups.get(name)
+    }
+
+    pub fn get_group_geo(&self, name: &str) -> Option<Group> {
+        self.get_group(name).and_then(|group| {
             if let Geo::Group(g) = &group.geo {
                 Some(g.clone())
             } else {
@@ -105,7 +109,7 @@ impl Parser {
     }
 
     pub fn get_triangle(&self, name: &str, i: usize) -> Option<Triangle> {
-        self.get_group(name)
+        self.get_group_geo(name)
             .and_then(|group| {
                 let child = group.get_child(i);
                 if let Geo::Triangle(triangle) = child.geo {

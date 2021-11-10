@@ -1,13 +1,31 @@
 use crate::shapes::{Geo, Shape};
 use crate::tuples::{points, vectors};
 use crate::rays::Ray;
+use crate::shapes::triangles::{Triangle, TriangleKind, Smooth};
+use crate::tuples::points::Point;
+use crate::tuples::vectors::Vector;
+
+fn tri_points() -> (Point, Point, Point) {
+    (points::new(0.0, 1.0, 0.0),
+     points::new(-1.0, 0.0, 0.0),
+     points::new(1.0, 0.0, 0.0))
+}
+
+fn smooth_tri_normals() -> (Vector, Vector, Vector) {
+    (vectors::new(0.0, 1.0, 0.0),
+     vectors::new(-1.0, 0.0, 0.0),
+     vectors::new(1.0, 0.0, 0.0))
+}
 
 fn set_up() -> Shape {
-    Shape::triangle(
-        points::new(0.0, 1.0, 0.0),
-        points::new(-1.0, 0.0, 0.0),
-        points::new(1.0, 0.0, 0.0)
-    )
+    let (p1, p2, p3) = tri_points();
+    Shape::triangle(p1, p2, p3)
+}
+
+fn smooth_tri_setup() -> Shape {
+    let (p1, p2, p3) = tri_points();
+    let (n1, n2, n3) = smooth_tri_normals();
+    Shape::smooth_triangle(p1, p2, p3, n1, n2, n3)
 }
 
 #[test]
@@ -78,4 +96,26 @@ fn test_ray_strikes_triangle() {
     let xs = triangle.intersect(&ray);
     assert_eq!(xs.len(), 1);
     assert_eq!(xs[0].t, 2.0);
+}
+
+#[test]
+fn test_construct_smooth_triangle() {
+    let triangle = smooth_tri_setup();
+    let (p1, p2, p3) = tri_points();
+    let (n1, n2, n3) = smooth_tri_normals();
+    if let Geo::Triangle(tri) = triangle.geo {
+        assert_eq!(tri.get_p1(), p1);
+        assert_eq!(tri.get_p2(), p2);
+        assert_eq!(tri.get_p3(), p3);
+
+        if let TriangleKind::Smooth(Smooth { n1: sn1, n2: sn2, n3: sn3 }) = tri.kind {
+            assert_eq!(sn1, n1);
+            assert_eq!(sn2, n2);
+            assert_eq!(sn3, n3);
+        } else {
+            panic!("Not a smooth triangle");
+        }
+    } else {
+        panic!("Not a smooth triangle");
+    }
 }
