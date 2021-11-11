@@ -4,7 +4,7 @@ use crate::shapes::Shape;
 use crate::rays::{Intersection3D, Ray, Intersection};
 use crate::math;
 use std::rc::Rc;
-use crate::shapes::triangles::TriangleKind::Regular;
+
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Triangle {

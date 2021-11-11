@@ -1,18 +1,18 @@
-use std::io::{Lines, BufReader, BufRead, Read, ErrorKind};
-use std::fs::File;
-use std::io;
+use std::io::{BufReader, BufRead, Read};
+
+
 use crate::math::Real;
-use std::num::ParseFloatError;
-use std::error::Error;
-use crate::tuples::points::{Point, PointT};
-use crate::tuples::{points, TupleLike};
+
+
+use crate::tuples::points::{Point};
+use crate::tuples::{points};
 use crate::shapes::groups::Group;
 use std::str::SplitWhitespace;
 use crate::shapes::triangles::Triangle;
 use std::rc::Rc;
-use crate::shapes::{Shape, Geo, Object};
+use crate::shapes::{Shape, Geo};
 use std::collections::HashMap;
-use std::cell::RefCell;
+
 
 pub struct Parser {
     vertices: Vec<Point>,

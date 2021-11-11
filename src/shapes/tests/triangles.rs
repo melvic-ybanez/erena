@@ -1,7 +1,7 @@
 use crate::shapes::{Geo, Shape};
 use crate::tuples::{points, vectors};
 use crate::rays::Ray;
-use crate::shapes::triangles::{Triangle, TriangleKind, Smooth};
+use crate::shapes::triangles::{TriangleKind, Smooth};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
