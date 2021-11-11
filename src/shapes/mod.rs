@@ -1,6 +1,6 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
-use crate::rays::{Ray, Intersection3D};
+use crate::rays::{Ray, Intersection3D, Intersection};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::shapes::cylinders::CylLike;
@@ -9,6 +9,7 @@ use std::rc::{Weak, Rc};
 use std::cell::RefCell;
 use crate::shapes::bounds::Bounds;
 use crate::shapes::triangles::Triangle;
+use crate::shapes::Geo::TestShape;
 
 #[derive(Debug, Clone)]
 pub struct Object<G> {
@@ -130,7 +131,7 @@ impl Shape {
         }
     }
 
-    pub fn normal_at(&self, world_point: Point) -> Vector {
+    pub fn normal_at(&self, world_point: Point, hit: &Intersection3D) -> Vector {
         let local_point = self.world_to_object(world_point);
 
         let local_normal = match self.geo {
@@ -141,7 +142,7 @@ impl Shape {
             Geo::Cylinder(CylLike { min, max, cone, .. }) =>
                 cylinders::normal_at(local_point, min, max, cone),
             Geo::Group(_) => groups::normal_at(),
-            Geo::Triangle(ref tri) => tri.get_normal()
+            Geo::Triangle(ref tri) => tri.get_normal(hit)
         };
 
         self.normal_to_world(local_normal)
@@ -163,6 +164,10 @@ impl Shape {
     pub fn geometry(mut self, geometry: Geo) -> Shape {
         self.geo = geometry;
         self
+    }
+
+    pub fn default_normal_at(&self, world_point: Point) -> Vector {
+        self.normal_at(world_point, &Intersection3D::test())
     }
 }
 

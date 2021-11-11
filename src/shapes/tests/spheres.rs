@@ -93,21 +93,21 @@ fn test_intersect_with_translated_sphere() {
 #[test]
 fn test_normal_at_point_on_x_axis() {
     let sphere = Shape::sphere();
-    let n = sphere.normal_at(points::new(1.0, 0.0, 0.0));
+    let n = sphere.default_normal_at(points::new(1.0, 0.0, 0.0));
     assert_eq!(n, vectors::new(1.0, 0.0, 0.0));
 }
 
 #[test]
 fn test_normal_at_point_on_y_axis() {
     let sphere = Shape::sphere();
-    let n = sphere.normal_at(points::new(0.0, 1.0, 0.0));
+    let n = sphere.default_normal_at(points::new(0.0, 1.0, 0.0));
     assert_eq!(n, vectors::new(0.0, 1.0, 0.0));
 }
 
 #[test]
 fn test_normal_at_point_on_z_axis() {
     let sphere = Shape::sphere();
-    let n = sphere.normal_at(points::new(0.0, 0.0, 1.0));
+    let n = sphere.default_normal_at(points::new(0.0, 0.0, 1.0));
     assert_eq!(n, vectors::new(0.0, 0.0, 1.0));
 }
 
@@ -115,7 +115,7 @@ fn test_normal_at_point_on_z_axis() {
 fn test_normal_at_nonaxial_point() {
     let sphere = Shape::sphere();
     let component = 3_f64.sqrt() / 3.0;
-    let n = sphere.normal_at(points::new(component, component, component));
+    let n = sphere.default_normal_at(points::new(component, component, component));
     assert_eq!(n, vectors::new(component, component, component));
 }
 
@@ -123,14 +123,14 @@ fn test_normal_at_nonaxial_point() {
 fn test_normal_is_normalized() {
     let sphere = Shape::sphere();
     let component = 3_f64.sqrt() / 3.0;
-    let n = sphere.normal_at(points::new(component, component, component));
+    let n = sphere.default_normal_at(points::new(component, component, component));
     assert_eq!(n, n.normalize());
 }
 
 #[test]
 fn test_normal_on_translated_sphere() {
     let sphere = Shape::sphere().transform(translation(0.0, 1.0, 0.0));
-    let n = sphere.normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
+    let n = sphere.default_normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
     assert_eq!(n, vectors::new(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
 }
 
@@ -138,7 +138,7 @@ fn test_normal_on_translated_sphere() {
 fn test_normal_on_transformed_sphere() {
     let m = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
     let sphere = Shape::sphere().transform(m);
-    let n = sphere.normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
+    let n = sphere.default_normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
     assert_eq!(n.round_items(), vectors::new(0.0, 0.97014, -0.24254));
 }
 

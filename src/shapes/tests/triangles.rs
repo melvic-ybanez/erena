@@ -1,9 +1,11 @@
 use crate::shapes::{Geo, Shape};
 use crate::tuples::{points, vectors};
-use crate::rays::{Ray, IntersectionKind};
+use crate::rays::{Ray, IntersectionKind, Intersection};
 use crate::shapes::triangles::{TriangleKind, Smooth};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use std::rc::Rc;
+use crate::math;
 
 fn tri_points() -> (Point, Point, Point) {
     (points::new(0.0, 1.0, 0.0),
@@ -41,7 +43,7 @@ fn test_constructing_triangle() {
         assert_eq!(t.get_p3(), p3);
         assert_eq!(t.get_edge1(), vectors::new(-1.0, -1.0, 0.0));
         assert_eq!(t.get_edge2(), vectors::new(1.0, -1.0, 0.0));
-        assert_eq!(t.get_normal(), vectors::new(0.0, 0.0, -1.0));
+        assert_eq!(t.get_default_normal(), vectors::new(0.0, 0.0, -1.0));
     } else {
         panic!("Not a triangle");
     }
@@ -52,9 +54,9 @@ fn test_triangle_normal() {
     let triangle = triangle();
 
     if let Geo::Triangle(ref tri) = triangle.geo {
-        assert_eq!(triangle.normal_at(points::new(0.0, 0.5, 0.0)), tri.get_normal());
-        assert_eq!(triangle.normal_at(points::new(-0.5, 0.75, 0.0)), tri.get_normal());
-        assert_eq!(triangle.normal_at(points::new(0.5, 0.25, 0.0)), tri.get_normal());
+        assert_eq!(triangle.default_normal_at(points::new(0.0, 0.5, 0.0)), tri.get_default_normal());
+        assert_eq!(triangle.default_normal_at(points::new(-0.5, 0.75, 0.0)), tri.get_default_normal());
+        assert_eq!(triangle.default_normal_at(points::new(0.5, 0.25, 0.0)), tri.get_default_normal());
     }
 }
 
@@ -130,10 +132,19 @@ fn test_intersection_stores_uv() {
 
     for intersection in xs.iter() {
         if let IntersectionKind::Triangle { u, v } = intersection.get_kind() {
-            assert_eq!(u, 0.45);
-            assert_eq!(v, 0.25);
+            assert_eq!(math::round(u, 2), 0.45);
+            assert_eq!(math::round(v, 2), 0.25);
         } else {
             panic!("Intersection kind is not triangle");
         }
     }
+}
+
+/// A smooth triangle uses u and v to interpolate the normal
+#[test]
+fn test_uv_interpolation_with_normal() {
+    let tri = Rc::new(smooth_triangle());
+    let i = Intersection::new_with_uv(1.0, Rc::clone(&tri), 0.45, 0.25);
+    let n = tri.normal_at(Point::origin(), &i);
+    assert_eq!(n, vectors::new(-0.5547, 0.83205, 0.0));
 }

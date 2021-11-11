@@ -8,9 +8,9 @@ use std::rc::Rc;
 #[test]
 fn test_normal_at() {
     let plane = Shape::plane();
-    let n1 = plane.normal_at(Point::origin());
-    let n2 = plane.normal_at(points::new(10.0, 0.0, -10.0));
-    let n3 = plane.normal_at(points::new(-5.0, 0.0, 150.0));
+    let n1 = plane.default_normal_at(Point::origin());
+    let n2 = plane.default_normal_at(points::new(10.0, 0.0, -10.0));
+    let n3 = plane.default_normal_at(points::new(-5.0, 0.0, 150.0));
 
     assert_eq!(plane.geo, Geo::Plane);
     assert_eq!(n1, vectors::new(0.0, 1.0, 0.0));

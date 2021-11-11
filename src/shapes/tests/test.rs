@@ -72,13 +72,13 @@ fn test_intersection_with_translation() {
 #[test]
 fn test_normal_on_translated_shape() {
     let shape = Shape::test().translate(0.0, 1.0, 0.0);
-    let n = shape.normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
+    let n = shape.default_normal_at(points::new(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
     assert_eq!(n, vectors::new(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
 }
 
 #[test]
 fn test_normal_on_transformed_shape() {
     let shape = Shape::test().rotate_z(math::PI / 5.0).scale(1.0, 0.5, 1.0);
-    let n = shape.normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
+    let n = shape.default_normal_at(points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0));
     assert_eq!(n.round_items(), vectors::new(0.0, 0.97014, -0.24254));
 }

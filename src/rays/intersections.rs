@@ -5,6 +5,7 @@ use crate::math;
 use crate::math::Real;
 use crate::shapes::{Object, Geo, Shape};
 use std::rc::Rc;
+use crate::shapes::triangles::{TriangleKind, Triangle};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Intersection<S> {
@@ -19,8 +20,8 @@ pub type Intersection3D = Intersection<Geo>;
 pub enum IntersectionKind {
     Regular,
     Triangle {
-        u: f32,
-        v: f32,
+        u: Real,
+        v: Real,
     },
 }
 
@@ -69,12 +70,16 @@ impl<S: Clone + PartialEq> Intersection<S> {
 }
 
 impl Intersection3D {
-    pub fn new_with_uv(t: Real, shape: Rc<Shape>, u: f32, v: f32) -> Intersection3D {
+    pub fn new_with_uv(t: Real, shape: Rc<Shape>, u: Real, v: Real) -> Intersection3D {
         Intersection::new_with_kind(t, Rc::clone(&shape), if let Geo::Triangle(_) = shape.geo {
             IntersectionKind::Triangle { u, v }
         } else {
             IntersectionKind::Regular
         })
+    }
+
+    pub fn test() -> Intersection3D {
+        Intersection::new(0.0, Rc::new(Shape::test()))
     }
 }
 

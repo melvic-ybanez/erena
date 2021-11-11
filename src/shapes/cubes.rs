@@ -115,7 +115,7 @@ mod tests {
             (points::new(-1.0, -1.0, -1.0), vectors::new(-1.0, 0.0, 0.0))
         ];
         for (point, normal) in data {
-            assert_eq!(cube.normal_at(point), normal);
+            assert_eq!(cube.default_normal_at(point), normal);
         }
     }
 }

@@ -146,7 +146,7 @@ fn test_normal_on_child() {
         scaling(1.0, 2.0, 3.0),
         translation(5.0, 0.0, 0.0),
         |shape| {
-            let normal = shape.normal_at(points::new(1.7321, 1.1547, -5.5774));
+            let normal = shape.default_normal_at(points::new(1.7321, 1.1547, -5.5774));
             assert_eq!(normal.round_items(), vectors::new(0.28570, 0.42854, -0.85716));
         }
     );

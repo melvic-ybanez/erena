@@ -50,7 +50,7 @@ fn test_cylinder_normal() {
         (points::new(-1.0, 1.0, 0.0), vectors::new(-1.0, 0.0, 0.0))
     ];
     for (point, normal) in data {
-        let n = cyl.normal_at(point);
+        let n = cyl.default_normal_at(point);
         assert_eq!(n, normal);
     }
 }
@@ -124,7 +124,7 @@ fn test_cylinder_end_caps_normal() {
     ];
 
     for (point, normal) in data {
-        assert_eq!(cyl.normal_at(point), normal);
+        assert_eq!(cyl.default_normal_at(point), normal);
     }
 }
 

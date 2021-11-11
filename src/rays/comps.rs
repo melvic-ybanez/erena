@@ -41,7 +41,7 @@ impl<'a> Comps3D<'a> {
             object,
             point,
             eye_vec: -ray.direction,
-            normal_vec: object.normal_at(point),
+            normal_vec: object.normal_at(point, hit),
             reflect_vec: Vector::zero(),
             inside: false,
             over_point: None,

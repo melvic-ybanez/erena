@@ -1,9 +1,10 @@
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::shapes::Shape;
-use crate::rays::{Intersection3D, Ray, Intersection};
+use crate::rays::{Intersection3D, Ray, Intersection, IntersectionKind};
 use crate::math;
 use std::rc::Rc;
+use crate::math::Real;
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -18,11 +19,16 @@ pub struct Triangle {
 
 impl Triangle {
     pub fn new<F>(p1: Point, p2: Point, p3: Point, kind_f: F) -> Triangle
-    where F: FnOnce(Vector, Vector) -> TriangleKind {
+        where F: FnOnce(Vector, Vector) -> TriangleKind {
         let edge1 = (p2 - p1).to_vector();
         let edge2 = (p3 - p1).to_vector();
         Triangle {
-            p1, p2, p3, edge1, edge2, kind: kind_f(edge1, edge2),
+            p1,
+            p2,
+            p3,
+            edge1,
+            edge2,
+            kind: kind_f(edge1, edge2),
         }
     }
 
@@ -42,11 +48,20 @@ impl Triangle {
         self.edge2
     }
 
-    pub fn get_normal(&self) -> Vector {
+    pub fn get_normal(&self, hit: &Intersection3D) -> Vector {
         match self.kind {
             TriangleKind::Regular { normal } => normal,
-            TriangleKind::Smooth(Smooth { n1, .. }) => n1,
+            TriangleKind::Smooth(Smooth { n1, n2, n3 }) =>
+                if let IntersectionKind::Triangle { u, v } = hit.get_kind() {
+                    n2 * u + n3 * v + n1 * (1.0 - u - v)
+                } else {
+                    n1  // actually, could have `panic!` here as well
+                }
         }
+    }
+
+    pub fn get_default_normal(&self) -> Vector {
+        self.get_normal(&Intersection3D::test())
     }
 
     pub fn get_p1(&self) -> Point {
@@ -68,7 +83,7 @@ impl Triangle {
         let determinant = self.get_edge1().dot(dir_cross_e2);
 
         if determinant.abs() < math::EPSILON {
-            return vec![]
+            return vec![];
         }
 
         let f = 1.0 / determinant;
@@ -76,25 +91,27 @@ impl Triangle {
         let u = f * p1_to_origin.dot(dir_cross_e2);
 
         if u < 0.0 || u > 1.0 {
-            return vec![]   // the ray misses
+            return vec![];   // the ray misses
         }
 
         let origin_cross_e1 = p1_to_origin.to_vector().cross(self.edge1);
         let v = f * ray.direction.dot(origin_cross_e1);
 
         if v < 0.0 || (u + v) > 1.0 {
-            return vec![]
+            return vec![];
         }
 
         let t = f * self.edge2.dot(origin_cross_e1);
-        vec![Intersection::new_with_uv(t, Rc::new(shape.clone()), u as f32, v as f32)]
+
+        // u and v are needed for smooth triangles
+        vec![Intersection::new_with_uv(t, Rc::new(shape.clone()), u, v)]
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum TriangleKind {
     Regular { normal: Vector },
-    Smooth(Smooth)
+    Smooth(Smooth),
 }
 
 impl TriangleKind {
@@ -111,7 +128,7 @@ impl TriangleKind {
 pub struct Smooth {
     pub n1: Vector,
     pub n2: Vector,
-    pub n3: Vector
+    pub n3: Vector,
 }
 
 impl Smooth {
