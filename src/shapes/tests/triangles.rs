@@ -1,6 +1,6 @@
 use crate::shapes::{Geo, Shape};
 use crate::tuples::{points, vectors};
-use crate::rays::Ray;
+use crate::rays::{Ray, IntersectionKind};
 use crate::shapes::triangles::{TriangleKind, Smooth};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
@@ -17,12 +17,12 @@ fn smooth_tri_normals() -> (Vector, Vector, Vector) {
      vectors::new(1.0, 0.0, 0.0))
 }
 
-fn set_up() -> Shape {
+fn triangle() -> Shape {
     let (p1, p2, p3) = tri_points();
     Shape::triangle(p1, p2, p3)
 }
 
-fn smooth_tri_setup() -> Shape {
+fn smooth_triangle() -> Shape {
     let (p1, p2, p3) = tri_points();
     let (n1, n2, n3) = smooth_tri_normals();
     Shape::smooth_triangle(p1, p2, p3, n1, n2, n3)
@@ -49,7 +49,7 @@ fn test_constructing_triangle() {
 
 #[test]
 fn test_triangle_normal() {
-    let triangle = set_up();
+    let triangle = triangle();
 
     if let Geo::Triangle(ref tri) = triangle.geo {
         assert_eq!(triangle.normal_at(points::new(0.0, 0.5, 0.0)), tri.get_normal());
@@ -62,14 +62,14 @@ fn test_triangle_normal() {
 /// of the triangle.
 #[test]
 fn test_intersect_parallel() {
-    let triangle = set_up();
+    let triangle = triangle();
     let ray = Ray::new(points::new(0.0, -1.0, -2.0), vectors::new(0.0, 1.0, 0.0));
     assert!(triangle.intersect(&ray).is_empty());
 }
 
 #[test]
 fn test_ray_misses_p1_p3_edge() {
-    let triangle = set_up();
+    let triangle = triangle();
     let ray = Ray::new(points::new(1.0, 1.0, -2.0), vectors::new(0.0, 0.0, 1.0));
     let xs = triangle.intersect(&ray);
     assert!(xs.is_empty());
@@ -77,21 +77,21 @@ fn test_ray_misses_p1_p3_edge() {
 
 #[test]
 fn test_ray_misses_p1_p2_edge() {
-    let triangle = set_up();
+    let triangle = triangle();
     let ray = Ray::new(points::new(-1.0, 1.0, -2.0), vectors::new(0.0, 0.0, 1.0));
     assert!(triangle.intersect(&ray).is_empty());
 }
 
 #[test]
 fn test_ray_misses_p2_p3_edge() {
-    let triangle = set_up();
+    let triangle = triangle();
     let ray = Ray::new(points::new(0.0, -1.0, -2.0), vectors::new(0.0, 0.0, 1.0));
     assert!(triangle.intersect(&ray).is_empty());
 }
 
 #[test]
 fn test_ray_strikes_triangle() {
-    let triangle = set_up();
+    let triangle = triangle();
     let ray = Ray::new(points::new(0.0, 0.5, -2.0), vectors::new(0.0, 0.0, 1.0));
     let xs = triangle.intersect(&ray);
     assert_eq!(xs.len(), 1);
@@ -100,7 +100,7 @@ fn test_ray_strikes_triangle() {
 
 #[test]
 fn test_construct_smooth_triangle() {
-    let triangle = smooth_tri_setup();
+    let triangle = smooth_triangle();
     let (p1, p2, p3) = tri_points();
     let (n1, n2, n3) = smooth_tri_normals();
     if let Geo::Triangle(tri) = triangle.geo {
@@ -117,5 +117,23 @@ fn test_construct_smooth_triangle() {
         }
     } else {
         panic!("Not a smooth triangle");
+    }
+}
+
+/// Checks that an intersection with a smooth triangle
+/// preserves the u and v properties
+#[test]
+fn test_intersection_stores_uv() {
+    let tri = smooth_triangle();
+    let ray = Ray::new(points::new(-0.2, 0.3, -2.0), vectors::new(0.0, 0.0, 1.0));
+    let xs = tri.intersect(&ray);
+
+    for intersection in xs.iter() {
+        if let IntersectionKind::Triangle { u, v } = intersection.get_kind() {
+            assert_eq!(u, 0.45);
+            assert_eq!(v, 0.25);
+        } else {
+            panic!("Intersection kind is not triangle");
+        }
     }
 }

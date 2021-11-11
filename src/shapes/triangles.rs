@@ -87,7 +87,7 @@ impl Triangle {
         }
 
         let t = f * self.edge2.dot(origin_cross_e1);
-        vec![Intersection::new(t, Rc::new(shape.clone()))]
+        vec![Intersection::new_with_uv(t, Rc::new(shape.clone()), u as f32, v as f32)]
     }
 }
 

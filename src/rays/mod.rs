@@ -1,5 +1,5 @@
 pub use comps::*;
-pub use intersections::{Intersection, Intersection3D};
+pub use intersections::{Intersection, Intersection3D, IntersectionKind};
 
 use crate::math::Real;
 use crate::matrix::Matrix;
