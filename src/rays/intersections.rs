@@ -38,7 +38,7 @@ impl<S: Clone + PartialEq> Intersection<S> {
         Intersection::new(t, Rc::clone(object))
     }
 
-    pub fn hit_refs(xs: Vec<&Intersection<S>>) -> Option<Intersection<S>> {
+    pub fn hit_from_refs(xs: Vec<&Intersection<S>>) -> Option<Intersection<S>> {
         let mut xs: Vec<_> = xs.into_iter().filter(|x| x.t >= 0.0).collect();
         if xs.is_empty() {
             None
@@ -49,7 +49,7 @@ impl<S: Clone + PartialEq> Intersection<S> {
     }
 
     pub fn hit(xs: Vec<Intersection<S>>) -> Option<Intersection<S>> {
-        Intersection::hit_refs(xs.iter().collect::<Vec<_>>())
+        Intersection::hit_from_refs(xs.iter().collect::<Vec<_>>())
     }
 
     pub fn agg(shape: &Rc<Object<S>>, ts: &[Real]) -> Vec<Intersection<S>> {
@@ -109,7 +109,7 @@ mod tests {
         let i1 = Intersection::from_ref(1.0, &sphere);
         let i2 = Intersection::from_ref(2.0, &sphere);
         let xs = vec![&i1, &i2];
-        assert_eq!(Intersection::hit_refs(xs), Some(i1));
+        assert_eq!(Intersection::hit_from_refs(xs), Some(i1));
     }
 
     #[test]
@@ -125,7 +125,7 @@ mod tests {
         let i1 = Intersection::from_ref(-2.0, &sphere);
         let i2 = Intersection::from_ref(-1.0, &sphere);
         let xs = vec![&i2, &i1];
-        assert_eq!(Intersection::hit_refs(xs), None);
+        assert_eq!(Intersection::hit_from_refs(xs), None);
     }
 
     /// Tests the hit as being the lowest non-negative intersection

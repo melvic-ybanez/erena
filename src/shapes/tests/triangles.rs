@@ -1,6 +1,6 @@
 use crate::shapes::{Geo, Shape};
 use crate::tuples::{points, vectors};
-use crate::rays::{Ray, IntersectionKind, Intersection};
+use crate::rays::{Ray, IntersectionKind, Intersection, Comps};
 use crate::shapes::triangles::{TriangleKind, Smooth};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
@@ -147,4 +147,15 @@ fn test_uv_interpolation_with_normal() {
     let i = Intersection::new_with_uv(1.0, Rc::clone(&tri), 0.45, 0.25);
     let n = tri.normal_at(Point::origin(), &i);
     assert_eq!(n, vectors::new(-0.5547, 0.83205, 0.0));
+}
+
+/// Preparing the normal on a smooth triangle
+#[test]
+fn test_prepare_normal_for_smooth() {
+    let tri = smooth_triangle();
+    let intersection = Intersection::new_with_uv(1.0, Rc::new(tri), 0.45, 0.25);
+    let ray = Ray::new(points::new(-0.2, 0.3, -2.0), vectors::new(0.0, 0.0, 1.0));
+    let xs = vec![intersection.clone()];
+    let comps = Comps::prepare(&intersection, &ray, &xs);
+    assert_eq!(comps.get_normal_vec(), vectors::new(-0.5547, 0.83205, 0.0));
 }
