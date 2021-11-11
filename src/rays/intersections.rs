@@ -3,20 +3,34 @@ use std::cmp::Ordering::Equal;
 
 use crate::math;
 use crate::math::Real;
-use crate::shapes::{Object, Geo};
+use crate::shapes::{Object, Geo, Shape};
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Intersection<S> {
     pub t: Real,
     pub object: Rc<Object<S>>,
+    kind: IntersectionKind,
 }
 
 pub type Intersection3D = Intersection<Geo>;
 
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum IntersectionKind {
+    Regular,
+    Triangle {
+        u: f32,
+        v: f32,
+    },
+}
+
 impl<S: Clone + PartialEq> Intersection<S> {
     pub fn new(t: Real, object: Rc<Object<S>>) -> Intersection<S> {
-        Intersection { t, object }
+        Intersection::new_with_kind(t, object, IntersectionKind::Regular)
+    }
+
+    pub fn new_with_kind(t: Real, object: Rc<Object<S>>, kind: IntersectionKind) -> Intersection<S> {
+        Intersection { t, object, kind }
     }
 
     pub fn from_ref(t: Real, object: &Rc<Object<S>>) -> Intersection<S> {
@@ -48,11 +62,25 @@ impl<S: Clone + PartialEq> Intersection<S> {
     pub(crate) fn compare(i1: &Intersection<S>, i2: &Intersection<S>) -> Ordering {
         math::order_reals(i1.t, i2.t)
     }
+
+    pub fn get_kind(&self) -> IntersectionKind {
+        self.kind
+    }
+}
+
+impl Intersection3D {
+    pub fn new_with_uv(t: Real, shape: Rc<Shape>, u: f32, v: f32) -> Intersection3D {
+        Intersection::new_with_kind(t, Rc::clone(&shape), if let Geo::Triangle(_) = shape.geo {
+            IntersectionKind::Triangle { u, v }
+        } else {
+            IntersectionKind::Regular
+        })
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::rays::intersections::Intersection;
+    use crate::rays::intersections::{Intersection, IntersectionKind};
     use crate::shapes::{Shape, spheres};
     use crate::rays::{Ray, Comps};
     use crate::tuples::{points, vectors};
@@ -122,7 +150,7 @@ mod tests {
         let shape = Rc::new(Shape::plane());
         let ray = Ray::new(
             points::new(0.0, 1.0, 1.0),
-            vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2())
+            vectors::new(0.0, -math::two_sqrt_div_2(), math::two_sqrt_div_2()),
         );
         let i = Intersection::from_ref(2_f64.sqrt(), &shape);
         let comps = Comps::prepare_default(&i, &ray);
@@ -173,5 +201,22 @@ mod tests {
         let comps = Comps::prepare(&i, &ray, &vec![i.clone()]);
         assert!(comps.get_under_point().z > math::EPSILON / 2.0);
         assert!(comps.get_point().z < comps.get_under_point().z);
+    }
+
+    #[test]
+    fn test_with_uv() {
+        let shape = Shape::triangle(
+            points::new(0.0, 1.0, 0.0),
+            points::new(-1.0, 0.0, 0.0),
+            points::new(1.0, 0.0, 0.0),
+        );
+        let intersection = Intersection::new_with_uv(3.5, Rc::new(shape), 0.2, 0.4);
+
+        if let IntersectionKind::Triangle { u, v } = intersection.get_kind() {
+            assert_eq!(u, 0.2);
+            assert_eq!(v, 0.4);
+        } else {
+            panic!("Intersection kind is not triangle");
+        }
     }
 }

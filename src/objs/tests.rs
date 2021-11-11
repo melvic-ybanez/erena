@@ -1,5 +1,4 @@
 use crate::objs;
-use std::io::Error;
 use crate::tuples::points;
 use crate::shapes::Geo;
 use std::fs::File;

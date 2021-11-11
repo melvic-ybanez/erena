@@ -13,7 +13,6 @@ use std::rc::Rc;
 use crate::shapes::{Shape, Geo, Object};
 use std::collections::HashMap;
 use std::cell::RefCell;
-use std::borrow::Borrow;
 
 pub struct Parser {
     vertices: Vec<Point>,
