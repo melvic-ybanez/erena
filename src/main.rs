@@ -10,7 +10,7 @@ mod materials;
 mod renderer;
 mod scene;
 mod patterns;
-mod objs;
+mod parsers;
 
 fn main() {
     println!("Rendering...");

@@ -1,5 +1,5 @@
-use crate::objs;
-use crate::tuples::points;
+use crate::parsers;
+use crate::tuples::{points, vectors};
 use crate::shapes::Geo;
 use std::fs::File;
 use std::io;
@@ -11,7 +11,7 @@ fn test_ignoring_unrecognized_files() {
         She set out one day.
         in a relative way,
         and came back the previous night." as &[u8];
-    let result = objs::parse_obj(gibberish);
+    let result = parsers::parse_obj(gibberish);
     assert!(result.is_empty());
 }
 
@@ -22,7 +22,7 @@ fn test_parsing_vertex_records() {
         v -1.0000 0.5000 0.0000
         v 1 0 0
         v 1 1 0" as &[u8];
-    let parser = objs::parse_obj(file);
+    let parser = parsers::parse_obj(file);
     let vertices = parser.get_vertices();
 
     assert_eq!(vertices[1], points::new(-1.0, 1.0, 0.0));
@@ -41,7 +41,7 @@ fn test_parsing_faces() {
 
         f 1 2 3
         f 1 3 4" as &[u8];
-    let mut parser = objs::parse_obj(file);
+    let mut parser = parsers::parse_obj(file);
     let group = parser.default_group();
     if let Geo::Group(g) = &group.geo {
         let t1 = g.get_child(0);
@@ -70,7 +70,7 @@ fn test_triangulating_polygons() {
         v 1 1 0
         v 0 2 0
         f 1 2 3 4 5" as &[u8];
-    let mut parser = objs::parse_obj(file);
+    let mut parser = parsers::parse_obj(file);
     let group = parser.default_group();
     if let Geo::Group(g) = &group.geo {
         let t1 = g.get_child(0);
@@ -98,7 +98,7 @@ fn test_triangulating_polygons() {
 #[test]
 fn test_triangles_in_groups() -> io::Result<()> {
     let file = File::open("resources/triangles.obj")?;
-    let parser = objs::parse_obj(file);
+    let parser = parsers::parse_obj(file);
 
     let t1 = parser.get_triangle_unsafe("FirstGroup", 0);
     let t2 = parser.get_triangle_unsafe("SecondGroup", 0);
@@ -111,4 +111,16 @@ fn test_triangles_in_groups() -> io::Result<()> {
     assert_eq!(t2.get_p2(), parser.vertices[3]);
     assert_eq!(t2.get_p3(), parser.vertices[4]);
     Ok(())
+}
+
+#[test]
+fn test_vertex_normal_records() {
+    let file = b"
+        vn 0 0 1
+        vn 0.707 0 -0.707
+        vn 1 2 3" as &[u8];
+    let parser = parsers::parse_obj(file);
+    assert_eq!(parser.get_normals()[1], vectors::new(0.0, 0.0, 1.0));
+    assert_eq!(parser.get_normals()[2], vectors::new(0.707, 0.0, -0.707));
+    assert_eq!(parser.get_normals()[3], vectors::new(1.0, 2.0, 3.0));
 }

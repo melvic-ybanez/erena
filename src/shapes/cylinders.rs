@@ -12,7 +12,8 @@ pub struct CylLike {
     pub min: Real,
     pub max: Real,
     pub closed: bool,
-    pub cone: bool,     // consider defining cone as its own type?
+    // consider defining cone as its own type?
+    pub cone: bool,
 }
 
 impl CylLike {
@@ -163,12 +164,12 @@ fn intersect_caps(cyl: &Shape, ray: &Ray, mut xs: Vec<Intersection3D>) -> Vec<In
     if let Geo::Cylinder(CylLike { min, max, closed, .. }) = cyl.geo {
         // not closed or no intersection. Reject.
         if !closed || math::compare_reals(ray.direction.y, 0.0) {
-            return xs
+            return xs;
         }
 
         check_cap(cyl, ray, min, &mut xs);
         check_cap(cyl, ray, max, &mut xs);
-        return xs
+        return xs;
     }
     xs
 }

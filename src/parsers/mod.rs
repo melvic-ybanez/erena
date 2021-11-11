@@ -5,23 +5,28 @@ use crate::math::Real;
 
 
 use crate::tuples::points::{Point};
-use crate::tuples::{points};
+use crate::tuples::{points, vectors};
 use crate::shapes::groups::Group;
 use std::str::SplitWhitespace;
 use crate::shapes::triangles::Triangle;
 use std::rc::Rc;
 use crate::shapes::{Shape, Geo};
 use std::collections::HashMap;
+use crate::tuples::vectors::Vector;
 
-
+/// Contains information about an input OBJ, which can be represented
+/// as a file, a byte slice or any data that implements Read.
+/// Note: vertices and normals are both 1-based
 pub struct Parser {
     vertices: Vec<Point>,
+    normals: Vec<Vector>,
     faces: Vec<FaceData>,
     groups: HashMap<String, Rc<Shape>>,
 }
 
 pub enum Statement {
     Vertex(Point),
+    Normal(Vector),
     Face(FaceData),
     Group(String),
     None,
@@ -30,12 +35,12 @@ pub enum Statement {
 type FaceData = Vec<usize>;
 
 impl Parser {
-    pub fn new(mut vertices: Vec<Point>, faces: Vec<FaceData>) -> Parser {
+    pub fn new() -> Parser {
         // this is a quick way to make the indices 1-based
-        let mut xs = vec![Point::origin()];
-        xs.append(&mut vertices);
+        let vertices = vec![Point::origin()];
+        let normals = vec![Vector::zero()];
 
-        Parser { vertices: xs, faces, groups: HashMap::new() }
+        Parser { vertices, normals, faces: vec![], groups: HashMap::new() }
     }
 
     pub fn len(&self) -> usize {
@@ -44,6 +49,10 @@ impl Parser {
 
     pub fn get_vertices(&self) -> Vec<Point> {
         self.vertices.clone()
+    }
+
+    pub fn get_normals(&self) -> Vec<Vector> {
+        self.normals.clone()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -127,12 +136,13 @@ impl Parser {
 pub fn parse_obj<R: Read>(read: R) -> Parser {
     let lines = BufReader::new(read).lines();
     let mut current_group: Option<String> = None;
-    let mut parser = Parser::new(vec![], vec![]);
+    let mut parser = Parser::new();
 
     for line in lines {
         if let Ok(line) = line {
             match parse_statement(line) {
                 Statement::Vertex(point) => parser.vertices.push(point),
+                Statement::Normal(vector) => parser.normals.push(vector),
                 Statement::Face(face) => {
                     if let Some(ref group) = current_group {
                         parser.add_face_to_group(group, &face);
@@ -140,10 +150,11 @@ pub fn parse_obj<R: Read>(read: R) -> Parser {
                     parser.faces.push(face)
                 }
                 Statement::Group(name) => current_group = Some(name),
-                _ => ()
+                Statement::None => (),
             }
         }
     }
+
     parser
 }
 
@@ -152,6 +163,7 @@ fn parse_statement(line: String) -> Statement {
 
     match line.next() {
         Some("v") => parse_vertex(line),
+        Some("vn") => parse_normal(line),
         Some("f") => parse_face(line),
         Some("g") => parse_group(line),
         _ => Statement::None
@@ -159,6 +171,15 @@ fn parse_statement(line: String) -> Statement {
 }
 
 fn parse_vertex(line: SplitWhitespace) -> Statement {
+    parse_tuple(line, |ps| Statement::Vertex(points::new(ps[0], ps[1], ps[2])))
+}
+
+fn parse_normal(line: SplitWhitespace) -> Statement {
+    parse_tuple(line, |vs| Statement::Normal(vectors::new(vs[0], vs[1], vs[2])))
+}
+
+fn parse_tuple<F>(line: SplitWhitespace, f: F) -> Statement
+    where F: FnOnce(Vec<Real>) -> Statement {
     let mut components: Vec<Real> = vec![];
 
     for word in line {
@@ -170,7 +191,7 @@ fn parse_vertex(line: SplitWhitespace) -> Statement {
     if components.is_empty() {
         Statement::None
     } else {
-        Statement::Vertex(points::new(components[0], components[1], components[2]))
+        f(components)
     }
 }
 
