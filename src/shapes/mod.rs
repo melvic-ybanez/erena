@@ -1,6 +1,6 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
-use crate::rays::{Ray, Intersection3D, Intersection};
+use crate::rays::{Ray, Intersection3D};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use crate::shapes::cylinders::CylLike;
@@ -9,7 +9,7 @@ use std::rc::{Weak, Rc};
 use std::cell::RefCell;
 use crate::shapes::bounds::Bounds;
 use crate::shapes::triangles::Triangle;
-use crate::shapes::Geo::TestShape;
+
 
 #[derive(Debug, Clone)]
 pub struct Object<G> {

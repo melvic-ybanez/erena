@@ -5,7 +5,7 @@ use crate::math;
 use crate::math::Real;
 use crate::shapes::{Object, Geo, Shape};
 use std::rc::Rc;
-use crate::shapes::triangles::{TriangleKind, Triangle};
+
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Intersection<S> {
