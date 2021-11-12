@@ -124,7 +124,7 @@ impl<T> Index<usize> for TupleLike<T> {
 
 impl<T> PartialEq for TupleLike<T> {
     fn eq(&self, other: &Self) -> bool {
-        (0..4).all(|i| math::compare_reals(self[i], other[i]))
+        (0..LEN).all(|i| math::compare_reals(self[i], other[i]))
     }
 }
 

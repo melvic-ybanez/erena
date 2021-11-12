@@ -15,6 +15,12 @@ impl Bounds {
         Bounds { min, max }
     }
 
+    /// Creates a box that has no space. Since the min points at positive infinity
+    /// and the max points at negative infinity, this box is considered invalid.
+    pub fn empty() -> Bounds {
+        Bounds::from_min(points::new(Real::INFINITY, Real::INFINITY, Real::INFINITY))
+    }
+
     /// Constructs a bounds with opposing minimum and maximum
     pub fn from_min(min: Point) -> Bounds {
         Bounds::new(min, (-min).to_point())
@@ -41,6 +47,17 @@ impl Bounds {
 mod tests {
     use crate::tuples::points;
     use crate::shapes::Shape;
+    use crate::shapes::bounds::Bounds;
+    use crate::math::Real;
+
+    #[test]
+    fn test_creating_empty_box() {
+        let bbox = Bounds::empty();
+        let min = points::new(Real::INFINITY, Real::INFINITY, Real::INFINITY);
+        let max = (-min).to_point();
+        assert_eq!(bbox.min, min);
+        //assert_eq!(bbox.max, max);
+    }
 
     #[test]
     fn test_triangle_bounding_box() {
