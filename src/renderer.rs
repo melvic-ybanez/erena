@@ -22,7 +22,8 @@ pub(crate) fn render_scene() {
                 .reflective(0.2)
         );
 
-    let mut objects = vec![floor, middle_sphere()];
+    let mut objects = vec![floor];
+    objects.append(&mut middle());
     objects.append(&mut cones());
 
     let mut world = World3D::new(
@@ -43,8 +44,8 @@ pub(crate) fn render_scene() {
     fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
 }
 
-fn middle_sphere() -> Shape {
-    Shape::sphere()
+fn middle() -> Vec<Shape> {
+    let middle = Shape::sphere()
         .translate(-0.5, 1.0, 0.5)
         .material(
             Material::default()
@@ -58,7 +59,19 @@ fn middle_sphere() -> Shape {
                 .diffuse(0.7)
                 .specular(0.3)
                 .reflective(0.5)
-        )
+        );
+    let glass = Shape::sphere()
+        .transform(translation(1.0, 0.47, 1.0) * scaling(0.47, 0.47, 0.47))
+        .material(
+            Material::default()
+                .diffuse(0.1)
+                .specular(1.0)
+                .shininess(300.0)
+                .transparency(1.0)
+                .reflective(1.0)
+                .refractive_index(1.5)
+        );
+    vec![middle, glass]
 }
 
 fn right() -> Rc<Shape> {
@@ -148,17 +161,20 @@ fn cylinders() -> Rc<Shape> {
         (157.0, 179.0, 208.0)
     ];
     let offset_scale = 0.8;
+    let left_offset = 2.1;
     let mut cyls = vec![
         CylLike::cylinder().min(-0.1).max(0.1).to_shape()
             .material(Material::default().color(colors::new(7.0 / 255.0, 87.0 / 255.0, 152.0 / 255.0)))
             .scale(offset_scale, 1.0, offset_scale)
-            .translate(2.0, 0.1, 0.5)
+            .translate(left_offset, 0.1, 0.5)
     ];
 
     let (mut last_min, mut last_max) = (-0.1, 0.1);
 
     for (i, (r, g, b)) in colors.iter().enumerate() {
+        // each cylinder is thinner than the previous one
         let scale_factor = offset_scale - ((i + 1) as f64 * 0.2);
+
         let scale_factor = if scale_factor >= 0.2 {
             scale_factor
         } else {
@@ -171,7 +187,8 @@ fn cylinders() -> Rc<Shape> {
         let new_cyl = CylLike::cylinder().min(last_min).max(last_max).to_shape()
             .material(Material::default().color(colors::new(r / 255.0, g / 255.0, b / 255.0)))
             .scale(scale_factor, 1.0, scale_factor)
-            .translate(2.0, last_max, 0.5);
+            .translate(left_offset, last_max, 0.5);
+
         cyls.push(new_cyl);
     }
 
