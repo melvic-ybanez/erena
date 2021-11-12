@@ -3,6 +3,7 @@ use crate::tuples::{points, vectors};
 use crate::shapes::Geo;
 use std::fs::File;
 use std::io;
+use crate::shapes::triangles::{TriangleKind, Smooth};
 
 #[test]
 fn test_ignoring_unrecognized_files() {
@@ -42,7 +43,7 @@ fn test_parsing_faces() {
         f 1 2 3
         f 1 3 4" as &[u8];
     let mut parser = parsers::parse_obj(file);
-    let group = parser.default_group();
+    let group = parser.get_default_group();
     if let Geo::Group(g) = &group.geo {
         let t1 = g.get_child(0);
         let t2 = g.get_child(1);
@@ -71,7 +72,7 @@ fn test_triangulating_polygons() {
         v 0 2 0
         f 1 2 3 4 5" as &[u8];
     let mut parser = parsers::parse_obj(file);
-    let group = parser.default_group();
+    let group = parser.get_default_group();
     if let Geo::Group(g) = &group.geo {
         let t1 = g.get_child(0);
         let t2 = g.get_child(1);
@@ -123,4 +124,38 @@ fn test_vertex_normal_records() {
     assert_eq!(parser.get_normals()[1], vectors::new(0.0, 0.0, 1.0));
     assert_eq!(parser.get_normals()[2], vectors::new(0.707, 0.0, -0.707));
     assert_eq!(parser.get_normals()[3], vectors::new(1.0, 2.0, 3.0));
+}
+
+#[test]
+fn test_faces_with_normals() {
+    let file = b"
+        v 0 1 0
+        v -1 0 0
+        v 1 0 0
+
+        vn -1 0 0
+        vn 1 0 0
+        vn 0 1 0
+
+        f 1//3 2//1 3//2
+        f 1/0/3 2/102/1 3/14/2" as &[u8];
+    let mut parser = parsers::parse_obj(file);
+
+    parser.group_default();
+
+    let t1 = parser.get_triangle_unsafe(parsers::DEFAULT_GROUP, 0);
+    let t2 = parser.get_triangle_unsafe(parsers::DEFAULT_GROUP, 1);
+
+    assert_eq!(t1.get_p1(), parser.vertices[1]);
+    assert_eq!(t1.get_p2(), parser.vertices[2]);
+    assert_eq!(t1.get_p3(), parser.vertices[3]);
+
+    if let TriangleKind::Smooth(Smooth { n1, n2, n3 }) = t1.kind {
+        assert_eq!(n1, parser.get_normals()[3]);
+        assert_eq!(n2, parser.get_normals()[1]);
+        assert_eq!(n3, parser.get_normals()[2]);
+    } else {
+        panic!("Not a smooth triangle");
+    }
+    assert_eq!(t2, t1);
 }

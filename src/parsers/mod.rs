@@ -32,7 +32,19 @@ pub enum Statement {
     None,
 }
 
-type FaceData = Vec<usize>;
+#[derive(Debug, Clone)]
+pub struct FaceData {
+    vs: Vec<usize>,
+    ns: Vec<usize>,
+}
+
+impl FaceData {
+    fn new(vs: Vec<usize>, ns: Vec<usize>) -> FaceData {
+        FaceData { vs, ns }
+    }
+}
+
+pub const DEFAULT_GROUP: &str = "default";
 
 impl Parser {
     pub fn new() -> Parser {
@@ -59,10 +71,13 @@ impl Parser {
         self.vertices.len() == 1
     }
 
-    pub fn default_group(&mut self) -> Rc<Shape> {
-        let key = "default";
-        self.group_faces(key, self.faces.clone());
-        self.groups.get(key).map(|r| (*r).clone()).unwrap_or(Rc::new(Shape::empty_group()))
+    pub fn get_default_group(&mut self) -> Rc<Shape> {
+        self.group_default();
+        self.groups.get(DEFAULT_GROUP).map(|r| (*r).clone()).unwrap_or(Rc::new(Shape::empty_group()))
+    }
+
+    pub fn group_default(&mut self) {
+        self.group_faces(DEFAULT_GROUP, self.faces.clone());
     }
 
     fn group_faces(&mut self, name: &str, faces: Vec<FaceData>) {
@@ -71,13 +86,13 @@ impl Parser {
         })
     }
 
-    fn add_face_to_group(&mut self, name: &str, face: &FaceData) -> Option<Rc<Shape>> {
+    fn add_face_to_group(&mut self, name: &str, data: &FaceData) -> Option<Rc<Shape>> {
         let group = match self.groups.get_mut(name) {
             None => Rc::new(Shape::empty_group()),
             Some(group) => group.clone()
         };
 
-        let triangles = self.fan_triangulation(face);
+        let triangles = self.fan_triangulation(data);
         for triangle in triangles {
             let triangle = Rc::new(Shape::new(Geo::Triangle(triangle)));
             if let Geo::Group(g) = &group.geo {
@@ -89,14 +104,25 @@ impl Parser {
     }
 
     /// Converts polygons into triangles
-    fn fan_triangulation(&self, face: &FaceData) -> Vec<Triangle> {
+    fn fan_triangulation(&self, data: &FaceData) -> Vec<Triangle> {
+        let FaceData { vs, ns } = data;
         let mut triangles: Vec<Triangle> = vec![];
-        for i in 1..face.len() - 1 {
-            let triangle = Triangle::regular(
-                self.vertices[face[0]],
-                self.vertices[face[i]],
-                self.vertices[face[i + 1]],
+        for i in 1..vs.len() - 1 {
+            let (v1, v2, v3) = (
+                self.vertices[vs[0]],
+                self.vertices[vs[i]],
+                self.vertices[vs[i + 1]],
             );
+            let triangle = if ns.is_empty() {
+                Triangle::regular(v1, v2, v3)
+            } else {
+                Triangle::smooth(
+                    v1, v2, v3,
+                    self.normals[ns[0]],
+                    self.normals[ns[i]],
+                    self.normals[ns[i + 1]],
+                )
+            };
             triangles.push(triangle)
         }
         triangles
@@ -143,11 +169,11 @@ pub fn parse_obj<R: Read>(read: R) -> Parser {
             match parse_statement(line) {
                 Statement::Vertex(point) => parser.vertices.push(point),
                 Statement::Normal(vector) => parser.normals.push(vector),
-                Statement::Face(face) => {
+                Statement::Face(data) => {
                     if let Some(ref group) = current_group {
-                        parser.add_face_to_group(group, &face);
+                        parser.add_face_to_group(group, &data);
                     }
-                    parser.faces.push(face)
+                    parser.faces.push(data)
                 }
                 Statement::Group(name) => current_group = Some(name),
                 Statement::None => (),
@@ -175,7 +201,7 @@ fn parse_vertex(line: SplitWhitespace) -> Statement {
 }
 
 fn parse_normal(line: SplitWhitespace) -> Statement {
-    parse_tuple(line, |vs| Statement::Normal(vectors::new(vs[0], vs[1], vs[2])))
+    parse_tuple(line, |ns| Statement::Normal(vectors::new(ns[0], ns[1], ns[2])))
 }
 
 fn parse_tuple<F>(line: SplitWhitespace, f: F) -> Statement
@@ -196,18 +222,34 @@ fn parse_tuple<F>(line: SplitWhitespace, f: F) -> Statement
 }
 
 fn parse_face(line: SplitWhitespace) -> Statement {
-    let mut vertex_indices: Vec<usize> = vec![];
+    let mut vs: Vec<usize> = vec![];
+    let mut ns: Vec<usize> = vec![];
 
-    for word in line {
-        if let Ok(vertex_index) = word.parse::<usize>() {
-            vertex_indices.push(vertex_index);
+    fn parse_part<F>(part: &str, f: F) where F: FnOnce(usize) -> () {
+        if let Ok(index) = part.parse::<usize>() {
+            f(index)
         }
     }
 
-    if vertex_indices.is_empty() {
+    for word in line {
+        let mut parts = word.split("/");
+
+        if let Some(part) = parts.next() {
+            parse_part(part, |i| vs.push(i));
+        }
+
+        // Ignores texture vertex
+        parts.next();
+
+        if let Some(part) = parts.next() {
+            parse_part(part, |i| ns.push(i));
+        }
+    }
+
+    if vs.is_empty() {
         Statement::None
     } else {
-        Statement::Face(vertex_indices)
+        Statement::Face(FaceData::new(vs, ns))
     }
 }
 
