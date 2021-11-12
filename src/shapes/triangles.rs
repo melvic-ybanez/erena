@@ -4,7 +4,9 @@ use crate::shapes::Shape;
 use crate::rays::{Intersection3D, Ray, Intersection, IntersectionKind};
 use crate::math;
 use std::rc::Rc;
-
+use crate::shapes::bounds::Bounds;
+use crate::math::Real;
+use crate::tuples::points;
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -105,6 +107,27 @@ impl Triangle {
 
         // u and v are needed for smooth triangles
         vec![Intersection::new_with_uv(t, Rc::new(shape.clone()), u, v)]
+    }
+
+    pub fn bounds(&self) -> Bounds {
+        fn compare<F, G>(tri: &Triangle, f: F, g: G) -> Real
+            where F: Fn(Point) -> Real,
+                  G: Fn(Real, Real) -> Real, {
+            g(f(tri.get_p1()), g(f(tri.get_p2()), f(tri.get_p3())))
+        }
+
+        fn min<F>(tri: &Triangle, f: F) -> Real where F: Fn(Point) -> Real {
+            compare(tri, f, Real::min)
+        }
+
+        fn max<F>(tri: &Triangle, f: F) -> Real where F: Fn(Point) -> Real {
+            compare(tri, f, Real::max)
+        }
+
+        Bounds::new(
+            points::new(min(self, |p| p.x), min(self, |p| p.y), min(self, |p| p.z)),
+            points::new(max(self, |p| p.x), max(self, |p| p.y), max(self, |p| p.z)),
+        )
     }
 }
 
