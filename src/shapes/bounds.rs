@@ -30,12 +30,12 @@ impl Bounds {
     pub fn of(shape: &Shape) -> Bounds {
         match &shape.geo {
             Geo::Sphere => Bounds::of(&Shape::cube()),
-            Geo::TestShape => Bounds::from_min(Point::origin()),
             Geo::Plane => Bounds::from_min(points::new(-Real::INFINITY, 0.0, -Real::INFINITY)),
             Geo::Cube => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
             Geo::Cylinder(cyl) => cyl.bounds(),
             Geo::Group(group) => group.bounds(),
             Geo::Triangle(tri) => tri.bounds(),
+            Geo::TestShape => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
         }
     }
 }
@@ -56,102 +56,5 @@ impl Add<Point> for Bounds {
                 Real::max(self.max.z, rhs.z),
             ),
         )
-    }
-}
-
-// TODO: Add more bounding box tests here.
-#[cfg(test)]
-mod tests {
-    use crate::tuples::points;
-    use crate::shapes::Shape;
-    use crate::shapes::bounds::Bounds;
-    use crate::math::Real;
-    use crate::shapes::cylinders::CylLike;
-
-    #[test]
-    fn test_creating_empty_box() {
-        let bbox = Bounds::empty();
-        let min = points::new(Real::INFINITY, Real::INFINITY, Real::INFINITY);
-        let max = (-min).to_point();
-        assert_eq!(bbox.min, min);
-        assert_eq!(bbox.max, max);
-    }
-
-    #[test]
-    fn test_adding_points_to_box() {
-        let bbox = Bounds::empty();
-        let p1 = points::new(-5.0, 2.0, 0.0);
-        let p2 = points::new(7.0, 0.0, -3.0);
-        let bbox = bbox + p1 + p2;
-        assert_eq!(bbox.min, points::new(-5.0, 0.0, -3.0));
-        assert_eq!(bbox.max, points::new(7.0, 2.0, 0.0));
-    }
-
-    #[test]
-    fn test_sphere_bounds() {
-        let shape = Shape::sphere();
-        let bbox = shape.bounds();
-        assert_eq!(bbox.min, points::new(-1.0, -1.0, -1.0));
-        assert_eq!(bbox.max, points::new(1.0, 1.0, 1.0));
-    }
-
-    #[test]
-    fn test_plane_bounds() {
-        let bbox = Shape::plane().bounds();
-        assert_eq!(bbox.min, points::new(-Real::INFINITY, 0.0, -Real::INFINITY));
-        assert_eq!(bbox.max, points::new(Real::INFINITY, 0.0, Real::INFINITY));
-    }
-
-    #[test]
-    fn test_cube_bounds() {
-        let bbox = Shape::cube().bounds();
-        assert_eq!(bbox.min, points::new(-1.0, -1.0, -1.0));
-        assert_eq!(bbox.max, points::new(1.0, 1.0, 1.0));
-    }
-
-    #[test]
-    fn test_unbounded_cylinder_bounds() {
-        let bbox = Shape::cylinder().bounds();
-        assert_eq!(bbox.min, points::new(-1.0, -Real::INFINITY, -1.0));
-        assert_eq!(bbox.max, points::new(1.0, Real::INFINITY, 1.0));
-    }
-
-    #[test]
-    fn test_bounded_cylinder_bounds() {
-        let bbox = CylLike::cylinder()
-            .min(-5.0).max(3.0)
-            .to_shape()
-            .bounds();
-        assert_eq!(bbox.min, points::new(-1.0, -5.0, -1.0));
-        assert_eq!(bbox.max, points::new(1.0, 3.0, 1.0));
-    }
-
-    #[test]
-    fn test_unbounded_cone_bounds() {
-        let bbox = Shape::cone().bounds();
-        assert_eq!(bbox.min, points::new(-Real::INFINITY, -Real::INFINITY, -Real::INFINITY));
-        assert_eq!(bbox.max, points::new(Real::INFINITY, Real::INFINITY, Real::INFINITY));
-    }
-
-    #[test]
-    fn test_bounded_cone_bounds() {
-        let bbox = CylLike::cone()
-            .min(-5.0).max(3.0)
-            .to_shape()
-            .bounds();
-        assert_eq!(bbox.min, points::new(-5.0, -5.0, -5.0));
-        assert_eq!(bbox.max, points::new(5.0, 3.0, 5.0));
-    }
-
-    #[test]
-    fn test_triangle_bounding_box() {
-        let p1 = points::new(-3.0, 7.0, 2.0);
-        let p2 = points::new(6.0, 2.0, -4.0);
-        let p3 = points::new(2.0, -1.0, -1.0);
-
-        let shape = Shape::triangle(p1, p2, p3);
-        let bounds = shape.bounds();
-        assert_eq!(bounds.min, points::new(-3.0, -1.0, -4.0));
-        assert_eq!(bounds.max, points::new(6.0, 7.0, 2.0));
     }
 }
