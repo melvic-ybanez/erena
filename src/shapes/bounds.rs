@@ -69,6 +69,7 @@ mod tests {
     use crate::shapes::Shape;
     use crate::shapes::bounds::Bounds;
     use crate::math::Real;
+    use crate::shapes::cylinders::CylLike;
 
     #[test]
     fn test_creating_empty_box() {
@@ -109,6 +110,23 @@ mod tests {
         let bbox = Shape::cube().bounds();
         assert_eq!(bbox.min, points::new(-1.0, -1.0, -1.0));
         assert_eq!(bbox.max, points::new(1.0, 1.0, 1.0));
+    }
+
+    #[test]
+    fn test_unbounded_cylinder_bounds() {
+        let bbox = Shape::cylinder().bounds();
+        assert_eq!(bbox.min, points::new(-1.0, -Real::INFINITY, -1.0));
+        assert_eq!(bbox.max, points::new(1.0, Real::INFINITY, 1.0));
+    }
+
+    #[test]
+    fn test_bounded_cylinder_bounds() {
+        let bbox = CylLike::cylinder()
+            .min(-5.0).max(3.0)
+            .to_shape()
+            .bounds();
+        assert_eq!(bbox.min, points::new(-1.0, -5.0, -1.0));
+        assert_eq!(bbox.max, points::new(1.0, 3.0, 1.0));
     }
 
     #[test]
