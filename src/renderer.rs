@@ -22,15 +22,14 @@ pub(crate) fn render_scene() {
                 .reflective(0.2)
         );
 
-    let mut objects = vec![floor];
-    objects.append(&mut middle());
+    let mut objects = vec![floor, middle()];
     objects.append(&mut cones());
 
     let mut world = World3D::new(
         objects,
         Some(PointLight::new(points::new(-10.0, 12.0, -10.0), Color::white())),
     );
-    world.add_groups(vec![&right(), &bottom(), &cylinders()]);
+    world.add_groups(vec![&right(), &bottom(), &cylinders(), &glasses()]);
 
     let mut camera = Camera::new(1000, 600, math::PI / 3.0);
     camera.transformation = view_transformation(
@@ -44,8 +43,8 @@ pub(crate) fn render_scene() {
     fs::write("erena.ppm", canvas.to_ppm().to_string()).expect("Can not render scene");
 }
 
-fn middle() -> Vec<Shape> {
-    let middle = Shape::sphere()
+fn middle() -> Shape {
+    Shape::sphere()
         .translate(-0.5, 1.0, 0.5)
         .material(
             Material::default()
@@ -59,19 +58,7 @@ fn middle() -> Vec<Shape> {
                 .diffuse(0.7)
                 .specular(0.3)
                 .reflective(0.5)
-        );
-    let glass = Shape::sphere()
-        .transform(translation(1.0, 0.47, 1.0) * scaling(0.47, 0.47, 0.47))
-        .material(
-            Material::default()
-                .diffuse(0.1)
-                .specular(1.0)
-                .shininess(300.0)
-                .transparency(1.0)
-                .reflective(1.0)
-                .refractive_index(1.5)
-        );
-    vec![middle, glass]
+        )
 }
 
 fn right() -> Rc<Shape> {
@@ -195,6 +182,32 @@ fn cylinders() -> Rc<Shape> {
     let group = Rc::new(Shape::empty_group());
     if let Geo::Group(g) = &group.geo {
         g.add_children(Rc::downgrade(&group), cyls.into_iter().map(|cyl| Rc::new(cyl)).collect());
+    }
+    group
+}
+
+fn glasses() -> Rc<Shape> {
+    let upper_base = CylLike::cylinder()
+        .closed(true).min(-0.025).max(0.025).to_shape()
+        .transform(translation(0.7, 0.575, -1.5) * scaling(0.3, 1.0, 0.3))
+        .material(Material::glass());
+    let body = CylLike::cylinder()
+        .closed(true).min(-0.275).max(0.275).to_shape()
+        .transform(translation(0.7, 0.275, -1.5) * scaling(0.05, 1.0, 0.05))
+        .material(Material::glass());
+    let sphere = Shape::sphere()
+        .transform(translation(0.7, 0.85, -1.5) * scaling(0.25, 0.25, 0.25))
+        .material(Material::glass());
+    let small_sphere = Shape::sphere()
+        .transform(translation(0.7, 1.25, -1.5) * scaling(0.15, 0.15, 0.15))
+        .material(Material::glass());
+
+    let group = Rc::new(Shape::empty_group());
+    if let Geo::Group(g) = &group.geo {
+        g.add_child(Rc::downgrade(&group), Rc::new(upper_base));
+        g.add_child(Rc::downgrade(&group), Rc::new(body));
+        g.add_child(Rc::downgrade(&group), Rc::new(sphere));
+        g.add_child(Rc::downgrade(&group), Rc::new(small_sphere));
     }
     group
 }

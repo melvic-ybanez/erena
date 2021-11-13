@@ -84,6 +84,16 @@ impl Material {
         ambient + diffuse + specular
     }
 
+    pub fn glass() -> Material {
+        Material::default()
+            .diffuse(0.1)
+            .specular(1.0)
+            .shininess(300.0)
+            .transparency(1.0)
+            .reflective(1.0)
+            .refractive_index(1.5)
+    }
+
     pub fn pattern_ref(self, pattern: &Pattern) -> Self {
         self.pattern(pattern.clone())
     }
