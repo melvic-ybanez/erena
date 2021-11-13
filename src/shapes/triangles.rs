@@ -110,24 +110,8 @@ impl Triangle {
     }
 
     pub fn bounds(&self) -> Bounds {
-        fn compare<F, G>(tri: &Triangle, f: F, g: G) -> Real
-            where F: Fn(Point) -> Real,
-                  G: Fn(Real, Real) -> Real, {
-            g(f(tri.get_p1()), g(f(tri.get_p2()), f(tri.get_p3())))
-        }
-
-        fn min<F>(tri: &Triangle, f: F) -> Real where F: Fn(Point) -> Real {
-            compare(tri, f, Real::min)
-        }
-
-        fn max<F>(tri: &Triangle, f: F) -> Real where F: Fn(Point) -> Real {
-            compare(tri, f, Real::max)
-        }
-
-        Bounds::new(
-            points::new(min(self, |p| p.x), min(self, |p| p.y), min(self, |p| p.z)),
-            points::new(max(self, |p| p.x), max(self, |p| p.y), max(self, |p| p.z)),
-        )
+        let bbox = Bounds::empty();
+        bbox + self.p1 + self.p2 + self.p3
     }
 }
 
