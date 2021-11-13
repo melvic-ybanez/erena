@@ -31,7 +31,7 @@ impl Bounds {
         match &shape.geo {
             Geo::Sphere => Bounds::of(&Shape::cube()),
             Geo::TestShape => Bounds::from_min(Point::origin()),
-            Geo::Plane => Bounds::from_min(points::new(-Real::INFINITY, -1.0, -Real::INFINITY)),
+            Geo::Plane => Bounds::from_min(points::new(-Real::INFINITY, 0.0, -Real::INFINITY)),
             Geo::Cube => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
             Geo::Cylinder(CylLike { min, max, .. }) => Bounds::new(
                 points::new(-1.0, *min, -1.0),
@@ -95,6 +95,13 @@ mod tests {
         let bbox = shape.bounds();
         assert_eq!(bbox.min, points::new(-1.0, -1.0, -1.0));
         assert_eq!(bbox.max, points::new(1.0, 1.0, 1.0));
+    }
+
+    #[test]
+    fn test_plane_bounds() {
+        let bbox = Shape::plane().bounds();
+        assert_eq!(bbox.min, points::new(-Real::INFINITY, 0.0, -Real::INFINITY));
+        assert_eq!(bbox.max, points::new(Real::INFINITY, 0.0, Real::INFINITY));
     }
 
     #[test]
