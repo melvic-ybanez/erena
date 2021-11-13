@@ -39,6 +39,13 @@ impl Bounds {
             Geo::TestShape => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
         }
     }
+
+    pub fn contains(&self, point: Point) -> bool {
+        let between = |p, min, max| p >= min && p <= max;
+        between(point.x, self.min.x, self.max.x) &&
+            between(point.y, self.min.y, self.max.y) &&
+            between(point.z, self.min.z, self.max.z)
+    }
 }
 
 impl Add<Point> for Bounds {

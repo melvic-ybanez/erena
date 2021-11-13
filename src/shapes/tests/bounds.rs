@@ -106,3 +106,23 @@ fn test_adding_bounding_boxes() {
     assert_eq!(bbox.min, points::new(-5.0, -7.0, -2.0));
     assert_eq!(bbox.max, points::new(14.0, 4.0, 8.0));
 }
+
+/// Tests to see if a box contains a point
+#[test]
+fn test_box_containing_point() {
+    let bbox = Bounds::new(points::new(5.0, -2.0, 0.0), points::new(11.0, 4.0, 7.0));
+    let data = [
+        (points::new(5.0, -2.0, 0.0), true),
+        (points::new(11.0, 4.0, 7.0), true),
+        (points::new(8.0, 1.0, 3.0), true),
+        (points::new(3.0, 0.0, 3.0), false),
+        (points::new(8.0, -4.0, 3.0), false),
+        (points::new(8.0, 1.0, -1.0), false),
+        (points::new(13.0, 1.0, 3.0), false),
+        (points::new(8.0, 5.0, 3.0), false),
+        (points::new(8.0, 1.0, 8.0), false)
+    ];
+    for (point, contains) in data {
+        assert_eq!(bbox.contains(point), contains);
+    }
+}
