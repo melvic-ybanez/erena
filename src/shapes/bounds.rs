@@ -90,6 +90,14 @@ mod tests {
     }
 
     #[test]
+    fn test_sphere_bounds() {
+        let shape = Shape::sphere();
+        let bbox = shape.bounds();
+        assert_eq!(bbox.min, points::new(-1.0, -1.0, -1.0));
+        assert_eq!(bbox.max, points::new(1.0, 1.0, 1.0));
+    }
+
+    #[test]
     fn test_triangle_bounding_box() {
         let p1 = points::new(-3.0, 7.0, 2.0);
         let p2 = points::new(6.0, 2.0, -4.0);
