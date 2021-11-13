@@ -33,10 +33,7 @@ impl Bounds {
             Geo::TestShape => Bounds::from_min(Point::origin()),
             Geo::Plane => Bounds::from_min(points::new(-Real::INFINITY, 0.0, -Real::INFINITY)),
             Geo::Cube => Bounds::from_min(points::new(-1.0, -1.0, -1.0)),
-            Geo::Cylinder(CylLike { min, max, .. }) => Bounds::new(
-                points::new(-1.0, *min, -1.0),
-                points::new(1.0, *max, 1.0),
-            ),
+            Geo::Cylinder(cyl) => cyl.bounds(),
             Geo::Group(group) => group.bounds(),
             Geo::Triangle(tri) => tri.bounds(),
         }
@@ -127,6 +124,23 @@ mod tests {
             .bounds();
         assert_eq!(bbox.min, points::new(-1.0, -5.0, -1.0));
         assert_eq!(bbox.max, points::new(1.0, 3.0, 1.0));
+    }
+
+    #[test]
+    fn test_unbounded_cone_bounds() {
+        let bbox = Shape::cone().bounds();
+        assert_eq!(bbox.min, points::new(-Real::INFINITY, -Real::INFINITY, -Real::INFINITY));
+        assert_eq!(bbox.max, points::new(Real::INFINITY, Real::INFINITY, Real::INFINITY));
+    }
+
+    #[test]
+    fn test_bounded_cone_bounds() {
+        let bbox = CylLike::cone()
+            .min(-5.0).max(3.0)
+            .to_shape()
+            .bounds();
+        assert_eq!(bbox.min, points::new(-5.0, -5.0, -5.0));
+        assert_eq!(bbox.max, points::new(5.0, 3.0, 5.0));
     }
 
     #[test]

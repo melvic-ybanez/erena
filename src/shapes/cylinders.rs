@@ -3,9 +3,10 @@ use crate::math::{EPSILON, Real};
 use crate::rays::{Intersection, Intersection3D, Ray};
 use crate::shapes::{Geo, Shape};
 use crate::tuples::points::Point;
-use crate::tuples::vectors;
+use crate::tuples::{vectors, points};
 use crate::tuples::vectors::Vector;
 use std::rc::Rc;
+use crate::shapes::bounds::Bounds;
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct CylLike {
@@ -59,6 +60,23 @@ impl CylLike {
 
     pub fn to_shape(&self) -> Shape {
         Shape::new(self.to_geo())
+    }
+
+    pub fn bounds(&self) -> Bounds {
+        if self.cone {
+            let a = self.min.abs();
+            let b = self.max.abs();
+            let limit = Real::max(a, b);
+            Bounds::new(
+                points::new(-limit, self.min, -limit),
+                points::new(limit, self.max, limit)
+            )
+        } else {
+            Bounds::new(
+                points::new(-1.0, self.min, -1.0),
+                points::new(1.0, self.max, 1.0),
+            )
+        }
     }
 }
 
