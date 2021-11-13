@@ -97,3 +97,12 @@ fn test_bound_of_test_shape() {
     assert_eq!(bbox.min, points::new(-1.0, -1.0, -1.0));
     assert_eq!(bbox.max, points::new(1.0, 1.0, 1.0));
 }
+
+#[test]
+fn test_adding_bounding_boxes() {
+    let box1 = Bounds::new(points::new(-5.0, -2.0, 0.0), points::new(7.0, 4.0, 4.0));
+    let box2 = Bounds::new(points::new(8.0, -7.0, -2.0), points::new(14.0, 2.0, 8.0));
+    let bbox = box1 + box2;
+    assert_eq!(bbox.min, points::new(-5.0, -7.0, -2.0));
+    assert_eq!(bbox.max, points::new(14.0, 4.0, 8.0));
+}

@@ -5,6 +5,7 @@ use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
 use std::ops::Add;
 
+/// Represents a bounding box
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Bounds {
     pub min: Point,
@@ -56,5 +57,13 @@ impl Add<Point> for Bounds {
                 Real::max(self.max.z, rhs.z),
             ),
         )
+    }
+}
+
+impl Add for Bounds {
+    type Output = Bounds;
+
+    fn add(self, other: Self) -> Self::Output {
+        self + other.min + other.max
     }
 }
