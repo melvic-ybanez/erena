@@ -2,7 +2,7 @@ use crate::tuples::points::Point;
 use crate::shapes::{Shape, Geo};
 use crate::tuples::points;
 use crate::math::Real;
-use crate::shapes::cylinders::CylLike;
+
 use std::ops::Add;
 use crate::matrix::Matrix;
 

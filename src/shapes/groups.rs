@@ -1,13 +1,13 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use crate::math;
-use crate::math::Real;
+
+
 use crate::rays::{Intersection, Intersection3D, Ray};
 use crate::shapes::bounds::Bounds;
 use crate::shapes::{cubes, Shape};
-use crate::tuples::points;
-use crate::tuples::points::Point;
+
+
 use crate::tuples::vectors::Vector;
 
 #[derive(Debug, PartialEq, Clone)]

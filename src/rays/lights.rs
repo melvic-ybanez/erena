@@ -1,5 +1,5 @@
 use crate::math::Real;
-use crate::scene::{World, World3D};
+use crate::scene::{World3D};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
