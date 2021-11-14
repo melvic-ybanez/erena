@@ -1,5 +1,7 @@
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
+use crate::scene::{World, World3D};
+use crate::math::Real;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct PointLight {
@@ -10,6 +12,14 @@ pub struct PointLight {
 impl PointLight {
     pub fn new(position: Point, intensity: Color) -> PointLight {
         PointLight { position, intensity }
+    }
+
+    pub fn intensity_at(&self, point: Point, world: &World3D) -> Real {
+        if world.is_shadowed_with_light(self.position, point) {
+            0.0
+        } else {
+            1.0
+        }
     }
 }
 
