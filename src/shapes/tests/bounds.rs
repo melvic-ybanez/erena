@@ -1,10 +1,11 @@
 use crate::tuples::points;
-use crate::shapes::Shape;
+use crate::shapes::{Shape, Geo};
 use crate::shapes::bounds::Bounds;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
 use crate::matrix::{rotation_x, rotation_y, CanTransform};
 use crate::math;
+use std::rc::Rc;
 
 #[test]
 fn test_creating_empty_box() {
@@ -160,4 +161,22 @@ fn test_box_in_parent_space() {
     let bbox = shape.parent_space_bounds();
     assert_eq!(bbox.min, points::new(0.5, -5.0, 1.0));
     assert_eq!(bbox.max, points::new(1.5, -1.0, 9.0));
+}
+
+#[test]
+fn test_group_bounds() {
+    let sphere = Shape::sphere().scale(2.0, 2.0, 2.0).translate(2.0, 5.0, -3.0);
+    let cyl = CylLike::cylinder().min(-2.0).max(2.0).to_shape()
+        .scale(0.5, 1.0, 0.5)
+        .translate(-4.0, -1.0, 4.0);
+    let group = Rc::new(Shape::empty_group());
+
+    if let Geo::Group(g) = &group.geo {
+        g.add_child(Rc::downgrade(&group), Rc::new(sphere));
+        g.add_child(Rc::downgrade(&group), Rc::new(cyl));
+    }
+
+    let bbox = group.bounds();
+    assert_eq!(bbox.min, points::new(-4.5, -3.0, -5.0));
+    assert_eq!(bbox.max, points::new(4.0, 7.0, 4.5));
 }
