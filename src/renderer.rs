@@ -87,8 +87,7 @@ fn right() -> Rc<Shape> {
 
     let group = Rc::new(Shape::empty_group());
     if let Geo::Group(g) = &group.geo {
-        g.add_child(Rc::downgrade(&group), Rc::new(right_sphere));
-        g.add_child(Rc::downgrade(&group), Rc::new(cube));
+        g.add_children(Rc::downgrade(&group), vec![Rc::new(right_sphere), Rc::new(cube)]);
     }
     group
 }

@@ -96,8 +96,11 @@ impl World3D {
 
     fn is_shadowed(&self, point: Point) -> bool {
         let light = self.light.expect("Light source is required");
+        self.is_shadowed_with_light(light.position, point)
+    }
 
-        let v = (light.position - point).to_vector();
+    fn is_shadowed_with_light(&self, light_position: Point, point: Point) -> bool {
+        let v = (light_position - point).to_vector();
         let distance = v.magnitude();
         let direction = v.normalize();
 
@@ -130,7 +133,7 @@ impl World3D {
 
     fn shade_hit(&self, comps: Comps3D, depth: u8) -> Color {
         if let Some(light) = self.light {
-            let shadowed = self.is_shadowed(comps.get_over_point());
+            let shadowed = self.is_shadowed_with_light(light.position, comps.get_over_point());
             let surface = comps.get_object().material.lighting(
                 comps.get_object(),
                 light,

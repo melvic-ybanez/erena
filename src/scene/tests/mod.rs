@@ -1,3 +1,5 @@
+mod shadows;
+
 use crate::matrix::{CanTransform, scaling};
 use crate::rays::{Comps3D, Intersection, Ray, Comps};
 use crate::scene::{World, World3D};
