@@ -152,6 +152,10 @@ impl Shape {
         Bounds::of(self)
     }
 
+    pub fn parent_space_bounds(&self) -> Bounds {
+        self.bounds().transform(&self.transformation)
+    }
+
     pub fn material_ref(self, material: &Material) -> Shape {
         self.material(material.clone())
     }

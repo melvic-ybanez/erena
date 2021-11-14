@@ -53,7 +53,7 @@ impl Bounds {
         self.contains_point(other.min) && self.contains_point(other.max)
     }
 
-    pub fn transform(&self, matrix: Matrix) -> Bounds {
+    pub fn transform(&self, matrix: &Matrix) -> Bounds {
         let Bounds { min, max } = self;
 
         // transform corners. Note that we are using the left-hand rule

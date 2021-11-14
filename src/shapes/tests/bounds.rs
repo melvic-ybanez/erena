@@ -3,7 +3,7 @@ use crate::shapes::Shape;
 use crate::shapes::bounds::Bounds;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
-use crate::matrix::{rotation_x, rotation_y};
+use crate::matrix::{rotation_x, rotation_y, CanTransform};
 use crate::math;
 
 #[test]
@@ -148,7 +148,16 @@ fn text_box_containing_box() {
 fn test_bounding_box_transformation() {
     let bbox = Bounds::new(points::new(-1.0, -1.0, -1.0), points::new(1.0, 1.0, 1.0));
     let matrix = rotation_x(math::PI / 4.0) * rotation_y(math::PI / 4.0);
-    let bbox = bbox.transform(matrix);
+    let bbox = bbox.transform(&matrix);
     assert_eq!(bbox.min.round_items(), points::new(-1.41421, -1.70711, -1.70711));
     assert_eq!(bbox.max.round_items(), points::new(1.41421, 1.70711, 1.70711));
+}
+
+/// Get a shape's bounding box in its parent's space
+#[test]
+fn test_box_in_parent_space() {
+    let shape = Shape::sphere().scale(0.5, 2.0, 4.0).translate(1.0, -3.0, 5.0);
+    let bbox = shape.parent_space_bounds();
+    assert_eq!(bbox.min, points::new(0.5, -5.0, 1.0));
+    assert_eq!(bbox.max, points::new(1.5, -1.0, 9.0));
 }
