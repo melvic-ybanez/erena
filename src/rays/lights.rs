@@ -30,23 +30,24 @@ impl PointLight {
 
 pub struct AreaLight {
     pub corner: Point,
-    pub u_steps: i32,
-    pub v_steps: i32,
+    pub u_steps: Step,
+    pub v_steps: Step,
     pub intensity: Color,
     u_vec: Vector,
     v_vec: Vector,
-    samples: i32,
+    samples: Step,
     position: Point,
-
 }
+
+type Step = usize;
 
 impl AreaLight {
     pub fn new(
         corner: Point,
         full_u_vec: Vector,
-        u_steps: i32,
+        u_steps: Step,
         full_v_vec: Vector,
-        v_steps: i32,
+        v_steps: Step,
         intensity: Color,
     ) -> AreaLight {
         let mid_point = {
@@ -64,6 +65,10 @@ impl AreaLight {
             intensity,
             position: mid_point
         }
+    }
+
+    pub fn point_on_light(&self, u: Step, v: Step) -> Point {
+        self.corner + self.u_vec * (u as Real + 0.5) + self.v_vec * (v as Real + 0.5)
     }
 }
 
@@ -98,5 +103,24 @@ mod tests {
         assert_eq!(light.v_steps, 2);
         assert_eq!(light.samples, 8);
         assert_eq!(light.position, points::new(1.0, 0.0, 0.5));
+    }
+
+    #[test]
+    fn test_finding_point_on_area_light() {
+        let corner = Point::origin();
+        let v1 = vectors::new(2.0, 0.0, 0.0);
+        let v2 = vectors::new(0.0, 0.0, 1.0);
+        let light = AreaLight::new(corner, v1, 4, v2, 2, Color::white());
+        let data = [
+            (0, 0, 0.25, 0.0, 0.25),
+            (1, 0, 0.75, 0.0, 0.25),
+            (0, 1, 0.25, 0.0, 0.75),
+            (2, 0, 1.25, 0.0, 0.25),
+            (3, 1, 1.75, 0.0, 0.75),
+        ];
+        for (u, v, x, y, z) in data {
+            let point = points::new(x, y, z);
+            assert_eq!(light.point_on_light(u, v), point)
+        }
     }
 }
