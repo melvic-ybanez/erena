@@ -41,12 +41,14 @@ impl Material {
         point: Point,
         eye_vec: Vector,
         normal_vec: Vector,
-        in_shadow: bool,
+        intensity: Real,
     ) -> Color {
         let color = match &self.pattern {
             None => self.color,
             Some(pattern) => pattern.at_object(object, point)
         };
+
+        let in_shadow = intensity == 0.0;
 
         // combine the surface color with the light's color
         let effective_color = color * light.intensity;
@@ -81,7 +83,7 @@ impl Material {
             (diffuse, specular)
         };
 
-        ambient + diffuse + specular
+        ambient + diffuse * intensity + specular * intensity
     }
 
     pub fn glass() -> Material {

@@ -5,6 +5,7 @@ use crate::tuples::points::Point;
 use crate::shapes::Shape;
 use crate::patterns::Pattern;
 use crate::rays::lights::PointLight;
+use crate::scene::World;
 
 fn set_up() -> (Material, Point) {
     (Material::default(), Point::origin())
@@ -27,7 +28,7 @@ fn test_lighting_in_between() {
     let eye_vec = vectors::new(0.0, 0.0, -1.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
-    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, false);
+    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, 1.0);
     assert_eq!(result, colors::new(1.9, 1.9, 1.9));
 }
 
@@ -39,7 +40,7 @@ fn test_lighting_in_between_offset_45() {
     let eye_vec = vectors::new(0.0, 2_f64.sqrt() / 2.0,  -2_f64.sqrt() / 2.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
-    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, false);
+    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, 1.0);
     assert_eq!(result, Color::white());
 }
 
@@ -51,7 +52,7 @@ fn test_lighting_opposite_surface_offset_45() {
     let eye_vec = vectors::new(0.0, 0.0, -1.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 10.0, -10.0), Color::white());
-    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, false);
+    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, 1.0);
     assert_eq!(result.round_items(), colors::new(0.7364, 0.7364, 0.7364));
 }
 
@@ -62,7 +63,7 @@ fn test_in_reflection_path() {
     let eye_vec = vectors::new(0.0, -2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 10.0, -10.0), Color::white());
-    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, false);
+    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, 1.0);
     assert_eq!(result.round_items(), colors::new(1.6364, 1.6364, 1.6364));
 }
 
@@ -73,7 +74,7 @@ fn test_lighting_behind_the_surface() {
     let eye_vec = vectors::new(0.0, 0.0, -1.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 0.0, 10.0), Color::white());
-    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, false);
+    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, 1.0);
     assert_eq!(result, colors::new(0.1, 0.1, 0.1));
 }
 
@@ -84,7 +85,7 @@ fn test_lighting_in_shadow() {
     let eye_vec = vectors::new(0.0, 0.0, -1.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
-    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, true);
+    let result = mat.lighting(&Shape::sphere(), light, position, eye_vec, normal_vec, 0.0);
     assert_eq!(result, colors::new(0.1, 0.1, 0.1));
 }
 
@@ -99,8 +100,8 @@ fn test_lighting_with_pattern() {
     let eye_vec = vectors::new(0.0, 0.0, -1.0);
     let normal_vec = vectors::new(0.0, 0.0, -1.0);
     let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
-    let c1 = mat.lighting(&Shape::sphere(), light, points::new(0.9, 0.0, 0.0), eye_vec, normal_vec, false);
-    let c2 = mat.lighting(&Shape::sphere(), light, points::new(1.1, 0.0, 0.0), eye_vec, normal_vec, false);
+    let c1 = mat.lighting(&Shape::sphere(), light, points::new(0.9, 0.0, 0.0), eye_vec, normal_vec, 1.0);
+    let c2 = mat.lighting(&Shape::sphere(), light, points::new(1.1, 0.0, 0.0), eye_vec, normal_vec, 1.0);
 
     assert_eq!(c1, Color::white());
     assert_eq!(c2, Color::black());
@@ -117,4 +118,28 @@ fn test_default_transparency_and_refractive_index() {
     let mat = Material::default();
     assert_eq!(mat.transparency, 0.0);
     assert_eq!(mat.refractive_index, 1.0);
+}
+
+#[test]
+fn test_lighting_uses_intensity() {
+    let world = World::default();
+    let light = PointLight::new(points::new(0.0, 0.0, -10.0), Color::white());
+    let shape = world.get_object(0);
+    let shape = shape.clone().material(
+        shape.material.ambient(0.1).diffuse(0.9).specular(0.0).color(Color::white())
+    );
+    let point = points::new(0.0, 0.0, -1.0);
+    let eye_vec = vectors::new(0.0, 0.0, -1.0);
+    let normal_vec = vectors::new(0.0, 0.0, -1.0);
+
+    let data = [
+        (1.0, Color::white()),
+        (0.5, colors::new(0.55, 0.55, 0.55)),
+        (0.0, colors::new(0.1, 0.1, 0.1))
+    ];
+
+    for (intensity, res) in data {
+        let result = shape.material.lighting(&shape, light, point, eye_vec, normal_vec, intensity);
+        assert_eq!(result, res);
+    }
 }

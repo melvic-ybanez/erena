@@ -133,14 +133,13 @@ impl World3D {
 
     fn shade_hit(&self, comps: Comps3D, depth: u8) -> Color {
         if let Some(light) = self.light {
-            let shadowed = self.is_shadowed_with_light(light.position, comps.get_over_point());
             let surface = comps.get_object().material.lighting(
                 comps.get_object(),
                 light,
                 comps.get_over_point(),
                 comps.get_eye_vec(),
                 comps.get_normal_vec(),
-                shadowed,
+                light.intensity_at(comps.get_over_point(), self),
             );
             let reflected = self.reflected_color(comps.clone(), depth);
             let refracted = self.refracted_color(comps.clone(), depth);
