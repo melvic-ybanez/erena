@@ -3,6 +3,8 @@ use crate::shapes::Shape;
 use crate::shapes::bounds::Bounds;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
+use crate::matrix::{rotation_x, rotation_y};
+use crate::math;
 
 #[test]
 fn test_creating_empty_box() {
@@ -140,4 +142,13 @@ fn text_box_containing_box() {
         let bbox2 = Bounds::new(min, max);
         assert_eq!(bbox.contains_box(bbox2), result);
     }
+}
+
+#[test]
+fn test_bounding_box_transformation() {
+    let bbox = Bounds::new(points::new(-1.0, -1.0, -1.0), points::new(1.0, 1.0, 1.0));
+    let matrix = rotation_x(math::PI / 4.0) * rotation_y(math::PI / 4.0);
+    let bbox = bbox.transform(matrix);
+    assert_eq!(bbox.min.round_items(), points::new(-1.41421, -1.70711, -1.70711));
+    assert_eq!(bbox.max.round_items(), points::new(1.41421, 1.70711, 1.70711));
 }

@@ -1,13 +1,12 @@
+use crate::math;
+use crate::math::Real;
+use crate::rays::{Intersection, Intersection3D, IntersectionKind, Ray};
+use crate::shapes::bounds::Bounds;
+use crate::shapes::Shape;
+use crate::tuples::points;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::shapes::Shape;
-use crate::rays::{Intersection3D, Ray, Intersection, IntersectionKind};
-use crate::math;
 use std::rc::Rc;
-use crate::shapes::bounds::Bounds;
-use crate::math::Real;
-use crate::tuples::points;
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Triangle {
@@ -21,7 +20,9 @@ pub struct Triangle {
 
 impl Triangle {
     pub fn new<F>(p1: Point, p2: Point, p3: Point, kind_f: F) -> Triangle
-        where F: FnOnce(Vector, Vector) -> TriangleKind {
+    where
+        F: FnOnce(Vector, Vector) -> TriangleKind,
+    {
         let edge1 = (p2 - p1).to_vector();
         let edge2 = (p3 - p1).to_vector();
         Triangle {
@@ -35,7 +36,9 @@ impl Triangle {
     }
 
     pub fn regular(p1: Point, p2: Point, p3: Point) -> Triangle {
-        Triangle::new(p1, p2, p3, |edge1, edge2| TriangleKind::regular(edge2.cross(edge1).normalize()))
+        Triangle::new(p1, p2, p3, |edge1, edge2| {
+            TriangleKind::regular(edge2.cross(edge1).normalize())
+        })
     }
 
     pub fn smooth(p1: Point, p2: Point, p3: Point, n1: Vector, n2: Vector, n3: Vector) -> Triangle {
@@ -53,12 +56,13 @@ impl Triangle {
     pub fn get_normal(&self, hit: &Intersection3D) -> Vector {
         match self.kind {
             TriangleKind::Regular { normal } => normal,
-            TriangleKind::Smooth(Smooth { n1, n2, n3 }) =>
+            TriangleKind::Smooth(Smooth { n1, n2, n3 }) => {
                 if let IntersectionKind::Triangle { u, v } = hit.get_kind() {
                     n2 * u + n3 * v + n1 * (1.0 - u - v)
                 } else {
-                    n1  // actually, could have `panic!` here as well
+                    n1 // actually, could have `panic!` here as well
                 }
+            }
         }
     }
 
@@ -93,7 +97,7 @@ impl Triangle {
         let u = f * p1_to_origin.dot(dir_cross_e2);
 
         if u < 0.0 || u > 1.0 {
-            return vec![];   // the ray misses
+            return vec![]; // the ray misses
         }
 
         let origin_cross_e1 = p1_to_origin.to_vector().cross(self.edge1);

@@ -4,6 +4,7 @@ use crate::tuples::points;
 use crate::math::Real;
 use crate::shapes::cylinders::CylLike;
 use std::ops::Add;
+use crate::matrix::Matrix;
 
 /// Represents a bounding box
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -42,13 +43,35 @@ impl Bounds {
 
     pub fn contains_point(&self, point: Point) -> bool {
         let between = |p, min, max| p >= min && p <= max;
-        between(point.x, self.min.x, self.max.x) &&
-            between(point.y, self.min.y, self.max.y) &&
-            between(point.z, self.min.z, self.max.z)
+        let Bounds { min, max } = self;
+        between(point.x, min.x, max.x) &&
+            between(point.y, min.y, max.y) &&
+            between(point.z, min.z, max.z)
     }
 
     pub fn contains_box(&self, other: Bounds) -> bool {
         self.contains_point(other.min) && self.contains_point(other.max)
+    }
+
+    pub fn transform(&self, matrix: Matrix) -> Bounds {
+        let Bounds { min, max } = self;
+
+        // transform corners. Note that we are using the left-hand rule
+        // so "back" here means negative z-axis (or towards the user)
+        let corners = [
+            (min.x, min.y, min.z),  // lower left back
+            (max.x, min.y, min.z),  // lower right back
+            (min.x, min.y, max.z),  // lower left front
+            (max.x, min.y, max.z),  // lower right front
+            (min.x, max.y, min.z),  // upper left back
+            (max.x, max.y, min.z),  // upper right back
+            (min.x, max.y, max.z),  // upper left front
+            (max.x, max.y, max.z)   // upper right front
+        ];
+
+        corners.iter().fold(Bounds::empty(), |bounds, (x, y, z)| {
+            bounds + (matrix.clone() * points::new(*x, *y, *z))
+        })
     }
 }
 
