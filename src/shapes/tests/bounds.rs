@@ -123,6 +123,21 @@ fn test_box_containing_point() {
         (points::new(8.0, 1.0, 8.0), false)
     ];
     for (point, contains) in data {
-        assert_eq!(bbox.contains(point), contains);
+        assert_eq!(bbox.contains_point(point), contains);
+    }
+}
+
+#[test]
+fn text_box_containing_box() {
+    let bbox = Bounds::new(points::new(5.0, -2.0, 0.0), points::new(11.0, 4.0, 7.0));
+    let data = [
+        (points::new(5.0, -2.0, 0.0), points::new(11.0, 4.0, 7.0), true),
+        (points::new(6.0, -1.0, 1.0), points::new(10.0, 3.0, 6.0), true),
+        (points::new(4.0, -3.0, -1.0), points::new(10.0, 3.0, 6.0), false),
+        (points::new(6.0, -1.0, 1.0), points::new(12.0, 5.0, 8.0), false),
+    ];
+    for (min, max, result) in data {
+        let bbox2 = Bounds::new(min, max);
+        assert_eq!(bbox.contains_box(bbox2), result);
     }
 }

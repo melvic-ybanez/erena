@@ -40,11 +40,15 @@ impl Bounds {
         }
     }
 
-    pub fn contains(&self, point: Point) -> bool {
+    pub fn contains_point(&self, point: Point) -> bool {
         let between = |p, min, max| p >= min && p <= max;
         between(point.x, self.min.x, self.max.x) &&
             between(point.y, self.min.y, self.max.y) &&
             between(point.z, self.min.z, self.max.z)
+    }
+
+    pub fn contains_box(&self, other: Bounds) -> bool {
+        self.contains_point(other.min) && self.contains_point(other.max)
     }
 }
 
