@@ -1,4 +1,4 @@
-mod random;
+pub mod random;
 
 use std::cmp::Ordering;
 

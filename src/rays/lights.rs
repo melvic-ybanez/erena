@@ -1,9 +1,10 @@
+use crate::math::random::{Random, SeqRand};
 use crate::math::Real;
-use crate::scene::{World3D};
+use crate::scene::World3D;
 use crate::tuples::colors::Color;
+use crate::tuples::points;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::tuples::points;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct PointLight {
@@ -28,7 +29,7 @@ impl PointLight {
     }
 }
 
-pub struct AreaLight {
+pub struct AreaLight<R: Random> {
     pub corner: Point,
     pub u_steps: Step,
     pub v_steps: Step,
@@ -37,11 +38,12 @@ pub struct AreaLight {
     v_vec: Vector,
     samples: Step,
     position: Point,
+    jitter_by: R,
 }
 
 type Step = usize;
 
-impl AreaLight {
+impl<R: Random> AreaLight<R> {
     pub fn new(
         corner: Point,
         full_u_vec: Vector,
@@ -49,10 +51,21 @@ impl AreaLight {
         full_v_vec: Vector,
         v_steps: Step,
         intensity: Color,
-    ) -> AreaLight {
+        jitter_by: R,
+    ) -> AreaLight<R> {
         let mid_point = {
-            let Vector { x: x1, y: y1, z: z1, .. } = full_u_vec;
-            let Vector { x: x2, y: y2, z: z2, .. } = full_v_vec;
+            let Vector {
+                x: x1,
+                y: y1,
+                z: z1,
+                ..
+            } = full_u_vec;
+            let Vector {
+                x: x2,
+                y: y2,
+                z: z2,
+                ..
+            } = full_v_vec;
             points::new((x1 + x2) / 2.0, (y1 + y2) / 2.0, (z1 + z2) / 2.0)
         };
         AreaLight {
@@ -63,12 +76,15 @@ impl AreaLight {
             v_vec: full_v_vec / v_steps as Real,
             samples: u_steps * v_steps,
             intensity,
-            position: mid_point
+            position: mid_point,
+            jitter_by,
         }
     }
 
     pub fn point_on_light(&self, u: Step, v: Step) -> Point {
-        self.corner + self.u_vec * (u as Real + 0.5) + self.v_vec * (v as Real + 0.5)
+        self.corner
+            + self.u_vec * (u as Real + self.jitter_by.next())
+            + self.v_vec * (v as Real + self.jitter_by.next())
     }
 
     pub fn intensity_at(&self, point: Point, world: &World3D) -> Real {
@@ -85,13 +101,35 @@ impl AreaLight {
     }
 }
 
+impl AreaLight<SeqRand> {
+    pub fn default(
+        corner: Point,
+        full_u_vec: Vector,
+        u_steps: Step,
+        full_v_vec: Vector,
+        v_steps: Step,
+        intensity: Color,
+    ) -> AreaLight<SeqRand> {
+        AreaLight::new(
+            corner,
+            full_u_vec,
+            u_steps,
+            full_v_vec,
+            v_steps,
+            intensity,
+            SeqRand::new(vec![0.5, 0.5]),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::rays::lights::{PointLight, AreaLight};
+    use crate::math::random::SeqRand;
+    use crate::rays::lights::{AreaLight, PointLight};
+    use crate::scene::World;
     use crate::tuples::colors::Color;
     use crate::tuples::points::Point;
-    use crate::tuples::{vectors, points};
-    use crate::scene::World;
+    use crate::tuples::{points, vectors};
 
     /// Tests that a point light has a position and intensity
     #[test]
@@ -108,7 +146,7 @@ mod tests {
         let corner = Point::origin();
         let v1 = vectors::new(2.0, 0.0, 0.0);
         let v2 = vectors::new(0.0, 0.0, 1.0);
-        let light = AreaLight::new(corner, v1, 4, v2, 2, Color::white());
+        let light = AreaLight::default(corner, v1, 4, v2, 2, Color::white());
 
         assert_eq!(light.corner, corner);
         assert_eq!(light.u_vec, vectors::new(0.5, 0.0, 0.0));
@@ -124,7 +162,7 @@ mod tests {
         let corner = Point::origin();
         let v1 = vectors::new(2.0, 0.0, 0.0);
         let v2 = vectors::new(0.0, 0.0, 1.0);
-        let light = AreaLight::new(corner, v1, 4, v2, 2, Color::white());
+        let light = AreaLight::default(corner, v1, 4, v2, 2, Color::white());
         let data = [
             (0, 0, 0.25, 0.0, 0.25),
             (1, 0, 0.75, 0.0, 0.25),
@@ -144,18 +182,46 @@ mod tests {
         let corner = points::new(-0.5, -0.5, -5.0);
         let v1 = vectors::new(1.0, 0.0, 0.0);
         let v2 = vectors::new(0.0, 1.0, 0.0);
-        let light = AreaLight::new(corner, v1, 2, v2, 2, Color::white());
+        let light = AreaLight::default(corner, v1, 2, v2, 2, Color::white());
         let data = [
             (0.0, 0.0, 2.0, 0.0),
             (1.0, -1.0, 2.0, 0.25),
             (1.5, 0.0, 2.0, 0.5),
             (1.25, 1.25, 3.0, 0.75),
-            (0.0, 0.0, -2.0, 1.0)
+            (0.0, 0.0, -2.0, 1.0),
         ];
         for (x, y, z, result) in data {
             let point = points::new(x, y, z);
             let intensity = light.intensity_at(point, &world);
             assert_eq!(intensity, result);
+        }
+    }
+
+    #[test]
+    fn test_find_point_on_jittered_light() {
+        let corner = Point::origin();
+        let v1 = vectors::new(2.0, 0.0, 0.0);
+        let v2 = vectors::new(0.0, 0.0, 1.0);
+        let light = AreaLight::new(
+            corner,
+            v1,
+            4,
+            v2,
+            2,
+            Color::white(),
+            SeqRand::new(vec![0.3, 0.7]),
+        );
+        let data = [
+            (0, 0, 0.15, 0.0, 0.35),
+            (1, 0, 0.65, 0.0, 0.35),
+            (0, 1, 0.15, 0.0, 0.85),
+            (2, 0, 1.15, 0.0, 0.35),
+            (3, 1, 1.65, 0.0, 0.85),
+        ];
+        for (u, v, x, y, z) in data {
+            let result = points::new(x, y, z);
+            let point = light.point_on_light(u, v);
+            assert_eq!(point, result);
         }
     }
 }
