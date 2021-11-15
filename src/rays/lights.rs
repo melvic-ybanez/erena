@@ -20,7 +20,7 @@ impl PointLight {
     }
 
     pub fn intensity_at(&self, point: Point, world: &World3D) -> Real {
-        if world.is_shadowed_with_light(self.position, point) {
+        if world.is_shadowed(self.position, point) {
             0.0
         } else {
             1.0
@@ -70,6 +70,19 @@ impl AreaLight {
     pub fn point_on_light(&self, u: Step, v: Step) -> Point {
         self.corner + self.u_vec * (u as Real + 0.5) + self.v_vec * (v as Real + 0.5)
     }
+
+    pub fn intensity_at(&self, point: Point, world: &World3D) -> Real {
+        let mut total = 0.0;
+        for v in 0..self.v_steps {
+            for u in 0..self.u_steps {
+                let light_position = self.point_on_light(u, v);
+                if !world.is_shadowed(light_position, point) {
+                    total += 1.0;
+                }
+            }
+        }
+        total / self.samples as Real
+    }
 }
 
 #[cfg(test)]
@@ -78,6 +91,7 @@ mod tests {
     use crate::tuples::colors::Color;
     use crate::tuples::points::Point;
     use crate::tuples::{vectors, points};
+    use crate::scene::World;
 
     /// Tests that a point light has a position and intensity
     #[test]
@@ -121,6 +135,27 @@ mod tests {
         for (u, v, x, y, z) in data {
             let point = points::new(x, y, z);
             assert_eq!(light.point_on_light(u, v), point)
+        }
+    }
+
+    #[test]
+    fn test_area_light_intensity() {
+        let world = World::default();
+        let corner = points::new(-0.5, -0.5, -5.0);
+        let v1 = vectors::new(1.0, 0.0, 0.0);
+        let v2 = vectors::new(0.0, 1.0, 0.0);
+        let light = AreaLight::new(corner, v1, 2, v2, 2, Color::white());
+        let data = [
+            (0.0, 0.0, 2.0, 0.0),
+            (1.0, -1.0, 2.0, 0.25),
+            (1.5, 0.0, 2.0, 0.5),
+            (1.25, 1.25, 3.0, 0.75),
+            (0.0, 0.0, -2.0, 1.0)
+        ];
+        for (x, y, z, result) in data {
+            let point = points::new(x, y, z);
+            let intensity = light.intensity_at(point, &world);
+            assert_eq!(intensity, result);
         }
     }
 }

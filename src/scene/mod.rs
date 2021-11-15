@@ -94,12 +94,12 @@ impl World3D {
         intersections
     }
 
-    pub fn is_shadowed(&self, point: Point) -> bool {
+    pub fn default_is_shadowed(&self, point: Point) -> bool {
         let light = self.light.expect("Light source is required");
-        self.is_shadowed_with_light(light.position, point)
+        self.is_shadowed(light.position, point)
     }
 
-    pub fn is_shadowed_with_light(&self, light_position: Point, point: Point) -> bool {
+    pub fn is_shadowed(&self, light_position: Point, point: Point) -> bool {
         let v = (light_position - point).to_vector();
         let distance = v.magnitude();
         let direction = v.normalize();

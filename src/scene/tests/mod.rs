@@ -108,7 +108,7 @@ fn test_behind_ray_color() {
 fn test_no_collinear() {
     let world = World::default();
     let point = points::new(0.0, 10.0, 0.0);
-    assert!(!world.is_shadowed(point));
+    assert!(!world.default_is_shadowed(point));
 }
 
 /// Tests the shadow when an object is between the point and the light
@@ -116,7 +116,7 @@ fn test_no_collinear() {
 fn test_object_shadow_between_point_and_light() {
     let world = World::default();
     let point = points::new(10.0, -10.0, 10.0);
-    assert!(world.is_shadowed(point));
+    assert!(world.default_is_shadowed(point));
 }
 
 /// Tests that there is no shadow when an object is behind the light
@@ -124,7 +124,7 @@ fn test_object_shadow_between_point_and_light() {
 fn test_no_object_shadow_behind_light() {
     let world = World::default();
     let point = points::new(-20.0, 20.0, -20.0);
-    assert!(!world.is_shadowed(point));
+    assert!(!world.default_is_shadowed(point));
 }
 
 /// Tests that there is no shadow when an object is behind the point
@@ -132,7 +132,7 @@ fn test_no_object_shadow_behind_light() {
 fn test_no_object_shadow_behind_point() {
     let world = World::default();
     let point = points::new(-2.0, 2.0, -2.0);
-    assert!(!world.is_shadowed(point));
+    assert!(!world.default_is_shadowed(point));
 }
 
 /// Tests that shade-hit is given an intersection in shadow

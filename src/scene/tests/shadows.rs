@@ -13,7 +13,7 @@ fn test_occlusion_between_two_points() {
         (points::new(-5.0, -5.0, -5.0), false)
     ];
     for (point, result) in data {
-        assert_eq!(world.is_shadowed_with_light(light_position, point), result);
+        assert_eq!(world.is_shadowed(light_position, point), result);
     }
 }
 

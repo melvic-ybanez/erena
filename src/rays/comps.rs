@@ -1,9 +1,9 @@
+use crate::math;
 use crate::math::Real;
-use crate::rays::{Ray, Intersection3D};
-use crate::shapes::{Object, Geo, Shape};
+use crate::rays::{Intersection3D, Ray};
+use crate::shapes::{Geo, Object, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::math;
 use std::borrow::Borrow;
 
 #[derive(Clone)]
@@ -70,7 +70,8 @@ impl<'a> Comps3D<'a> {
 
         for i in xs.iter() {
             if i == hit {
-                self.n1 = containers.last()
+                self.n1 = containers
+                    .last()
                     .map(|obj| obj.material.refractive_index)
                     .unwrap_or(1.0);
             }
@@ -82,7 +83,8 @@ impl<'a> Comps3D<'a> {
             }
 
             if i == hit {
-                self.n2 = containers.last()
+                self.n2 = containers
+                    .last()
                     .map(|obj| obj.material.refractive_index)
                     .unwrap_or(1.0);
                 break;
@@ -135,13 +137,13 @@ impl<'a, S> Comps<'a, S> {
 
 #[cfg(test)]
 mod tests {
-    use crate::rays::{Intersection, Ray};
     use crate::rays::comps::{Comps, Comps3D};
+    use crate::rays::{Intersection, Ray};
     use crate::shapes::Shape;
-    use crate::tuples::{points, vectors};
     use crate::tuples::points::Point;
-    use std::rc::Rc;
+    use crate::tuples::{points, vectors};
     use std::borrow::Borrow;
+    use std::rc::Rc;
 
     /// Tests precomputing the state of an intersection
     #[test]
@@ -177,6 +179,6 @@ mod tests {
         assert_eq!(comps.point, points::new(0.0, 0.0, 1.0));
         assert_eq!(comps.eye_vec, vectors::new(0.0, 0.0, -1.0));
         assert!(comps.inside);
-        assert_eq!(comps.normal_vec, vectors::new(0.0, 0.0, -1.0));     // (0, 0, 1) but inverted
+        assert_eq!(comps.normal_vec, vectors::new(0.0, 0.0, -1.0)); // (0, 0, 1) but inverted
     }
 }

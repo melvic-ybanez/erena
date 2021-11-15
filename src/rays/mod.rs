@@ -6,14 +6,14 @@ use crate::matrix::Matrix;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 
-mod intersections;
 mod comps;
+mod intersections;
 pub mod lights;
 
 #[derive(Debug, PartialOrd, PartialEq, Copy, Clone)]
 pub struct Ray {
     pub(crate) origin: Point,
-    pub(crate) direction: Vector
+    pub(crate) direction: Vector,
 }
 
 impl Ray {
@@ -26,7 +26,10 @@ impl Ray {
     }
 
     pub(crate) fn transform(&self, transformation: Matrix) -> Ray {
-        Ray::new(transformation.clone() * self.origin, transformation * self.direction)
+        Ray::new(
+            transformation.clone() * self.origin,
+            transformation * self.direction,
+        )
     }
 }
 
