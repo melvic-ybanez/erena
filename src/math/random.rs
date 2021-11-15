@@ -1,5 +1,4 @@
-
-use std::cell::{RefCell};
+use std::cell::{RefCell, RefMut};
 use std::slice::Iter;
 
 pub trait Random<'a> {
@@ -20,19 +19,21 @@ impl<'a> TestRand<'a> {
     }
 
     pub fn maybe_next(&'a self) -> Option<f64> {
-        let mut iter = self.iter.borrow_mut();
-        match iter.clone() {
-            None => {
-                let mut new_iter = self.seq.iter();
-                let result = new_iter.next().cloned();
+        let mut maybe_iter = self.iter.borrow_mut();
+        let mut reset = |mut maybe_iter: RefMut<Option<Iter<'a, f64>>>| {
+            let mut new_iter = self.seq.iter();
+            let result = new_iter.next().cloned();
 
-                // reset iterator to make the set of options cyclic
-                *iter = Some(new_iter);
+            // reset iterator to make the set of options cyclic
+            *maybe_iter = Some(new_iter);
 
-                // return the next item again
-                result
-            }
-            Some(mut iter) => iter.next().cloned(),
+            // return the next item again
+            result
+        };
+
+        match maybe_iter.clone() {
+            None => reset(maybe_iter),
+            Some(mut iter) => iter.next().cloned().or_else(|| reset(maybe_iter)),
         }
     }
 }
@@ -62,5 +63,7 @@ mod tests {
         let gen = TestRand::from_seq(vec![0.1, 0.5, 1.0]);
         assert_eq!(gen.next(), 0.1);
         assert_eq!(gen.next(), 0.5);
+        assert_eq!(gen.next(), 1.0);
+        assert_eq!(gen.next(), 0.1);
     }
 }
