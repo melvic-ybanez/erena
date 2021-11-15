@@ -1,3 +1,5 @@
+mod random;
+
 use std::cmp::Ordering;
 
 /// Represents real number
