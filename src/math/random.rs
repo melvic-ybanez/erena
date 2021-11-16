@@ -1,6 +1,4 @@
-use std::cell::{RefCell, RefMut, Cell};
-use std::slice::Iter;
-use std::borrow::Borrow;
+use std::cell::{Cell};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RandGen {
