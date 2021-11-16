@@ -2,6 +2,7 @@ use std::fs;
 
 use crate::materials::Material;
 use crate::math;
+use crate::math::random::RandGen;
 use crate::math::Real;
 use crate::matrix::{scaling, translation, view_transformation, CanTransform};
 use crate::patterns::Pattern;
@@ -14,7 +15,6 @@ use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::{colors, points, vectors};
 use std::rc::Rc;
-use crate::math::random::RandGen;
 
 pub(crate) fn render_scene() {
     let floor = Shape::plane().material(
@@ -29,19 +29,26 @@ pub(crate) fn render_scene() {
     let mut objects = vec![floor, middle()];
     objects.append(&mut cones());
 
+    let full_vec = vectors::new(-10.0, 12.0, -10.0);
     let mut world = World3D::new(
         objects,
         Some(AreaLight::new(
             Point::origin(),
-            points::new(-10.0, 12.0, -10.0).to_vector(),
+            full_vec,
             4,
-            points::new(-10.0, 12.0, -10.0).to_vector(),
+            full_vec,
             4,
             Color::white(),
-            RandGen::Live
+            RandGen::Live,
         )),
     );
-    world.add_groups(vec![&right(), &bottom(), &cylinders(), &glasses()]);
+    world.add_objects_refs(vec![
+        &right(),
+        &bottom(),
+        &cylinders(),
+        &glasses(),
+        &triangles(),
+    ]);
 
     let mut camera = Camera::new(1000, 600, math::PI / 3.0);
     camera.transformation = view_transformation(
@@ -268,4 +275,67 @@ fn cones() -> Vec<Shape> {
         .scale(0.6, 1.0, 0.6)
         .translate(-3.5, 0.1, 4.5);
     vec![base, cone]
+}
+
+fn triangles() -> Rc<Shape> {
+    let side = Shape::triangle(
+        points::new(0.0, 2_f64.sqrt(), 0.0),
+        points::new(-1.0, 0.0, 0.0),
+        points::new(1.0, 0.0, 0.0),
+    )
+    .material(
+        Material::glass(),
+    );
+
+    let side1 = side.clone().rotate_x(math::DEG_45);
+    let side2 = side
+        .clone()
+        .rotate_y(math::DEG_45 * 2.0)
+        .rotate_z(-math::DEG_45)
+        .translate(-1.0, 0.0, 1.0);
+    let side3 = side
+        .clone()
+        .rotate_x(-math::DEG_45)
+        .translate(0.0, 0.0, 2.0);
+    let side4 = side
+        .clone()
+        .rotate_y(-math::DEG_45 * 2.0)
+        .rotate_z(math::DEG_45)
+        .translate(1.0, 0.0, 1.0);
+
+    let sphere = Shape::sphere()
+        .material(Material::default().color(colors::new(0.1, 0.1, 0.6)).reflective(0.5))
+        .scale_all(0.2)
+        .translate(-0.5, 0.2, 0.5);
+
+    let cylinder = CylLike::cylinder()
+        .min(-0.2)
+        .max(0.2)
+        .closed(true)
+        .to_shape()
+        .material(Material::default().color(colors::new(0.6, 0.1, 0.1)).reflective(0.5))
+        .scale(0.2, 1.0, 0.2)
+        .translate(0.0, 0.2, 1.0);
+
+    let cube = Shape::cube()
+        .material(Material::default().color(colors::new(0.1, 0.6, 0.1)).reflective(0.5))
+        .scale_all(0.17)
+        .translate(0.3, 0.17, 0.5);
+
+    let groups = Rc::new(Shape::empty_group().translate(4.5, 0.0, 4.0));
+    if let Geo::Group(g) = &groups.geo {
+        g.add_children(
+            Rc::downgrade(&groups),
+            vec![
+                Rc::new(side1),
+                Rc::new(side2),
+                Rc::new(side3),
+                Rc::new(side4),
+                Rc::new(sphere),
+                Rc::new(cylinder),
+                Rc::new(cube)
+            ],
+        );
+    }
+    groups
 }

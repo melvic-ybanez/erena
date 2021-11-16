@@ -44,7 +44,7 @@ impl<S> World<S> {
         }
     }
 
-    pub fn add_groups(&mut self, rcs: Vec<&Rc<Object<S>>>) where S: Clone {
+    pub fn add_objects_refs(&mut self, rcs: Vec<&Rc<Object<S>>>) where S: Clone {
         self.add_objects(rcs.into_iter().map(|rc| rc.borrow()).collect());
     }
 

@@ -220,6 +220,10 @@ pub(crate) mod colors {
         TupleLike::new(red, green, blue, 0.0)
     }
 
+    pub fn rgbi(r: i32, g: i32, b: i32) -> Color {
+        new(r as Real / 255.0, g as Real / 255.0, b as Real / 255.0)
+    }
+
     impl Color {
         pub(crate) fn red_value(&self) -> Real {
             self.x

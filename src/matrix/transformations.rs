@@ -112,6 +112,10 @@ pub trait CanTransform: Sized {
         self.transform(scaling(x, y, z))
     }
 
+    fn scale_all(self, value: Real) -> Self {
+        self.scale(value, value, value)
+    }
+
     fn translate(self, x: Real, y: Real, z: Real) -> Self {
         self.transform(translation(x, y, z))
     }

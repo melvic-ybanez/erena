@@ -3,13 +3,15 @@ pub mod random;
 use std::cmp::Ordering;
 
 /// Represents real number
-pub(crate) type Real = f64;
+pub type Real = f64;
 
-pub(crate) const EPSILON: Real = 0.000001;
+pub const EPSILON: Real = 0.000001;
 
-pub(crate) const PI: Real = std::f64::consts::PI;
+pub const PI: Real = std::f64::consts::PI;
 
-pub(crate) type Idx = (usize, usize);
+pub type Idx = (usize, usize);
+
+pub const DEG_45: Real = PI / 4.0;
 
 pub(crate) fn compare_reals(a: Real, b: Real) -> bool {
     let diff = (a - b).abs();
