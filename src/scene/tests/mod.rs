@@ -31,7 +31,7 @@ fn test_default_world() {
     let s2 = Shape::sphere().transform(scaling(0.5, 0.5, 0.5));
 
     let world = World::default();
-    assert_eq!(world.light, Some(light));
+    assert_eq!(world.light, Some(light.to_area_light()));
     assert!(world.contains(&s1));
     assert!(world.contains(&s2));
 }
@@ -64,7 +64,7 @@ fn test_shading_an_intersection() {
 #[test]
 fn test_shading_from_inside() {
     let mut world = World::default();
-    world.light = Some(PointLight::new(points::new(0.0, 0.25, 0.0), Color::white()));
+    world.add_point_light(PointLight::new(points::new(0.0, 0.25, 0.0), Color::white()));
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 0.0, 1.0));
     let shape = Rc::new(world.get_object(1));
     let i = Intersection::from_ref(0.5, &shape);
@@ -139,7 +139,7 @@ fn test_no_object_shadow_behind_point() {
 #[test]
 fn test_shade_hit_intersection_in_shadow() {
     let mut world = World::empty();
-    world.add_light(PointLight::new(points::new(0.0, 0.0, -10.0), Color::white()));
+    world.add_point_light(PointLight::new(points::new(0.0, 0.0, -10.0), Color::white()));
 
     let sphere1 = Shape::sphere();
     world.add_object(&sphere1);
@@ -214,7 +214,7 @@ fn test_shade_with_reflective_mat() {
 #[test]
 fn test_mutually_reflective_surfaces_color() {
     let mut world = World::default();
-    world.add_light(PointLight::new(Point::origin(), Color::white()));
+    world.add_point_light(PointLight::new(Point::origin(), Color::white()));
 
     let lower = Rc::new(Shape::plane()
         .material(Material::default().reflective(1.0))

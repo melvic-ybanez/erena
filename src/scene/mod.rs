@@ -4,7 +4,7 @@ use crate::shapes::{Object, Shape, Geo};
 use crate::tuples::{colors, points};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
-use crate::rays::lights::PointLight;
+use crate::rays::lights::{PointLight, AreaLight};
 use crate::materials::dielectrics;
 use std::rc::Rc;
 use std::borrow::Borrow;
@@ -14,7 +14,7 @@ pub mod camera;
 #[derive(Clone)]
 pub struct World<S> {
     pub objects: Vec<Object<S>>,
-    pub light: Option<PointLight>,
+    pub light: Option<AreaLight>,
 }
 
 pub type World3D = World<Geo>;
@@ -22,7 +22,7 @@ pub type World3D = World<Geo>;
 const DEFAULT_DEPTH: u8 = 5;
 
 impl<S> World<S> {
-    pub fn new(objects: Vec<Object<S>>, light: Option<PointLight>) -> World<S> {
+    pub fn new(objects: Vec<Object<S>>, light: Option<AreaLight>) -> World<S> {
         World { objects, light }
     }
 
@@ -52,8 +52,8 @@ impl<S> World<S> {
         self.objects.contains(shape)
     }
 
-    pub fn add_light(&mut self, point_light: PointLight) {
-        self.light = Some(point_light);
+    pub fn add_point_light(&mut self, point_light: PointLight) {
+        self.light = Some(point_light.to_area_light());
     }
 
     pub fn update_object<F>(&mut self, i: usize, f: F) -> Object<S>
@@ -65,6 +65,10 @@ impl<S> World<S> {
 
     pub fn get_object(&self, index: usize) -> Object<S> where S: Clone {
         self.objects[index].clone()
+    }
+
+    pub fn get_light(&self) -> Option<&AreaLight> {
+        self.light.as_ref()
     }
 }
 
@@ -81,7 +85,7 @@ impl World3D {
 
         world.add_object(&sphere1);
         world.add_object(&sphere2);
-        world.light = Some(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()));
+        world.add_point_light(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()));
         world
     }
 
@@ -95,8 +99,8 @@ impl World3D {
     }
 
     pub fn default_is_shadowed(&self, point: Point) -> bool {
-        let light = self.light.expect("Light source is required");
-        self.is_shadowed(light.position, point)
+        let light = self.get_light().expect("Light source is required");
+        self.is_shadowed(light.get_position(), point)
     }
 
     pub fn is_shadowed(&self, light_position: Point, point: Point) -> bool {
@@ -132,10 +136,10 @@ impl World3D {
     }
 
     fn shade_hit(&self, comps: Comps3D, depth: u8) -> Color {
-        if let Some(light) = self.light {
+        if let Some(light) = self.get_light() {
             let surface = comps.get_object().material.lighting(
                 comps.get_object(),
-                light,
+                light.clone(),
                 comps.get_over_point(),
                 comps.get_eye_vec(),
                 comps.get_normal_vec(),

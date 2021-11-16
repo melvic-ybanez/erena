@@ -1,10 +1,10 @@
 use crate::math::Real;
+use crate::patterns::Pattern;
+use crate::rays::lights::{AreaLight, PointLight};
+use crate::shapes::Object;
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::patterns::Pattern;
-use crate::shapes::Object;
-use crate::rays::lights::PointLight;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Material {
@@ -37,7 +37,7 @@ impl Material {
     pub fn lighting<S>(
         &self,
         object: &Object<S>,
-        light: PointLight,
+        light: AreaLight,
         point: Point,
         eye_vec: Vector,
         normal_vec: Vector,
@@ -45,7 +45,7 @@ impl Material {
     ) -> Color {
         let color = match &self.pattern {
             None => self.color,
-            Some(pattern) => pattern.at_object(object, point)
+            Some(pattern) => pattern.at_object(object, point),
         };
 
         let in_shadow = intensity == 0.0;
@@ -53,37 +53,62 @@ impl Material {
         // combine the surface color with the light's color
         let effective_color = color * light.intensity;
 
-        // direction of the light source
-        let light_vec = (light.position - point).normalize();
-
         let ambient = effective_color * self.ambient;
 
-        // compute the cosine of the angle between the light vector and the normal vector.
-        let light_dot_normal = light_vec.dot(normal_vec);
+        let mut sum = Color::black();
 
-        // if the cosine is negative, the light is on the other side of the surface
-        let (diffuse, specular) = if light_dot_normal < 0.0 || in_shadow {
-            (Color::black(), Color::black())
-        } else {
-            let diffuse = effective_color * self.diffuse * light_dot_normal;
+        for v in 0..light.v_steps {
+            for u in 0..light.u_steps {
+                let light_position = light.point_on_light(u, v);
 
-            let reflect_vec = -light_vec.reflect(normal_vec);
+                // direction of the light source
+                let light_vec = (light_position - point).normalize();
 
-            // compute the cosine of the angle between the reflection vector and the eye vector
-            let reflect_dot_eye = reflect_vec.dot(eye_vec);
+                // compute the cosine of the angle between the light vector and the normal vector.
+                let light_dot_normal = light_vec.dot(normal_vec);
 
-            // if the cosine is negative, the light reflects away from the eye
-            let specular = if reflect_dot_eye <= 0.0 {
-                Color::black()
-            } else {
-                let factor = reflect_dot_eye.powf(self.shininess);
-                light.intensity * self.specular * factor
-            };
+                // if the cosine is negative, the light is on the other side of the surface
+                if light_dot_normal >= 0.0 && !in_shadow {
+                    let diffuse = effective_color * self.diffuse * light_dot_normal;
 
-            (diffuse, specular)
-        };
+                    let reflect_vec = -light_vec.reflect(normal_vec);
 
-        ambient + diffuse * intensity + specular * intensity
+                    // compute the cosine of the angle between the reflection vector and the eye vector
+                    let reflect_dot_eye = reflect_vec.dot(eye_vec);
+
+                    // if the cosine is negative, the light reflects away from the eye
+                    let specular = if reflect_dot_eye <= 0.0 {
+                        Color::black()
+                    } else {
+                        let factor = reflect_dot_eye.powf(self.shininess);
+                        light.intensity * self.specular * factor
+                    };
+
+                    sum = sum + diffuse + specular;
+                };
+            }
+        }
+
+        ambient + (sum / (light.get_samples() as Real)) * intensity
+    }
+
+    pub fn pl_lighting<S>(
+        &self,
+        object: &Object<S>,
+        light: PointLight,
+        point: Point,
+        eye_vec: Vector,
+        normal_vec: Vector,
+        intensity: Real,
+    ) -> Color {
+        self.lighting(
+            object,
+            light.to_area_light(),
+            point,
+            eye_vec,
+            normal_vec,
+            intensity,
+        )
     }
 
     pub fn glass() -> Material {
@@ -150,6 +175,6 @@ impl Material {
     }
 }
 
+pub mod dielectrics;
 #[cfg(test)]
 mod tests;
-pub mod dielectrics;

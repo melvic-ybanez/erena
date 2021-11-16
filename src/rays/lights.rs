@@ -1,4 +1,4 @@
-use crate::math::random::{Random, SeqRand};
+use crate::math::random::{SeqRand, RandGen};
 use crate::math::Real;
 use crate::scene::World3D;
 use crate::tuples::colors::Color;
@@ -27,9 +27,21 @@ impl PointLight {
             1.0
         }
     }
+
+    pub fn to_area_light(&self) -> AreaLight {
+        AreaLight::default(
+            Point::origin(),
+            self.position.to_vector(),
+            1,
+            self.position.to_vector(),
+            1,
+            self.intensity,
+        )
+    }
 }
 
-pub struct AreaLight<R: Random> {
+#[derive(Debug, Clone, PartialEq)]
+pub struct AreaLight {
     pub corner: Point,
     pub u_steps: Step,
     pub v_steps: Step,
@@ -38,12 +50,12 @@ pub struct AreaLight<R: Random> {
     v_vec: Vector,
     samples: Step,
     position: Point,
-    jitter_by: R,
+    jitter_by: RandGen,
 }
 
 type Step = usize;
 
-impl<R: Random> AreaLight<R> {
+impl AreaLight {
     pub fn new(
         corner: Point,
         full_u_vec: Vector,
@@ -51,8 +63,8 @@ impl<R: Random> AreaLight<R> {
         full_v_vec: Vector,
         v_steps: Step,
         intensity: Color,
-        jitter_by: R,
-    ) -> AreaLight<R> {
+        jitter_by: RandGen,
+    ) -> AreaLight {
         let mid_point = {
             let Vector {
                 x: x1,
@@ -81,6 +93,25 @@ impl<R: Random> AreaLight<R> {
         }
     }
 
+    pub fn default(
+        corner: Point,
+        full_u_vec: Vector,
+        u_steps: Step,
+        full_v_vec: Vector,
+        v_steps: Step,
+        intensity: Color,
+    ) -> AreaLight {
+        AreaLight::new(
+            corner,
+            full_u_vec,
+            u_steps,
+            full_v_vec,
+            v_steps,
+            intensity,
+            RandGen::Seq(SeqRand::new(vec![0.5, 0.5])),
+        )
+    }
+
     pub fn point_on_light(&self, u: Step, v: Step) -> Point {
         self.corner
             + self.u_vec * (u as Real + self.jitter_by.next())
@@ -99,32 +130,19 @@ impl<R: Random> AreaLight<R> {
         }
         total / self.samples as Real
     }
-}
 
-impl AreaLight<SeqRand> {
-    pub fn default(
-        corner: Point,
-        full_u_vec: Vector,
-        u_steps: Step,
-        full_v_vec: Vector,
-        v_steps: Step,
-        intensity: Color,
-    ) -> AreaLight<SeqRand> {
-        AreaLight::new(
-            corner,
-            full_u_vec,
-            u_steps,
-            full_v_vec,
-            v_steps,
-            intensity,
-            SeqRand::new(vec![0.5, 0.5]),
-        )
+    pub fn get_samples(&self) -> Step {
+        self.samples
+    }
+
+    pub fn get_position(&self) -> Point {
+        self.position
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::math::random::SeqRand;
+    use crate::math::random::{SeqRand, RandGen};
     use crate::rays::lights::{AreaLight, PointLight};
     use crate::scene::World;
     use crate::tuples::colors::Color;
@@ -209,7 +227,7 @@ mod tests {
             v2,
             2,
             Color::white(),
-            SeqRand::new(vec![0.3, 0.7]),
+            RandGen::Seq(SeqRand::new(vec![0.3, 0.7])),
         );
         let data = [
             (0, 0, 0.15, 0.0, 0.35),

@@ -22,7 +22,7 @@ fn test_occlusion_between_two_points() {
 #[test]
 fn test_intensity_for_point_light() {
     let world = World::default();
-    let light = world.light.expect("Default world requires a light");
+    let light = world.get_light().expect("Default world requires a light");
     let data = [
         (0.0, 1.0001, 0.0, 1.0),
         (-1.0001, 0.0, 1.0, 1.0),

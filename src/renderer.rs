@@ -27,7 +27,7 @@ pub(crate) fn render_scene() {
 
     let mut world = World3D::new(
         objects,
-        Some(PointLight::new(points::new(-10.0, 12.0, -10.0), Color::white())),
+        Some(PointLight::new(points::new(-10.0, 12.0, -10.0), Color::white()).to_area_light()),
     );
     world.add_groups(vec![&right(), &bottom(), &cylinders(), &glasses()]);
 
