@@ -1,9 +1,7 @@
 use crate::math;
-
 use crate::rays::{Intersection, Intersection3D, IntersectionKind, Ray};
 use crate::shapes::bounds::Bounds;
 use crate::shapes::Shape;
-
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
 use std::rc::Rc;

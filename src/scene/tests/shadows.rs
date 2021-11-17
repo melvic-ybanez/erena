@@ -10,7 +10,7 @@ fn test_occlusion_between_two_points() {
         (points::new(10.0, 10.0, 10.0), true),
         (points::new(-20.0, -20.0, -20.0), false),
         (points::new(-20.0, -20.0, -20.0), false),
-        (points::new(-5.0, -5.0, -5.0), false)
+        (points::new(-5.0, -5.0, -5.0), false),
     ];
     for (point, result) in data {
         assert_eq!(world.is_shadowed(light_position, point), result);
@@ -30,7 +30,7 @@ fn test_intensity_for_point_light() {
         (0.0, 0.0, 1.0001, 0.0),
         (1.0001, 0.0, 0.0, 0.0),
         (0.0, -1.0001, 0.0, 0.0),
-        (0.0, 0.0, 0.0, 0.0)
+        (0.0, 0.0, 0.0, 0.0),
     ];
     for (x, y, z, result) in data {
         let point = points::new(x, y, z);

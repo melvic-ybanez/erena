@@ -1,12 +1,12 @@
-use crate::shapes::{Shape, Geo};
-use crate::matrix::{Matrix, CanTransform, scaling, translation, rotation_y};
-use crate::shapes::groups::not_a_group;
-use crate::rays::Ray;
-use crate::tuples::points::Point;
-use crate::tuples::{vectors, points};
-use std::rc::Rc;
 use crate::math;
+use crate::matrix::{rotation_y, scaling, translation, CanTransform, Matrix};
+use crate::rays::Ray;
+use crate::shapes::groups::not_a_group;
+use crate::shapes::{Geo, Shape};
+use crate::tuples::points::Point;
+use crate::tuples::{points, vectors};
 use std::borrow::Borrow;
+use std::rc::Rc;
 
 #[test]
 fn test_create_group() {
@@ -95,7 +95,9 @@ fn test_intersect_transformed() {
 }
 
 fn with_nested_object<F>(outer_trans: Matrix, inner_trans: Matrix, child_trans: Matrix, f: F)
-    where F: Fn(&Shape) -> () {
+where
+    F: Fn(&Shape) -> (),
+{
     let outer = Rc::new(Shape::empty_group().transform(outer_trans));
     let inner = Rc::new(Shape::empty_group().transform(inner_trans));
     let shape = Rc::new(Shape::sphere().transform(child_trans));
@@ -119,7 +121,7 @@ fn test_world_to_object_space_conversion() {
         |shape| {
             let point = shape.world_to_object(points::new(-2.0, 0.0, -10.0));
             assert_eq!(point, points::new(0.0, 0.0, -1.0));
-        }
+        },
     );
 }
 
@@ -131,10 +133,16 @@ fn test_object_normal_to_world_space() {
         scaling(1.0, 2.0, 3.0),
         translation(5.0, 0.0, 0.0),
         |shape| {
-            let normal = shape.normal_to_world(
-                vectors::new(3_f64.sqrt() / 3.0, 3_f64.sqrt() / 3.0, 3_f64.sqrt() / 3.0));
-            assert_eq!(normal.round_items(), vectors::new(0.28571, 0.42857, -0.85714));
-        }
+            let normal = shape.normal_to_world(vectors::new(
+                3_f64.sqrt() / 3.0,
+                3_f64.sqrt() / 3.0,
+                3_f64.sqrt() / 3.0,
+            ));
+            assert_eq!(
+                normal.round_items(),
+                vectors::new(0.28571, 0.42857, -0.85714)
+            );
+        },
     );
 }
 
@@ -147,7 +155,10 @@ fn test_normal_on_child() {
         translation(5.0, 0.0, 0.0),
         |shape| {
             let normal = shape.default_normal_at(points::new(1.7321, 1.1547, -5.5774));
-            assert_eq!(normal.round_items(), vectors::new(0.28570, 0.42854, -0.85716));
-        }
+            assert_eq!(
+                normal.round_items(),
+                vectors::new(0.28570, 0.42854, -0.85716)
+            );
+        },
     );
 }

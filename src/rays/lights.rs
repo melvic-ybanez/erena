@@ -1,4 +1,4 @@
-use crate::math::random::{SeqRand, RandGen};
+use crate::math::random::{RandGen, SeqRand};
 use crate::math::Real;
 use crate::scene::World3D;
 use crate::tuples::colors::Color;
@@ -142,7 +142,7 @@ impl AreaLight {
 
 #[cfg(test)]
 mod tests {
-    use crate::math::random::{SeqRand, RandGen};
+    use crate::math::random::{RandGen, SeqRand};
     use crate::rays::lights::{AreaLight, PointLight};
     use crate::scene::World;
     use crate::tuples::colors::Color;

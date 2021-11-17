@@ -1,12 +1,9 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-
-
 use crate::rays::{Intersection, Intersection3D, Ray};
 use crate::shapes::bounds::Bounds;
 use crate::shapes::{cubes, Shape};
-
 
 use crate::tuples::vectors::Vector;
 

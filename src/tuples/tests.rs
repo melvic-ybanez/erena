@@ -1,6 +1,6 @@
-use crate::tuples::{colors, points, vectors};
 use crate::tuples;
 use crate::tuples::vectors::Vector;
+use crate::tuples::{colors, points, vectors};
 
 /// A tuple with w=1.0 is a point
 #[test]
@@ -48,7 +48,10 @@ fn test_tuples_addition() {
 fn test_points_subtraction() {
     let point1 = points::new(3.0, 2.0, 1.0);
     let point2 = points::new(5.0, 6.0, 7.0);
-    assert_eq!((point1 - point2).to_vector(), vectors::new(-2.0, -4.0, -6.0));
+    assert_eq!(
+        (point1 - point2).to_vector(),
+        vectors::new(-2.0, -4.0, -6.0)
+    );
 }
 
 /// Tests subtracting a vector from a point
@@ -105,15 +108,23 @@ fn test_magnitude() {
     assert_eq!(vectors::new(0.0, 1.0, 0.0).magnitude(), 1.0);
     assert_eq!(vectors::new(0.0, 0.0, 1.0).magnitude(), 1.0);
     assert_eq!(vectors::new(1.0, 2.0, 3.0).magnitude(), (14 as f64).sqrt());
-    assert_eq!(vectors::new(-1.0, -2.0, -3.0).magnitude(), (14 as f64).sqrt());
+    assert_eq!(
+        vectors::new(-1.0, -2.0, -3.0).magnitude(),
+        (14 as f64).sqrt()
+    );
 }
 
 #[test]
 fn test_normalization() {
-    assert_eq!(vectors::new(4.0, 0.0, 0.0).normalize(), vectors::new(1.0, 0.0, 0.0));
+    assert_eq!(
+        vectors::new(4.0, 0.0, 0.0).normalize(),
+        vectors::new(1.0, 0.0, 0.0)
+    );
     let sqrt14 = (14 as f64).sqrt();
-    assert_eq!(vectors::new(1.0, 2.0, 3.0).normalize(),
-               vectors::new(1.0 / sqrt14, 2.0 / sqrt14, 3.0 / sqrt14));
+    assert_eq!(
+        vectors::new(1.0, 2.0, 3.0).normalize(),
+        vectors::new(1.0 / sqrt14, 2.0 / sqrt14, 3.0 / sqrt14)
+    );
     // magnitude of a normalize vector
     assert_eq!(vectors::new(1.0, 2.0, 3.0).normalize().magnitude(), 1.0);
 }

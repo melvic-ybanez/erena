@@ -3,9 +3,8 @@ use std::cmp::Ordering::Equal;
 
 use crate::math;
 use crate::math::Real;
-use crate::shapes::{Object, Geo, Shape};
+use crate::shapes::{Geo, Object, Shape};
 use std::rc::Rc;
-
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Intersection<S> {
@@ -19,10 +18,7 @@ pub type Intersection3D = Intersection<Geo>;
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum IntersectionKind {
     Regular,
-    Triangle {
-        u: Real,
-        v: Real,
-    },
+    Triangle { u: Real, v: Real },
 }
 
 impl<S: Clone + PartialEq> Intersection<S> {
@@ -30,7 +26,11 @@ impl<S: Clone + PartialEq> Intersection<S> {
         Intersection::new_with_kind(t, object, IntersectionKind::Regular)
     }
 
-    pub fn new_with_kind(t: Real, object: Rc<Object<S>>, kind: IntersectionKind) -> Intersection<S> {
+    pub fn new_with_kind(
+        t: Real,
+        object: Rc<Object<S>>,
+        kind: IntersectionKind,
+    ) -> Intersection<S> {
         Intersection { t, object, kind }
     }
 
@@ -53,11 +53,15 @@ impl<S: Clone + PartialEq> Intersection<S> {
     }
 
     pub fn agg(shape: &Rc<Object<S>>, ts: &[Real]) -> Vec<Intersection<S>> {
-        ts.iter().map(|&t| Intersection::from_ref(t, shape)).collect()
+        ts.iter()
+            .map(|&t| Intersection::from_ref(t, shape))
+            .collect()
     }
 
     pub fn from_data(data: &[(Real, &Rc<Object<S>>)]) -> Vec<Intersection<S>> {
-        data.iter().map(|(t, obj)| Intersection::from_ref(*t, obj)).collect()
+        data.iter()
+            .map(|(t, obj)| Intersection::from_ref(*t, obj))
+            .collect()
     }
 
     pub(crate) fn compare(i1: &Intersection<S>, i2: &Intersection<S>) -> Ordering {
@@ -71,11 +75,15 @@ impl<S: Clone + PartialEq> Intersection<S> {
 
 impl Intersection3D {
     pub fn new_with_uv(t: Real, shape: Rc<Shape>, u: Real, v: Real) -> Intersection3D {
-        Intersection::new_with_kind(t, Rc::clone(&shape), if let Geo::Triangle(_) = shape.geo {
-            IntersectionKind::Triangle { u, v }
-        } else {
-            IntersectionKind::Regular
-        })
+        Intersection::new_with_kind(
+            t,
+            Rc::clone(&shape),
+            if let Geo::Triangle(_) = shape.geo {
+                IntersectionKind::Triangle { u, v }
+            } else {
+                IntersectionKind::Regular
+            },
+        )
     }
 
     pub fn test() -> Intersection3D {
@@ -85,13 +93,13 @@ impl Intersection3D {
 
 #[cfg(test)]
 mod tests {
-    use crate::rays::intersections::{Intersection, IntersectionKind};
-    use crate::shapes::{Shape, spheres};
-    use crate::rays::{Ray, Comps};
-    use crate::tuples::{points, vectors};
-    use crate::matrix::CanTransform;
-    use crate::math;
     use crate::materials::Material;
+    use crate::math;
+    use crate::matrix::CanTransform;
+    use crate::rays::intersections::{Intersection, IntersectionKind};
+    use crate::rays::{Comps, Ray};
+    use crate::shapes::{spheres, Shape};
+    use crate::tuples::{points, vectors};
     use std::rc::Rc;
 
     #[test]
@@ -116,7 +124,10 @@ mod tests {
     fn test_hit_when_some_ts_are_negative() {
         let sphere = Rc::new(Shape::sphere());
         let xs = Intersection::agg(&sphere, &[-1.0, 1.0]);
-        assert_eq!(Intersection::hit(xs), Some(Intersection::from_ref(1.0, &sphere)));
+        assert_eq!(
+            Intersection::hit(xs),
+            Some(Intersection::from_ref(1.0, &sphere))
+        );
     }
 
     #[test]
@@ -132,10 +143,11 @@ mod tests {
     #[test]
     fn test_hit_as_lowest_non_negative() {
         let sphere = Rc::new(Shape::sphere());
-        let xs = Intersection::agg(&sphere, &[
-            5.0, 7.0, -3.0, 2.0,
-        ]);
-        assert_eq!(Intersection::hit(xs), Some(Intersection::from_ref(2.0, &sphere)));
+        let xs = Intersection::agg(&sphere, &[5.0, 7.0, -3.0, 2.0]);
+        assert_eq!(
+            Intersection::hit(xs),
+            Some(Intersection::from_ref(2.0, &sphere))
+        );
     }
 
     /// Tests that the hit should offset the point
@@ -159,20 +171,29 @@ mod tests {
         );
         let i = Intersection::from_ref(2_f64.sqrt(), &shape);
         let comps = Comps::prepare_default(&i, &ray);
-        assert_eq!(comps.get_reflect_vec(), vectors::new(0.0, math::two_sqrt_div_2(), math::two_sqrt_div_2()));
+        assert_eq!(
+            comps.get_reflect_vec(),
+            vectors::new(0.0, math::two_sqrt_div_2(), math::two_sqrt_div_2())
+        );
     }
 
     #[test]
     fn test_finding_n1_and_n2() {
-        let a = Rc::new(spheres::glass()
-            .scale(2.0, 2.0, 2.0)
-            .material(Material::default().refractive_index(1.5)));
-        let b = Rc::new(spheres::glass()
-            .translate(0.0, 0.0, -0.25)
-            .material(Material::default().refractive_index(2.0)));
-        let c = Rc::new(spheres::glass()
-            .translate(0.0, 0.0, 0.25)
-            .material(Material::default().refractive_index(2.5)));
+        let a = Rc::new(
+            spheres::glass()
+                .scale(2.0, 2.0, 2.0)
+                .material(Material::default().refractive_index(1.5)),
+        );
+        let b = Rc::new(
+            spheres::glass()
+                .translate(0.0, 0.0, -0.25)
+                .material(Material::default().refractive_index(2.0)),
+        );
+        let c = Rc::new(
+            spheres::glass()
+                .translate(0.0, 0.0, 0.25)
+                .material(Material::default().refractive_index(2.5)),
+        );
         let ray = Ray::new(points::new(0.0, 0.0, -4.0), vectors::new(0.0, 0.0, 1.0));
         let xs = Intersection::from_data(&[
             (2.0, &a),

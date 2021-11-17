@@ -1,9 +1,9 @@
 use crate::parsers;
-use crate::tuples::{points, vectors};
+use crate::shapes::triangles::{Smooth, TriangleKind};
 use crate::shapes::Geo;
+use crate::tuples::{points, vectors};
 use std::fs::File;
 use std::io;
-use crate::shapes::triangles::{TriangleKind, Smooth};
 
 #[test]
 fn test_ignoring_unrecognized_files() {
@@ -78,7 +78,8 @@ fn test_triangulating_polygons() {
         let t2 = g.get_child(1);
         let t3 = g.get_child(2);
 
-        if let (Geo::Triangle(t1), Geo::Triangle(t2), Geo::Triangle(t3)) = (t1.geo, t2.geo, t3.geo) {
+        if let (Geo::Triangle(t1), Geo::Triangle(t2), Geo::Triangle(t3)) = (t1.geo, t2.geo, t3.geo)
+        {
             let vertices = parser.get_vertices();
 
             assert_eq!(t1.get_p1(), vertices[1]);

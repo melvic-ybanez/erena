@@ -2,10 +2,10 @@ use std::marker::PhantomData;
 use std::ops;
 use std::ops::Index;
 
-use crate::{math, tuples};
 use crate::math::Real;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use crate::{math, tuples};
 
 #[derive(Debug, Copy, Clone, PartialOrd)]
 pub struct TupleLike<T> {
@@ -13,15 +13,20 @@ pub struct TupleLike<T> {
     pub y: Real,
     pub z: Real,
     pub w: Real,
-    _phantom: PhantomData<T>
+    _phantom: PhantomData<T>,
 }
 
 pub const LEN: usize = 4;
 
 impl<T> TupleLike<T> {
-
     pub(crate) fn new(x: Real, y: Real, z: Real, w: Real) -> TupleLike<T> {
-        TupleLike { x, y, z, w, _phantom: PhantomData }
+        TupleLike {
+            x,
+            y,
+            z,
+            w,
+            _phantom: PhantomData,
+        }
     }
 
     pub(crate) fn from_array(elems: &[Real; LEN]) -> TupleLike<T> {
@@ -62,7 +67,7 @@ impl<T> TupleLike<T> {
             math::round_to_5(self.x),
             math::round_to_5(self.y),
             math::round_to_5(self.z),
-            math::round_to_5(self.w)
+            math::round_to_5(self.w),
         )
     }
 }
@@ -71,7 +76,12 @@ impl<T, S> ops::Add<TupleLike<S>> for TupleLike<T> {
     type Output = TupleLike<T>;
 
     fn add(self, that: TupleLike<S>) -> Self::Output {
-        TupleLike::new(self.x + that.x, self.y + that.y, self.z + that.z, self.w + that.w)
+        TupleLike::new(
+            self.x + that.x,
+            self.y + that.y,
+            self.z + that.z,
+            self.w + that.w,
+        )
     }
 }
 
@@ -79,7 +89,12 @@ impl<T, S> ops::Sub<TupleLike<S>> for TupleLike<T> {
     type Output = TupleLike<T>;
 
     fn sub(self, rhs: TupleLike<S>) -> Self::Output {
-        TupleLike::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z, self.w - rhs.w)
+        TupleLike::new(
+            self.x - rhs.x,
+            self.y - rhs.y,
+            self.z - rhs.z,
+            self.w - rhs.w,
+        )
     }
 }
 
@@ -96,7 +111,12 @@ impl<T> ops::Mul<Real> for TupleLike<T> {
 
     /// Scalar multiplication
     fn mul(self, scalar: Real) -> Self::Output {
-        TupleLike::new(self.x * scalar, self.y * scalar, self.z * scalar, self.w * scalar)
+        TupleLike::new(
+            self.x * scalar,
+            self.y * scalar,
+            self.z * scalar,
+            self.w * scalar,
+        )
     }
 }
 
@@ -117,7 +137,7 @@ impl<T> Index<usize> for TupleLike<T> {
             1 => &self.y,
             2 => &self.z,
             3 => &self.w,
-            _ => panic!("Invalid index")
+            _ => panic!("Invalid index"),
         }
     }
 }
@@ -181,8 +201,8 @@ pub(crate) mod vectors {
 
 pub(crate) mod points {
     use crate::math::Real;
-    use crate::tuples::TupleLike;
     use crate::tuples::vectors::Vector;
+    use crate::tuples::TupleLike;
 
     #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
     pub struct PointT;

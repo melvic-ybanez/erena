@@ -73,11 +73,11 @@ impl Camera {
                     let source_x = x * 2;
 
                     // computes the average...
-                    canvas[(x, y)] = (high_res_canvas[(source_x, source_y)] +
-                        high_res_canvas[(source_x, source_y + 1)] +
-                        high_res_canvas[(source_x + 1, source_y)] +
-                        high_res_canvas[(source_x + 1, source_y + 1)]
-                    ) * 0.25;
+                    canvas[(x, y)] = (high_res_canvas[(source_x, source_y)]
+                        + high_res_canvas[(source_x, source_y + 1)]
+                        + high_res_canvas[(source_x + 1, source_y)]
+                        + high_res_canvas[(source_x + 1, source_y + 1)])
+                        * 0.25;
                 }
             }
 

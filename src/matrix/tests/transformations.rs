@@ -1,7 +1,9 @@
 use crate::math;
-use crate::matrix::{Matrix, rotation_x, rotation_y, rotation_z, scaling, shearing, translation, view_transformation};
-use crate::tuples::{points, vectors};
+use crate::matrix::{
+    rotation_x, rotation_y, rotation_z, scaling, shearing, translation, view_transformation, Matrix,
+};
 use crate::tuples::points::Point;
+use crate::tuples::{points, vectors};
 
 #[test]
 fn test_translation() {
@@ -17,7 +19,7 @@ fn test_translation_inverse() {
     let point = points::new(-3.0, 4.0, 5.0);
     match maybe_inv {
         Some(transform) => assert_eq!(transform * point, points::new(-8.0, 7.0, 3.0)),
-        None => panic!("No inverse")
+        None => panic!("No inverse"),
     }
 }
 
@@ -51,7 +53,7 @@ fn test_inverse_scaling() {
             let vec = vectors::new(-4.0, 6.0, 8.0);
             assert_eq!(inv * vec, vectors::new(-2.0, 2.0, 2.0));
         }
-        None => panic!("No inverse")
+        None => panic!("No inverse"),
     }
 }
 
@@ -69,7 +71,10 @@ fn test_rotation_around_x() {
     let point = points::new(0.0, 1.0, 0.0);
     let half_quarter = rotation_x(math::PI / 4.0);
     let full_quarter = rotation_x(math::PI / 2.0);
-    assert_eq!(half_quarter * &point, points::new(0.0, 2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0));
+    assert_eq!(
+        half_quarter * &point,
+        points::new(0.0, 2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0)
+    );
     assert_eq!(full_quarter * point, points::new(0.0, 0.0, 1.0));
 }
 
@@ -80,9 +85,11 @@ fn test_inverse_x_rotation() {
     let point = points::new(0.0, 1.0, 0.0);
     let half_quarter = rotation_x(math::PI / 4.0);
     match half_quarter.inverse() {
-        Some(inv) =>
-            assert_eq!(inv * point, points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0)),
-        None => panic!("No inverse")
+        Some(inv) => assert_eq!(
+            inv * point,
+            points::new(0.0, 2_f64.sqrt() / 2.0, -2_f64.sqrt() / 2.0)
+        ),
+        None => panic!("No inverse"),
     }
 }
 
@@ -91,7 +98,10 @@ fn test_rotation_around_y() {
     let point = points::new(0.0, 0.0, 1.0);
     let half_quarter = rotation_y(math::PI / 4.0);
     let full_quarter = rotation_y(math::PI / 2.0);
-    assert_eq!(half_quarter * &point, points::new(2_f64.sqrt() / 2.0, 0.0, 2_f64.sqrt() / 2.0));
+    assert_eq!(
+        half_quarter * &point,
+        points::new(2_f64.sqrt() / 2.0, 0.0, 2_f64.sqrt() / 2.0)
+    );
     assert_eq!(full_quarter * point, points::new(1.0, 0.0, 0.0));
 }
 
@@ -100,7 +110,10 @@ fn test_rotation_around_z() {
     let point = points::new(0.0, 1.0, 0.0);
     let half_quarter = rotation_z(math::PI / 4.0);
     let full_quarter = rotation_z(math::PI / 2.0);
-    assert_eq!(half_quarter * &point, points::new(-2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0, 0.0));
+    assert_eq!(
+        half_quarter * &point,
+        points::new(-2_f64.sqrt() / 2.0, 2_f64.sqrt() / 2.0, 0.0)
+    );
     assert_eq!(full_quarter * point, points::new(-1.0, 0.0, 0.0));
 }
 
@@ -135,13 +148,13 @@ fn test_transformations_sequence() {
     let b = scaling(5.0, 5.0, 5.0);
     let c = translation(10.0, 5.0, 7.0);
 
-    let point = a * point;  // apply rotation
+    let point = a * point; // apply rotation
     assert_eq!(point, points::new(1.0, -1.0, 0.0));
 
-    let point = b * point;  // then scale
+    let point = b * point; // then scale
     assert_eq!(point, points::new(5.0, -5.0, 0.0));
 
-    let point = c * point;  // then translate
+    let point = c * point; // then translate
     assert_eq!(point, points::new(15.0, 0.0, 7.0));
 }
 
@@ -190,10 +203,11 @@ fn test_an_arbitrary_view_transformation() {
     let to = points::new(4.0, -2.0, 8.0);
     let up = vectors::new(1.0, 1.0, 0.0);
     let t = view_transformation(from, to, up);
-    assert_eq!(t.round_items(5), Matrix::new44(&[
-        -0.50709, 0.50709, 0.67612, -2.36643,
-        0.76772, 0.60609, 0.12122, -2.82843,
-        -0.35857, 0.59761, -0.71714, 0.00000,
-        0.00000, 0.00000, 0.00000, 1.00000,
-    ]));
+    assert_eq!(
+        t.round_items(5),
+        Matrix::new44(&[
+            -0.50709, 0.50709, 0.67612, -2.36643, 0.76772, 0.60609, 0.12122, -2.82843, -0.35857,
+            0.59761, -0.71714, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000,
+        ])
+    );
 }

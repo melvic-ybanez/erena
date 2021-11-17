@@ -1,5 +1,5 @@
-use crate::rays::Comps3D;
 use crate::math::Real;
+use crate::rays::Comps3D;
 
 pub fn schlick(comps: Comps3D) -> Real {
     // cosine of the angle between the eye and normal vectors
@@ -11,7 +11,7 @@ pub fn schlick(comps: Comps3D) -> Real {
         let sin2t = n * n * (1.0 - cos * cos);
 
         if sin2t > 1.0 {
-            return 1.0
+            return 1.0;
         }
 
         (1.0 - sin2t).sqrt()
@@ -26,20 +26,23 @@ pub fn schlick(comps: Comps3D) -> Real {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::shapes::spheres;
-    use crate::rays::{Ray, Intersection, Comps};
-    use crate::tuples::{points, vectors};
     use crate::math;
+    use crate::rays::{Comps, Intersection, Ray};
+    use crate::shapes::spheres;
     use crate::tuples::points::Point;
+    use crate::tuples::{points, vectors};
     use std::rc::Rc;
 
     #[test]
     fn test_schlick_under_total_internal_reflection() {
         let shape = Rc::new(spheres::glass());
-        let ray = Ray::new(points::new(0.0, 0.0, math::two_sqrt_div_2()), vectors::new(0.0, 1.0, 0.0));
+        let ray = Ray::new(
+            points::new(0.0, 0.0, math::two_sqrt_div_2()),
+            vectors::new(0.0, 1.0, 0.0),
+        );
         let xs = Intersection::from_data(&[
             (-math::two_sqrt_div_2(), &shape),
-            (math::two_sqrt_div_2(), &shape)
+            (math::two_sqrt_div_2(), &shape),
         ]);
         let comps = Comps::prepare(&xs[1], &ray, &xs);
         let reflectance = schlick(comps);

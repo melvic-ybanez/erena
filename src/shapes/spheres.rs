@@ -1,8 +1,8 @@
-use crate::rays::{Intersection, Ray, Intersection3D};
+use crate::materials::Material;
+use crate::rays::{Intersection, Intersection3D, Ray};
 use crate::shapes::Shape;
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
-use crate::materials::Material;
 use std::rc::Rc;
 
 pub fn intersect(sphere: &Shape, transformed_ray: &Ray) -> Vec<Intersection3D> {
@@ -18,8 +18,14 @@ pub fn intersect(sphere: &Shape, transformed_ray: &Ray) -> Vec<Intersection3D> {
         vec![]
     } else {
         vec![
-            Intersection::new((-b - discriminant.sqrt()) / (2.0 * a), Rc::new(sphere.clone())),     // t1
-            Intersection::new((-b + discriminant.sqrt()) / (2.0 * a), Rc::new(sphere.clone())),     // t2
+            Intersection::new(
+                (-b - discriminant.sqrt()) / (2.0 * a),
+                Rc::new(sphere.clone()),
+            ), // t1
+            Intersection::new(
+                (-b + discriminant.sqrt()) / (2.0 * a),
+                Rc::new(sphere.clone()),
+            ), // t2
         ]
     }
 }
@@ -29,7 +35,5 @@ pub fn normal_at(local_point: Point) -> Vector {
 }
 
 pub fn glass() -> Shape {
-    Shape::sphere().material(
-        Material::default().transparency(1.0).refractive_index(1.5)
-    )
+    Shape::sphere().material(Material::default().transparency(1.0).refractive_index(1.5))
 }

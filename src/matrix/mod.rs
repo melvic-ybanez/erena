@@ -2,9 +2,9 @@ use std::ops::{Index, IndexMut, Mul};
 
 pub use transformations::*;
 
-use crate::{math, tuples};
 use crate::math::Real;
 use crate::tuples::TupleLike;
+use crate::{math, tuples};
 use std::cell::RefCell;
 
 mod transformations;
@@ -70,10 +70,7 @@ impl Matrix {
     #[inline(always)]
     pub(crate) fn id44() -> Matrix {
         Matrix::new44(&[
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ])
     }
 
@@ -147,7 +144,7 @@ impl Matrix {
     /// 3. For every element E in M', divide E by the determinant of M0.
     pub fn inverse(&self) -> Option<Matrix> {
         if self.inverse.borrow().is_some() {
-            return self.inverse.borrow().clone()
+            return self.inverse.borrow().clone();
         }
 
         let inverse = if !self.is_invertible() {
@@ -175,7 +172,11 @@ impl Matrix {
 
     /// This is used mainly for testing purposes
     fn round_items(&self, limit: u32) -> Matrix {
-        let elems: Vec<_> = self.elements.iter().map(|&x| math::round(x, limit)).collect();
+        let elems: Vec<_> = self
+            .elements
+            .iter()
+            .map(|&x| math::round(x, limit))
+            .collect();
         Matrix::new(self.width, self.height, elems)
     }
 }

@@ -1,15 +1,14 @@
 use crate::materials::Material;
 use crate::matrix::{CanTransform, Matrix};
-use crate::rays::{Ray, Intersection3D};
-use crate::tuples::points::Point;
-use crate::tuples::vectors::Vector;
+use crate::rays::{Intersection3D, Ray};
+use crate::shapes::bounds::Bounds;
 use crate::shapes::cylinders::CylLike;
 use crate::shapes::groups::Group;
-use std::rc::{Weak, Rc};
-use std::cell::RefCell;
-use crate::shapes::bounds::Bounds;
 use crate::shapes::triangles::Triangle;
-
+use crate::tuples::points::Point;
+use crate::tuples::vectors::Vector;
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
 
 #[derive(Debug, Clone)]
 pub struct Object<G> {
@@ -40,7 +39,7 @@ impl<G> Object<G> {
     pub fn world_to_object(&self, world_point: Point) -> Point {
         let point = match self.get_parent() {
             None => world_point,
-            Some(parent) => parent.world_to_object(world_point)
+            Some(parent) => parent.world_to_object(world_point),
         };
         self.transformation.inverse_or_id44() * point
     }
@@ -51,7 +50,7 @@ impl<G> Object<G> {
             .normalize();
         match self.get_parent() {
             None => normal,
-            Some(parent) => parent.normal_to_world(normal)
+            Some(parent) => parent.normal_to_world(normal),
         }
     }
 
@@ -95,8 +94,7 @@ impl Shape {
     }
 
     pub fn group(objects: Vec<Shape>) -> Shape {
-        let objects: Vec<_> = objects.into_iter()
-            .map(|obj| Rc::new(obj)).collect();
+        let objects: Vec<_> = objects.into_iter().map(|obj| Rc::new(obj)).collect();
         Shape::from_group(Group::new(objects))
     }
 
@@ -104,7 +102,14 @@ impl Shape {
         Shape::new(Geo::Triangle(Triangle::regular(p1, p2, p3)))
     }
 
-    pub fn smooth_triangle(p1: Point, p2: Point, p3: Point, n1: Vector, n2: Vector, n3: Vector) -> Shape {
+    pub fn smooth_triangle(
+        p1: Point,
+        p2: Point,
+        p3: Point,
+        n1: Vector,
+        n2: Vector,
+        n3: Vector,
+    ) -> Shape {
         Shape::new(Geo::Triangle(Triangle::smooth(p1, p2, p3, n1, n2, n3)))
     }
 
@@ -124,10 +129,9 @@ impl Shape {
             Geo::TestShape => test::intersect(&local_ray),
             Geo::Plane => planes::intersect(self, &local_ray),
             Geo::Cube => cubes::intersect(self, &local_ray),
-            Geo::Cylinder(CylLike { cone, .. }) =>
-                cylinders::intersect(self, &local_ray, cone),
+            Geo::Cylinder(CylLike { cone, .. }) => cylinders::intersect(self, &local_ray, cone),
             Geo::Group(ref group) => group.intersect(self, &local_ray),
-            Geo::Triangle(ref tri) => tri.intersect(self, &local_ray)
+            Geo::Triangle(ref tri) => tri.intersect(self, &local_ray),
         }
     }
 
@@ -139,10 +143,11 @@ impl Shape {
             Geo::TestShape => test::normal_at(local_point),
             Geo::Plane => planes::normal_at(),
             Geo::Cube => cubes::normal_at(local_point),
-            Geo::Cylinder(CylLike { min, max, cone, .. }) =>
-                cylinders::normal_at(local_point, min, max, cone),
+            Geo::Cylinder(CylLike { min, max, cone, .. }) => {
+                cylinders::normal_at(local_point, min, max, cone)
+            }
             Geo::Group(_) => groups::normal_at(),
-            Geo::Triangle(ref tri) => tri.get_normal(hit)
+            Geo::Triangle(ref tri) => tri.get_normal(hit),
         };
 
         self.normal_to_world(local_normal)
@@ -177,9 +182,9 @@ impl Shape {
 
 impl<G: PartialEq> PartialEq for Object<G> {
     fn eq(&self, other: &Self) -> bool {
-        self.transformation == other.transformation &&
-            self.material == other.material &&
-            self.geo == other.geo
+        self.transformation == other.transformation
+            && self.material == other.material
+            && self.geo == other.geo
     }
 }
 
@@ -204,7 +209,7 @@ impl<S> CanTransform for Object<S> {
 }
 
 mod test {
-    use crate::rays::{Ray, Intersection3D};
+    use crate::rays::{Intersection3D, Ray};
     use crate::tuples::points::Point;
     use crate::tuples::vectors::Vector;
 
@@ -226,10 +231,10 @@ mod test {
 #[cfg(test)]
 mod tests;
 
-pub mod spheres;
-mod planes;
+mod bounds;
 mod cubes;
 pub mod cylinders;
 pub mod groups;
-mod bounds;
+mod planes;
+pub mod spheres;
 pub mod triangles;

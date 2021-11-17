@@ -1,11 +1,11 @@
 use std::f64::consts::{FRAC_1_SQRT_2, PI};
 
 use crate::materials::Material;
-use crate::matrix::{CanTransform, Matrix, rotation_z, scaling, translation};
+use crate::matrix::{rotation_z, scaling, translation, CanTransform, Matrix};
 use crate::rays::Ray;
-use crate::shapes::{Shape, spheres};
-use crate::tuples::{points, vectors};
+use crate::shapes::{spheres, Shape};
 use crate::tuples::points::Point;
+use crate::tuples::{points, vectors};
 
 #[test]
 fn test_two_point_intersection() {

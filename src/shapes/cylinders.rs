@@ -1,12 +1,12 @@
 use crate::math;
-use crate::math::{EPSILON, Real};
+use crate::math::{Real, EPSILON};
 use crate::rays::{Intersection, Intersection3D, Ray};
+use crate::shapes::bounds::Bounds;
 use crate::shapes::{Geo, Shape};
 use crate::tuples::points::Point;
-use crate::tuples::{vectors, points};
 use crate::tuples::vectors::Vector;
+use crate::tuples::{points, vectors};
 use std::rc::Rc;
-use crate::shapes::bounds::Bounds;
 
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct CylLike {
@@ -69,7 +69,7 @@ impl CylLike {
             let limit = Real::max(a, b);
             Bounds::new(
                 points::new(-limit, self.min, -limit),
-                points::new(limit, self.max, limit)
+                points::new(limit, self.max, limit),
             )
         } else {
             Bounds::new(
@@ -81,7 +81,10 @@ impl CylLike {
 }
 
 pub fn intersect(cyl: &Shape, ray: &Ray, cone: bool) -> Vec<Intersection3D> {
-    let Ray { origin: o, direction: d } = ray;
+    let Ray {
+        origin: o,
+        direction: d,
+    } = ray;
 
     let dx2 = d.x.powi(2);
     let dy2 = d.y.powi(2);
@@ -123,11 +126,7 @@ pub fn intersect(cyl: &Shape, ray: &Ray, cone: bool) -> Vec<Intersection3D> {
     let t0 = (-b - disc.sqrt()) / (2.0 * a);
     let t1 = (-b + disc.sqrt()) / (2.0 * a);
 
-    let (t0, t1) = if t0 > t1 {
-        (t1, t0)
-    } else {
-        (t0, t1)
-    };
+    let (t0, t1) = if t0 > t1 { (t1, t0) } else { (t0, t1) };
 
     let mut xs: Vec<Intersection3D> = vec![];
 
@@ -157,7 +156,11 @@ pub fn normal_at(point: Point, min: Real, max: Real, cone: bool) -> Vector {
     } else {
         let y = if cone {
             let y = (point.x.powi(2) + point.z.powi(2)).sqrt();
-            if point.y > 0.0 { -y } else { y }
+            if point.y > 0.0 {
+                -y
+            } else {
+                y
+            }
         } else {
             0.0
         };
@@ -179,7 +182,10 @@ fn check_cap<'a>(cyl: &'a Shape, ray: &Ray, limit: Real, xs: &mut Vec<Intersecti
 }
 
 fn intersect_caps(cyl: &Shape, ray: &Ray, mut xs: Vec<Intersection3D>) -> Vec<Intersection3D> {
-    if let Geo::Cylinder(CylLike { min, max, closed, .. }) = cyl.geo {
+    if let Geo::Cylinder(CylLike {
+        min, max, closed, ..
+    }) = cyl.geo
+    {
         // not closed or no intersection. Reject.
         if !closed || math::compare_reals(ray.direction.y, 0.0) {
             return xs;

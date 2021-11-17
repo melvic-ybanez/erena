@@ -11,21 +11,35 @@ pub struct Canvas {
 
 impl Canvas {
     pub fn new(width: usize, height: usize) -> Canvas {
-        Canvas { width, height, pixels: vec![Color::black(); width * height] }
+        Canvas {
+            width,
+            height,
+            pixels: vec![Color::black(); width * height],
+        }
     }
 
     pub fn to_ppm(&self) -> Ppm {
-        let header = format!("P3\n{} {}\n{}", self.width, self.height, Ppm::MAX_COLOR_VALUE);
+        let header = format!(
+            "P3\n{} {}\n{}",
+            self.width,
+            self.height,
+            Ppm::MAX_COLOR_VALUE
+        );
 
         fn row(chunk: &[Color]) -> Vec<String> {
-            let row: Vec<_> = chunk.iter().map(|color| {
-                let Color { x: r, y: g, z: b, .. } = color;
-                let max_value = Ppm::MAX_COLOR_VALUE as i32;
-                let r = math::scale_to(max_value, *r);
-                let g = math::scale_to(max_value, *g);
-                let b = math::scale_to(max_value, *b);
-                format!("{} {} {}", r, g, b)
-            }).collect();
+            let row: Vec<_> = chunk
+                .iter()
+                .map(|color| {
+                    let Color {
+                        x: r, y: g, z: b, ..
+                    } = color;
+                    let max_value = Ppm::MAX_COLOR_VALUE as i32;
+                    let r = math::scale_to(max_value, *r);
+                    let g = math::scale_to(max_value, *g);
+                    let b = math::scale_to(max_value, *b);
+                    format!("{} {} {}", r, g, b)
+                })
+                .collect();
             Canvas::wrap(row.join(" "))
         }
 
@@ -38,7 +52,7 @@ impl Canvas {
             let next_str = next.to_string();
             match acc.last_mut() {
                 None => vec![next_str],
-                Some(last) =>
+                Some(last) => {
                     if last.len() + next.len() > 69 {
                         acc.push(next_str);
                         acc
@@ -46,6 +60,7 @@ impl Canvas {
                         *last = last.to_string() + " " + &next;
                         acc
                     }
+                }
             }
         })
     }
@@ -97,7 +112,10 @@ mod tests {
         let canvas = Canvas::new(10, 20);
         assert_eq!(canvas.width, 10);
         assert_eq!(canvas.height, 20);
-        canvas.pixels.iter().for_each(|color| assert_eq!(*color, Color::black()));
+        canvas
+            .pixels
+            .iter()
+            .for_each(|color| assert_eq!(*color, Color::black()));
     }
 
     #[test]
@@ -125,11 +143,14 @@ mod tests {
         canvas[(2, 1)] = c2;
         canvas[(4, 2)] = c3;
         let ppm = canvas.to_ppm();
-        assert_eq!(ppm.data, vec![
-            "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
-            "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0",
-            "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"
-        ]);
+        assert_eq!(
+            ppm.data,
+            vec![
+                "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+                "0 0 0 0 0 0 0 128 0 0 0 0 0 0 0",
+                "0 0 0 0 0 0 0 0 0 0 0 0 0 0 255"
+            ]
+        );
     }
 
     #[test]
@@ -141,11 +162,14 @@ mod tests {
             }
         }
         let ppm = canvas.to_ppm();
-        assert_eq!(ppm.data, vec![
-            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
-            "153 255 204 153 255 204 153 255 204 153 255 204 153",
-            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
-            "153 255 204 153 255 204 153 255 204 153 255 204 153"
-        ])
+        assert_eq!(
+            ppm.data,
+            vec![
+                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+                "153 255 204 153 255 204 153 255 204 153 255 204 153",
+                "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204",
+                "153 255 204 153 255 204 153 255 204 153 255 204 153"
+            ]
+        )
     }
 }

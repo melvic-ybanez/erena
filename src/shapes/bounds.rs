@@ -1,10 +1,10 @@
-use crate::tuples::points::Point;
-use crate::shapes::{Shape, Geo};
-use crate::tuples::points;
 use crate::math::Real;
+use crate::shapes::{Geo, Shape};
+use crate::tuples::points;
+use crate::tuples::points::Point;
 
-use std::ops::Add;
 use crate::matrix::Matrix;
+use std::ops::Add;
 
 /// Represents a bounding box
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -44,9 +44,9 @@ impl Bounds {
     pub fn contains_point(&self, point: Point) -> bool {
         let between = |p, min, max| p >= min && p <= max;
         let Bounds { min, max } = self;
-        between(point.x, min.x, max.x) &&
-            between(point.y, min.y, max.y) &&
-            between(point.z, min.z, max.z)
+        between(point.x, min.x, max.x)
+            && between(point.y, min.y, max.y)
+            && between(point.z, min.z, max.z)
     }
 
     pub fn contains_box(&self, other: Bounds) -> bool {
@@ -59,14 +59,14 @@ impl Bounds {
         // transform corners. Note that we are using the left-hand rule
         // so "back" here means negative z-axis (or towards the user)
         let corners = [
-            (min.x, min.y, min.z),  // lower left back
-            (max.x, min.y, min.z),  // lower right back
-            (min.x, min.y, max.z),  // lower left front
-            (max.x, min.y, max.z),  // lower right front
-            (min.x, max.y, min.z),  // upper left back
-            (max.x, max.y, min.z),  // upper right back
-            (min.x, max.y, max.z),  // upper left front
-            (max.x, max.y, max.z)   // upper right front
+            (min.x, min.y, min.z), // lower left back
+            (max.x, min.y, min.z), // lower right back
+            (min.x, min.y, max.z), // lower left front
+            (max.x, min.y, max.z), // lower right front
+            (min.x, max.y, min.z), // upper left back
+            (max.x, max.y, min.z), // upper right back
+            (min.x, max.y, max.z), // upper left front
+            (max.x, max.y, max.z), // upper right front
         ];
 
         corners.iter().fold(Bounds::empty(), |bounds, (x, y, z)| {

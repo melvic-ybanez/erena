@@ -1,22 +1,26 @@
+use crate::math;
+use crate::rays::{Comps, Intersection, IntersectionKind, Ray};
+use crate::shapes::triangles::{Smooth, TriangleKind};
 use crate::shapes::{Geo, Shape};
-use crate::tuples::{points, vectors};
-use crate::rays::{Ray, IntersectionKind, Intersection, Comps};
-use crate::shapes::triangles::{TriangleKind, Smooth};
 use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use crate::tuples::{points, vectors};
 use std::rc::Rc;
-use crate::math;
 
 fn tri_points() -> (Point, Point, Point) {
-    (points::new(0.0, 1.0, 0.0),
-     points::new(-1.0, 0.0, 0.0),
-     points::new(1.0, 0.0, 0.0))
+    (
+        points::new(0.0, 1.0, 0.0),
+        points::new(-1.0, 0.0, 0.0),
+        points::new(1.0, 0.0, 0.0),
+    )
 }
 
 fn smooth_tri_normals() -> (Vector, Vector, Vector) {
-    (vectors::new(0.0, 1.0, 0.0),
-     vectors::new(-1.0, 0.0, 0.0),
-     vectors::new(1.0, 0.0, 0.0))
+    (
+        vectors::new(0.0, 1.0, 0.0),
+        vectors::new(-1.0, 0.0, 0.0),
+        vectors::new(1.0, 0.0, 0.0),
+    )
 }
 
 fn triangle() -> Shape {
@@ -54,9 +58,18 @@ fn test_triangle_normal() {
     let triangle = triangle();
 
     if let Geo::Triangle(ref tri) = triangle.geo {
-        assert_eq!(triangle.default_normal_at(points::new(0.0, 0.5, 0.0)), tri.get_default_normal());
-        assert_eq!(triangle.default_normal_at(points::new(-0.5, 0.75, 0.0)), tri.get_default_normal());
-        assert_eq!(triangle.default_normal_at(points::new(0.5, 0.25, 0.0)), tri.get_default_normal());
+        assert_eq!(
+            triangle.default_normal_at(points::new(0.0, 0.5, 0.0)),
+            tri.get_default_normal()
+        );
+        assert_eq!(
+            triangle.default_normal_at(points::new(-0.5, 0.75, 0.0)),
+            tri.get_default_normal()
+        );
+        assert_eq!(
+            triangle.default_normal_at(points::new(0.5, 0.25, 0.0)),
+            tri.get_default_normal()
+        );
     }
 }
 
@@ -110,7 +123,12 @@ fn test_construct_smooth_triangle() {
         assert_eq!(tri.get_p2(), p2);
         assert_eq!(tri.get_p3(), p3);
 
-        if let TriangleKind::Smooth(Smooth { n1: sn1, n2: sn2, n3: sn3 }) = tri.kind {
+        if let TriangleKind::Smooth(Smooth {
+            n1: sn1,
+            n2: sn2,
+            n3: sn3,
+        }) = tri.kind
+        {
             assert_eq!(sn1, n1);
             assert_eq!(sn2, n2);
             assert_eq!(sn3, n3);

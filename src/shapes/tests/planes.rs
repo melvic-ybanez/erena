@@ -1,7 +1,7 @@
-use crate::shapes::{Shape, Geo};
+use crate::rays::Ray;
+use crate::shapes::{Geo, Shape};
 use crate::tuples::points::Point;
 use crate::tuples::{points, vectors};
-use crate::rays::Ray;
 use std::rc::Rc;
 
 /// The normal of a plane is the same everywhere

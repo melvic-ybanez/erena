@@ -283,9 +283,7 @@ fn triangles() -> Rc<Shape> {
         points::new(-1.0, 0.0, 0.0),
         points::new(1.0, 0.0, 0.0),
     )
-    .material(
-        Material::glass(),
-    );
+    .material(Material::glass());
 
     let side1 = side.clone().rotate_x(math::DEG_45);
     let side2 = side
@@ -304,7 +302,11 @@ fn triangles() -> Rc<Shape> {
         .translate(1.0, 0.0, 1.0);
 
     let sphere = Shape::sphere()
-        .material(Material::default().color(colors::new(0.1, 0.1, 0.6)).reflective(0.5))
+        .material(
+            Material::default()
+                .color(colors::new(0.1, 0.1, 0.6))
+                .reflective(0.5),
+        )
         .scale_all(0.2)
         .translate(-0.5, 0.2, 0.5);
 
@@ -313,12 +315,20 @@ fn triangles() -> Rc<Shape> {
         .max(0.2)
         .closed(true)
         .to_shape()
-        .material(Material::default().color(colors::new(0.6, 0.1, 0.1)).reflective(0.5))
+        .material(
+            Material::default()
+                .color(colors::new(0.6, 0.1, 0.1))
+                .reflective(0.5),
+        )
         .scale(0.2, 1.0, 0.2)
         .translate(0.0, 0.2, 1.0);
 
     let cube = Shape::cube()
-        .material(Material::default().color(colors::new(0.1, 0.6, 0.1)).reflective(0.5))
+        .material(
+            Material::default()
+                .color(colors::new(0.1, 0.6, 0.1))
+                .reflective(0.5),
+        )
         .scale_all(0.17)
         .translate(0.3, 0.17, 0.5);
 
@@ -333,7 +343,7 @@ fn triangles() -> Rc<Shape> {
                 Rc::new(side4),
                 Rc::new(sphere),
                 Rc::new(cylinder),
-                Rc::new(cube)
+                Rc::new(cube),
             ],
         );
     }

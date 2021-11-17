@@ -1,13 +1,13 @@
-use crate::matrix::{CanTransform, scaling};
-use crate::rays::{Comps3D, Intersection, Ray, Intersection3D};
-use crate::shapes::{Object, Shape, Geo};
-use crate::tuples::{colors, points};
+use crate::materials::dielectrics;
+use crate::matrix::{scaling, CanTransform};
+use crate::rays::lights::{AreaLight, PointLight};
+use crate::rays::{Comps3D, Intersection, Intersection3D, Ray};
+use crate::shapes::{Geo, Object, Shape};
 use crate::tuples::colors::Color;
 use crate::tuples::points::Point;
-use crate::rays::lights::{PointLight, AreaLight};
-use crate::materials::dielectrics;
-use std::rc::Rc;
+use crate::tuples::{colors, points};
 use std::borrow::Borrow;
+use std::rc::Rc;
 
 pub mod camera;
 
@@ -34,21 +34,33 @@ impl<S> World<S> {
         self.objects.is_empty() && self.light.is_none()
     }
 
-    pub fn add_object(&mut self, object: &Object<S>) where S: Clone {
+    pub fn add_object(&mut self, object: &Object<S>)
+    where
+        S: Clone,
+    {
         self.objects.push((*object).clone());
     }
 
-    pub fn add_objects(&mut self, objects: Vec<&Object<S>>) where S: Clone {
+    pub fn add_objects(&mut self, objects: Vec<&Object<S>>)
+    where
+        S: Clone,
+    {
         for obj in objects {
             self.add_object(obj);
         }
     }
 
-    pub fn add_objects_refs(&mut self, rcs: Vec<&Rc<Object<S>>>) where S: Clone {
+    pub fn add_objects_refs(&mut self, rcs: Vec<&Rc<Object<S>>>)
+    where
+        S: Clone,
+    {
         self.add_objects(rcs.into_iter().map(|rc| rc.borrow()).collect());
     }
 
-    fn contains(&self, shape: &Object<S>) -> bool where S: PartialEq {
+    fn contains(&self, shape: &Object<S>) -> bool
+    where
+        S: PartialEq,
+    {
         self.objects.contains(shape)
     }
 
@@ -57,13 +69,18 @@ impl<S> World<S> {
     }
 
     pub fn update_object<F>(&mut self, i: usize, f: F) -> Object<S>
-        where S: Clone, F: Fn(Object<S>) -> Object<S>
+    where
+        S: Clone,
+        F: Fn(Object<S>) -> Object<S>,
     {
         self.objects[i] = f(self.objects[i].clone());
         self.get_object(i)
     }
 
-    pub fn get_object(&self, index: usize) -> Object<S> where S: Clone {
+    pub fn get_object(&self, index: usize) -> Object<S>
+    where
+        S: Clone,
+    {
         self.objects[index].clone()
     }
 
@@ -85,12 +102,16 @@ impl World3D {
 
         world.add_object(&sphere1);
         world.add_object(&sphere2);
-        world.add_point_light(PointLight::new(points::new(-10.0, 10.0, -10.0), Color::white()));
+        world.add_point_light(PointLight::new(
+            points::new(-10.0, 10.0, -10.0),
+            Color::white(),
+        ));
         world
     }
 
     fn intersect(&self, ray: &Ray) -> Vec<Intersection<Geo>> {
-        let mut intersections: Vec<Intersection3D> = self.objects
+        let mut intersections: Vec<Intersection3D> = self
+            .objects
             .iter()
             .flat_map(|obj| obj.intersect(ray))
             .collect();
@@ -113,7 +134,7 @@ impl World3D {
 
         match Intersection::hit(intersections) {
             None => false,
-            Some(hit) => hit.t < distance
+            Some(hit) => hit.t < distance,
         }
     }
 
@@ -198,8 +219,8 @@ impl World3D {
                 // again, from Pythagorean identities
                 let cos_t = (1.0 - sin2t).sqrt();
                 // direction of the refracted ray
-                let direction = comps.get_normal_vec() *
-                    (n_ratio * cos_i - cos_t) - comps.get_eye_vec() * n_ratio;
+                let direction = comps.get_normal_vec() * (n_ratio * cos_i - cos_t)
+                    - comps.get_eye_vec() * n_ratio;
 
                 let refracted_ray = Ray::new(comps.get_under_point(), direction);
                 self.color_at(&refracted_ray, depth - 1) * comps.get_object().material.transparency

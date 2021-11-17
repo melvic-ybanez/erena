@@ -1,9 +1,9 @@
-use crate::shapes::{Shape, Geo};
-use crate::matrix::{Matrix, CanTransform, translation};
 use crate::materials::Material;
+use crate::matrix::{translation, CanTransform, Matrix};
 use crate::rays::Ray;
+use crate::shapes::{Geo, Shape};
 use crate::tuples::{points, vectors};
-use crate::{shapes, math};
+use crate::{math, shapes};
 use std::f64::consts::FRAC_1_SQRT_2;
 
 #[test]

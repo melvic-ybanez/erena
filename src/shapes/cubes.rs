@@ -1,12 +1,12 @@
-use crate::shapes::Shape;
-use crate::rays::{Ray, Intersection3D, Intersection};
-use crate::tuples::vectors::Vector;
-use crate::tuples::points::Point;
-use crate::math::Real;
 use crate::math;
-use crate::tuples::vectors;
-use std::rc::Rc;
+use crate::math::Real;
+use crate::rays::{Intersection, Intersection3D, Ray};
 use crate::shapes::bounds::Bounds;
+use crate::shapes::Shape;
+use crate::tuples::points::Point;
+use crate::tuples::vectors;
+use crate::tuples::vectors::Vector;
+use std::rc::Rc;
 
 pub fn intersect(cube: &Shape, ray: &Ray) -> Vec<Intersection3D> {
     let Ray { origin, direction } = ray;
@@ -23,7 +23,7 @@ pub fn intersect(cube: &Shape, ray: &Ray) -> Vec<Intersection3D> {
     } else {
         vec![
             Intersection::new(t_min, Rc::new(cube.clone())),
-            Intersection::new(t_max, Rc::new(cube.clone()))
+            Intersection::new(t_max, Rc::new(cube.clone())),
         ]
     }
 }
@@ -58,21 +58,56 @@ fn check_axis(origin: Real, direction: Real, min: Real, max: Real) -> (Real, Rea
 
 #[cfg(test)]
 mod tests {
-    use crate::shapes::Shape;
     use crate::rays::Ray;
+    use crate::shapes::Shape;
     use crate::tuples::{points, vectors};
 
     #[test]
     fn test_ray_cube_intersection() {
         let cube = Shape::cube();
         let data = [
-            (points::new(5.0, 0.5, 0.0), vectors::new(-1.0, 0.0, 0.0), 4.0, 6.0),   // +x
-            (points::new(-5.0, 0.5, 0.0), vectors::new(1.0, 0.0, 0.0), 4.0, 6.0),   // -x
-            (points::new(0.5, 5.0, 0.0), vectors::new(0.0, -1.0, 0.0), 4.0, 6.0),   // +y
-            (points::new(0.5, -5.0, 0.0), vectors::new(0.0, 1.0, 0.0), 4.0, 6.0),   // -y
-            (points::new(0.5, 0.0, 5.0), vectors::new(0.0, 0.0, -1.0), 4.0, 6.0),   // +z
-            (points::new(0.5, 0.0, -5.0), vectors::new(0.0, 0.0, 1.0), 4.0, 6.0),   // -z
-            (points::new(0.0, 0.5, 0.0), vectors::new(0.0, 0.0, 1.0), -1.0, 1.0),   // inside
+            (
+                points::new(5.0, 0.5, 0.0),
+                vectors::new(-1.0, 0.0, 0.0),
+                4.0,
+                6.0,
+            ), // +x
+            (
+                points::new(-5.0, 0.5, 0.0),
+                vectors::new(1.0, 0.0, 0.0),
+                4.0,
+                6.0,
+            ), // -x
+            (
+                points::new(0.5, 5.0, 0.0),
+                vectors::new(0.0, -1.0, 0.0),
+                4.0,
+                6.0,
+            ), // +y
+            (
+                points::new(0.5, -5.0, 0.0),
+                vectors::new(0.0, 1.0, 0.0),
+                4.0,
+                6.0,
+            ), // -y
+            (
+                points::new(0.5, 0.0, 5.0),
+                vectors::new(0.0, 0.0, -1.0),
+                4.0,
+                6.0,
+            ), // +z
+            (
+                points::new(0.5, 0.0, -5.0),
+                vectors::new(0.0, 0.0, 1.0),
+                4.0,
+                6.0,
+            ), // -z
+            (
+                points::new(0.0, 0.5, 0.0),
+                vectors::new(0.0, 0.0, 1.0),
+                -1.0,
+                1.0,
+            ), // inside
         ];
         for (origin, direction, t1, t2) in data.iter() {
             let ray = Ray::new(*origin, *direction);
@@ -87,9 +122,18 @@ mod tests {
     fn test_ray_misses_a_cube() {
         let cube = Shape::cube();
         let data = [
-            (points::new(-2.0, 0.0, 0.0), vectors::new(0.2673, 0.5345, 0.8018)),
-            (points::new(0.0, -2.0, 0.0), vectors::new(0.8018, 0.2673, 0.5345)),
-            (points::new(0.0, 0.0, -2.0), vectors::new(0.5345, 0.8018, 0.2673)),
+            (
+                points::new(-2.0, 0.0, 0.0),
+                vectors::new(0.2673, 0.5345, 0.8018),
+            ),
+            (
+                points::new(0.0, -2.0, 0.0),
+                vectors::new(0.8018, 0.2673, 0.5345),
+            ),
+            (
+                points::new(0.0, 0.0, -2.0),
+                vectors::new(0.5345, 0.8018, 0.2673),
+            ),
             (points::new(2.0, 0.0, 2.0), vectors::new(0.0, 0.0, -1.0)),
             (points::new(0.0, 2.0, 2.0), vectors::new(0.0, -1.0, 0.0)),
             (points::new(2.0, 2.0, 0.0), vectors::new(-1.0, 0.0, 0.0)),
@@ -112,7 +156,7 @@ mod tests {
             (points::new(-0.6, 0.3, 1.0), vectors::new(0.0, 0.0, 1.0)),
             (points::new(0.4, 0.4, -1.0), vectors::new(0.0, 0.0, -1.0)),
             (points::new(1.0, 1.0, 1.0), vectors::new(1.0, 0.0, 0.0)),
-            (points::new(-1.0, -1.0, -1.0), vectors::new(-1.0, 0.0, 0.0))
+            (points::new(-1.0, -1.0, -1.0), vectors::new(-1.0, 0.0, 0.0)),
         ];
         for (point, normal) in data {
             assert_eq!(cube.default_normal_at(point), normal);

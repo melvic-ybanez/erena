@@ -1,4 +1,4 @@
-use std::cell::{Cell};
+use std::cell::Cell;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RandGen {
@@ -13,8 +13,8 @@ impl RandGen {
                 // return the next item. Crash the program if
                 // iterator still can't return anything
                 seq_rand.maybe_next().expect("Can't fetch next value")
-            },
-            RandGen::Live => rand::random()
+            }
+            RandGen::Live => rand::random(),
         }
     }
 }

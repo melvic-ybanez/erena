@@ -1,16 +1,16 @@
 mod shadows;
 
-use crate::matrix::{CanTransform, scaling};
-use crate::rays::{Comps3D, Intersection, Ray, Comps};
-use crate::scene::{World, World3D};
-use crate::shapes::Shape;
-use crate::tuples::{colors, points, vectors};
-use crate::tuples::colors::Color;
-use crate::tuples::points::Point;
 use crate::materials::Material;
 use crate::math;
-use crate::rays::lights::PointLight;
+use crate::matrix::{scaling, CanTransform};
 use crate::patterns::Pattern;
+use crate::rays::lights::PointLight;
+use crate::rays::{Comps, Comps3D, Intersection, Ray};
+use crate::scene::{World, World3D};
+use crate::shapes::Shape;
+use crate::tuples::colors::Color;
+use crate::tuples::points::Point;
+use crate::tuples::{colors, points, vectors};
 use std::rc::Rc;
 
 #[test]
@@ -139,7 +139,10 @@ fn test_no_object_shadow_behind_point() {
 #[test]
 fn test_shade_hit_intersection_in_shadow() {
     let mut world = World::empty();
-    world.add_point_light(PointLight::new(points::new(0.0, 0.0, -10.0), Color::white()));
+    world.add_point_light(PointLight::new(
+        points::new(0.0, 0.0, -10.0),
+        Color::white(),
+    ));
 
     let sphere1 = Shape::sphere();
     world.add_object(&sphere1);
@@ -178,9 +181,11 @@ fn test_non_reflective_mat_reflection() {
 #[test]
 fn test_reflective_mat_reflection() {
     let mut world = World::default();
-    let shape = Rc::new(Shape::plane().material(
-        Material::default().reflective(0.5)
-    ).translate(0.0, -1.0, 0.0));
+    let shape = Rc::new(
+        Shape::plane()
+            .material(Material::default().reflective(0.5))
+            .translate(0.0, -1.0, 0.0),
+    );
     world.add_object(&shape);
     let ray = Ray::new(
         points::new(0.0, 0.0, -3.0),
@@ -196,9 +201,11 @@ fn test_reflective_mat_reflection() {
 #[test]
 fn test_shade_with_reflective_mat() {
     let mut world = World::default();
-    let shape = Rc::new(Shape::plane()
-        .material(Material::default().reflective(0.5))
-        .translate(0.0, -1.0, 0.0));
+    let shape = Rc::new(
+        Shape::plane()
+            .material(Material::default().reflective(0.5))
+            .translate(0.0, -1.0, 0.0),
+    );
     world.add_object(&shape);
     let ray = Ray::new(
         points::new(0.0, 0.0, -3.0),
@@ -216,14 +223,18 @@ fn test_mutually_reflective_surfaces_color() {
     let mut world = World::default();
     world.add_point_light(PointLight::new(Point::origin(), Color::white()));
 
-    let lower = Rc::new(Shape::plane()
-        .material(Material::default().reflective(1.0))
-        .translate(0.0, -1.0, 0.0));
+    let lower = Rc::new(
+        Shape::plane()
+            .material(Material::default().reflective(1.0))
+            .translate(0.0, -1.0, 0.0),
+    );
     world.add_object(&lower);
 
-    let upper = Rc::new(Shape::plane()
-        .material(Material::default().reflective(1.0))
-        .translate(0.0, 1.0, 0.0));
+    let upper = Rc::new(
+        Shape::plane()
+            .material(Material::default().reflective(1.0))
+            .translate(0.0, 1.0, 0.0),
+    );
     world.add_object(&upper);
 
     let ray = Ray::new(Point::origin(), vectors::new(0.0, 1.0, 0.0));
@@ -234,9 +245,11 @@ fn test_mutually_reflective_surfaces_color() {
 #[test]
 fn test_reflected_color_at_max_recursive_depth() {
     let mut world = World::default();
-    let shape = Rc::new(Shape::plane()
-        .material(Material::default().reflective(0.5))
-        .translate(0.0, -1.0, 0.0));
+    let shape = Rc::new(
+        Shape::plane()
+            .material(Material::default().reflective(0.5))
+            .translate(0.0, -1.0, 0.0),
+    );
     world.add_object(&shape);
     let ray = Ray::new(
         points::new(0.0, 0.0, -3.0),
@@ -267,10 +280,13 @@ fn test_total_internal_reflection_refraction() {
     let shape = Rc::new(world.update_object(0, |obj| {
         obj.material(Material::default().transparency(1.0).refractive_index(1.5))
     }));
-    let ray = Ray::new(points::new(0.0, 0.0, math::two_sqrt_div_2()), vectors::new(0.0, 1.0, 0.0));
+    let ray = Ray::new(
+        points::new(0.0, 0.0, math::two_sqrt_div_2()),
+        vectors::new(0.0, 1.0, 0.0),
+    );
     let xs = Intersection::from_data(&[
         (-math::two_sqrt_div_2(), &shape),
-        (math::two_sqrt_div_2(), &shape)
+        (math::two_sqrt_div_2(), &shape),
     ]);
 
     // Check the second intersection, instead of the first,
@@ -285,19 +301,15 @@ fn test_refracted_color_with_refracted_ray() {
     let mut world = World::default();
 
     let a = Rc::new(world.update_object(0, |obj| {
-        obj.material(
-            Material::default().ambient(1.0).pattern(Pattern::test()))
+        obj.material(Material::default().ambient(1.0).pattern(Pattern::test()))
     }));
 
     let b = Rc::new(world.update_object(1, |obj| {
-        obj.material(
-            Material::default().transparency(1.0).refractive_index(1.5))
+        obj.material(Material::default().transparency(1.0).refractive_index(1.5))
     }));
 
     let ray = Ray::new(points::new(0.0, 0.0, 0.1), vectors::new(0.0, 1.0, 0.0));
-    let xs = Intersection::from_data(&[
-        (-0.9899, &a), (-0.4899, &b), (0.4899, &b), (0.9899, &a)
-    ]);
+    let xs = Intersection::from_data(&[(-0.9899, &a), (-0.4899, &b), (0.4899, &b), (0.9899, &a)]);
     let comps = Comps::prepare(&xs[2], &ray, &xs);
     let color = world.refracted_color_default(comps);
     assert_eq!(color.round_items(), colors::new(0.0, 0.99888, 0.04722));
@@ -307,14 +319,20 @@ fn test_refracted_color_with_refracted_ray() {
 fn test_shade_hit_with_a_transparent_mat() {
     let mut world = World::default();
 
-    let floor = Rc::new(Shape::plane()
-        .translate(0.0, -1.0, 0.0)
-        .material(Material::default().transparency(0.5).refractive_index(1.5)));
+    let floor = Rc::new(
+        Shape::plane()
+            .translate(0.0, -1.0, 0.0)
+            .material(Material::default().transparency(0.5).refractive_index(1.5)),
+    );
     world.add_object(&floor);
 
-    let ball = Rc::new(Shape::sphere()
-        .translate(0.0, -3.5, -0.5)
-        .material(Material::default().color(colors::new(1.0, 0.0, 0.0)).ambient(0.5)));
+    let ball = Rc::new(
+        Shape::sphere().translate(0.0, -3.5, -0.5).material(
+            Material::default()
+                .color(colors::new(1.0, 0.0, 0.0))
+                .ambient(0.5),
+        ),
+    );
     world.add_object(&ball);
 
     let ray = Ray::new(

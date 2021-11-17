@@ -1,8 +1,8 @@
-use crate::tuples::vectors::Vector;
-use crate::tuples::vectors;
-use crate::shapes::Shape;
-use crate::rays::{Ray, Intersection3D};
 use crate::math;
+use crate::rays::{Intersection3D, Ray};
+use crate::shapes::Shape;
+use crate::tuples::vectors;
+use crate::tuples::vectors::Vector;
 use std::rc::Rc;
 
 /// Computes the normal-at function for a plane.

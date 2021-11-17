@@ -1,9 +1,9 @@
-use crate::patterns::{Pattern, PatternType};
-use crate::tuples::colors::Color;
-use crate::tuples::{points, colors};
-use crate::tuples::points::Point;
-use crate::shapes::Shape;
 use crate::matrix::CanTransform;
+use crate::patterns::{Pattern, PatternType};
+use crate::shapes::Shape;
+use crate::tuples::colors::Color;
+use crate::tuples::points::Point;
+use crate::tuples::{colors, points};
 
 fn default_stripe() -> Pattern {
     Pattern::stripe(Color::white(), Color::black())
@@ -80,9 +80,18 @@ fn test_stripes_with_both_transformation() {
 fn test_gradient_linear_interpolation() {
     let pattern = Pattern::gradient(Color::white(), Color::black());
     assert_eq!(pattern.at(Point::origin()), Color::white());
-    assert_eq!(pattern.at(points::new(0.25, 0.0, 0.0)), colors::new(0.75, 0.75, 0.75));
-    assert_eq!(pattern.at(points::new(0.5, 0.0, 0.0)), colors::new(0.5, 0.5, 0.5));
-    assert_eq!(pattern.at(points::new(0.75, 0.0, 0.0)), colors::new(0.25, 0.25, 0.25));
+    assert_eq!(
+        pattern.at(points::new(0.25, 0.0, 0.0)),
+        colors::new(0.75, 0.75, 0.75)
+    );
+    assert_eq!(
+        pattern.at(points::new(0.5, 0.0, 0.0)),
+        colors::new(0.5, 0.5, 0.5)
+    );
+    assert_eq!(
+        pattern.at(points::new(0.75, 0.0, 0.0)),
+        colors::new(0.25, 0.25, 0.25)
+    );
 }
 
 /// A ring should extend in both x and z

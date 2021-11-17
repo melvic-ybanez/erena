@@ -1,18 +1,16 @@
-use std::io::{BufReader, BufRead, Read};
-
+use std::io::{BufRead, BufReader, Read};
 
 use crate::math::Real;
 
-
-use crate::tuples::points::{Point};
-use crate::tuples::{points, vectors};
 use crate::shapes::groups::Group;
-use std::str::SplitWhitespace;
 use crate::shapes::triangles::Triangle;
-use std::rc::Rc;
-use crate::shapes::{Shape, Geo};
-use std::collections::HashMap;
+use crate::shapes::{Geo, Shape};
+use crate::tuples::points::Point;
 use crate::tuples::vectors::Vector;
+use crate::tuples::{points, vectors};
+use std::collections::HashMap;
+use std::rc::Rc;
+use std::str::SplitWhitespace;
 
 /// Contains information about an input OBJ, which can be represented
 /// as a file, a byte slice or any data that implements Read.
@@ -52,7 +50,12 @@ impl Parser {
         let vertices = vec![Point::origin()];
         let normals = vec![Vector::zero()];
 
-        Parser { vertices, normals, faces: vec![], groups: HashMap::new() }
+        Parser {
+            vertices,
+            normals,
+            faces: vec![],
+            groups: HashMap::new(),
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -73,7 +76,10 @@ impl Parser {
 
     pub fn get_default_group(&mut self) -> Rc<Shape> {
         self.group_default();
-        self.groups.get(DEFAULT_GROUP).map(|r| (*r).clone()).unwrap_or(Rc::new(Shape::empty_group()))
+        self.groups
+            .get(DEFAULT_GROUP)
+            .map(|r| (*r).clone())
+            .unwrap_or(Rc::new(Shape::empty_group()))
     }
 
     pub fn group_default(&mut self) {
@@ -89,7 +95,7 @@ impl Parser {
     fn add_face_to_group(&mut self, name: &str, data: &FaceData) -> Option<Rc<Shape>> {
         let group = match self.groups.get_mut(name) {
             None => Rc::new(Shape::empty_group()),
-            Some(group) => group.clone()
+            Some(group) => group.clone(),
         };
 
         let triangles = self.fan_triangulation(data);
@@ -117,7 +123,9 @@ impl Parser {
                 Triangle::regular(v1, v2, v3)
             } else {
                 Triangle::smooth(
-                    v1, v2, v3,
+                    v1,
+                    v2,
+                    v3,
                     self.normals[ns[0]],
                     self.normals[ns[i]],
                     self.normals[ns[i + 1]],
@@ -143,15 +151,14 @@ impl Parser {
     }
 
     pub fn get_triangle(&self, name: &str, i: usize) -> Option<Triangle> {
-        self.get_group_geo(name)
-            .and_then(|group| {
-                let child = group.get_child(i);
-                if let Geo::Triangle(triangle) = child.geo {
-                    Some(triangle.clone())
-                } else {
-                    None
-                }
-            })
+        self.get_group_geo(name).and_then(|group| {
+            let child = group.get_child(i);
+            if let Geo::Triangle(triangle) = child.geo {
+                Some(triangle.clone())
+            } else {
+                None
+            }
+        })
     }
 
     pub fn get_triangle_unsafe(&self, name: &str, i: usize) -> Triangle {
@@ -192,20 +199,26 @@ fn parse_statement(line: String) -> Statement {
         Some("vn") => parse_normal(line),
         Some("f") => parse_face(line),
         Some("g") => parse_group(line),
-        _ => Statement::None
+        _ => Statement::None,
     }
 }
 
 fn parse_vertex(line: SplitWhitespace) -> Statement {
-    parse_tuple(line, |ps| Statement::Vertex(points::new(ps[0], ps[1], ps[2])))
+    parse_tuple(line, |ps| {
+        Statement::Vertex(points::new(ps[0], ps[1], ps[2]))
+    })
 }
 
 fn parse_normal(line: SplitWhitespace) -> Statement {
-    parse_tuple(line, |ns| Statement::Normal(vectors::new(ns[0], ns[1], ns[2])))
+    parse_tuple(line, |ns| {
+        Statement::Normal(vectors::new(ns[0], ns[1], ns[2]))
+    })
 }
 
 fn parse_tuple<F>(line: SplitWhitespace, f: F) -> Statement
-    where F: FnOnce(Vec<Real>) -> Statement {
+where
+    F: FnOnce(Vec<Real>) -> Statement,
+{
     let mut components: Vec<Real> = vec![];
 
     for word in line {
@@ -225,7 +238,10 @@ fn parse_face(line: SplitWhitespace) -> Statement {
     let mut vs: Vec<usize> = vec![];
     let mut ns: Vec<usize> = vec![];
 
-    fn parse_part<F>(part: &str, f: F) where F: FnOnce(usize) -> () {
+    fn parse_part<F>(part: &str, f: F)
+    where
+        F: FnOnce(usize) -> (),
+    {
         if let Ok(index) = part.parse::<usize>() {
             f(index)
         }
@@ -256,7 +272,7 @@ fn parse_face(line: SplitWhitespace) -> Statement {
 fn parse_group(mut line: SplitWhitespace) -> Statement {
     match line.next() {
         None => Statement::None,
-        Some(name) => Statement::Group(name.to_string())
+        Some(name) => Statement::Group(name.to_string()),
     }
 }
 
