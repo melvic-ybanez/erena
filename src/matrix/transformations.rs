@@ -11,10 +11,14 @@ use crate::tuples::vectors::Vector;
 /// Note: Applying this matrix to any vector V should yield V (unaltered)
 /// because V's fourth component is 0 (it cancels the fourth column)
 ///
+#[rustfmt::skip]
 #[inline(always)]
 pub fn translation(x: Real, y: Real, z: Real) -> Matrix {
     Matrix::new44(&[
-        1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
+        1.0, 0.0, 0.0, x,
+        0.0, 1.0, 0.0, y,
+        0.0, 0.0, 1.0, z,
+        0.0, 0.0, 0.0, 1.0,
     ])
 }
 
@@ -23,89 +27,64 @@ pub fn translation(x: Real, y: Real, z: Real) -> Matrix {
 /// The operation will multiply each component of P by S[i, i], where i is the index
 /// of P's component, effectively changing the "size" of P.
 /// This works for both point and vector.
+#[rustfmt::skip]
 #[inline(always)]
 pub fn scaling(x: Real, y: Real, z: Real) -> Matrix {
     Matrix::new44(&[
-        x, 0.0, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, 0.0, z, 0.0, 0.0, 0.0, 0.0, 1.0,
+        x, 0.0, 0.0, 0.0,
+        0.0, y, 0.0, 0.0,
+        0.0, 0.0, z, 0.0,
+        0.0, 0.0, 0.0, 1.0,
     ])
 }
 
 /// Clockwise rotation along the x-axis.
 /// Note: This rotation is based on the lef-hand rule.
+#[rustfmt::skip]
 #[inline(always)]
 pub fn rotation_x(rad: Real) -> Matrix {
     Matrix::new44(&[
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        rad.cos(),
-        -rad.sin(),
-        0.0,
-        0.0,
-        rad.sin(),
-        rad.cos(),
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
+        1.0, 0.0, 0.0, 0.0,
+        0.0, rad.cos(), -rad.sin(), 0.0,
+        0.0, rad.sin(), rad.cos(),
+        0.0, 0.0, 0.0, 0.0, 1.0,
     ])
 }
 
 /// Clockwise rotation along the y-axis.
 /// Note: This rotation is based on the lef-hand rule.
+#[rustfmt::skip]
 #[inline(always)]
 pub fn rotation_y(rad: Real) -> Matrix {
     Matrix::new44(&[
-        rad.cos(),
-        0.0,
-        rad.sin(),
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        -rad.sin(),
-        0.0,
-        rad.cos(),
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
+        rad.cos(), 0.0, rad.sin(), 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        -rad.sin(), 0.0, rad.cos(), 0.0,
+        0.0, 0.0, 0.0, 1.0,
     ])
 }
 
 /// Clockwise rotation along the z-axis.
 /// Note: This rotation is based on the lef-hand rule.
+#[rustfmt::skip]
 #[inline(always)]
 pub fn rotation_z(rad: Real) -> Matrix {
     Matrix::new44(&[
-        rad.cos(),
-        -rad.sin(),
-        0.0,
-        0.0,
-        rad.sin(),
-        rad.cos(),
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
+        rad.cos(), -rad.sin(), 0.0, 0.0,
+        rad.sin(), rad.cos(), 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
     ])
 }
 
+#[rustfmt::skip]
 #[inline(always)]
 pub fn shearing(xy: Real, xz: Real, yx: Real, yz: Real, zx: Real, zy: Real) -> Matrix {
     Matrix::new44(&[
-        1.0, xy, xz, 0.0, yx, 1.0, yz, 0.0, zx, zy, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+        1.0, xy, xz, 0.0,
+        yx, 1.0, yz, 0.0,
+        zx, zy, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
     ])
 }
 
